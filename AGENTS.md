@@ -2,7 +2,10 @@
 
 ## Authority and scope
 
-- The accepted functional requirements, technical requirements, detailed-level design, ODP bundle, and living project plan remain controlling until governed copies are introduced here.
+- `Documentation/` is the authoritative home for the accepted functional requirements, technical requirements, detailed-level design, governed ODP bundle, and living project plan.
+- Before material work, inspect `Documentation/ProjectPlan.html` and identify the affected FDN, WP, DLD, T, G, and R records.
+- After every material decision, artifact or code change, test, deployment, blocker, failure, rollback, or evidence update, update `Documentation/ProjectPlan.html` before final reporting whenever project state changed.
+- Public conclusions derived from local raw research must be incorporated into a reviewed controlling document; `Documentation/Import/` remains local and ignored.
 - Do not infer acceptance of an implementation decision from the presence of a placeholder directory.
 - Keep changes traceable to project-plan identifiers (FDN, WP, DLD, T, G, or R).
 
@@ -38,6 +41,6 @@
 ## Repository policy
 
 - Git is permitted in this external implementation repository.
-- Do not create or mirror Git metadata inside the separate Quantomancer workspace.
+- Do not create or mirror Git metadata inside separate analysis or operations workspaces.
 - Do not configure a remote or publish changes unless explicitly authorized.
 - WebStorm is the primary review environment; `.idea/` remains local and ignored.

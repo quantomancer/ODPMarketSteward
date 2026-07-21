@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ODP Market Steward — Technical Requirements</title>
+  <style>
+    :root {
+      --ink: #142033;
+      --muted: #526174;
+      --navy: #102b4e;
+      --blue: #1769aa;
+      --teal: #087f78;
+      --green: #217346;
+      --amber: #9a6300;
+      --red: #a12b2b;
+      --paper: #ffffff;
+      --wash: #f3f7fb;
+      --line: #d7e0ea;
+      --code: #edf3f8;
+      --shadow: 0 14px 40px rgba(16, 43, 78, 0.11);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: linear-gradient(180deg, #eaf2f8 0, #f8fafc 320px, #f8fafc 100%);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.56;
+    }
+
+    a { color: var(--blue); }
+
+    code {
+      padding: 0.08rem 0.28rem;
+      border-radius: 0.28rem;
+      background: var(--code);
+      color: #153b5e;
+      font-size: 0.92em;
+    }
+
+    header {
+      color: white;
+      background:
+        radial-gradient(circle at 82% 12%, rgba(64, 185, 176, 0.32), transparent 28%),
+        linear-gradient(130deg, #0e2747, #124d73 58%, #087f78);
+      border-bottom: 5px solid #56c3b9;
+    }
+
+    .hero {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 56px 0 48px;
+    }
+
+    .eyebrow {
+      margin-bottom: 0.55rem;
+      color: #a9eee8;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 900px;
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4.4rem);
+      line-height: 1.03;
+      letter-spacing: -0.035em;
+    }
+
+    .subtitle {
+      max-width: 850px;
+      margin: 1.15rem 0 0;
+      color: #d7edf7;
+      font-size: 1.08rem;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 1.4rem;
+    }
+
+    .badge {
+      padding: 0.32rem 0.68rem;
+      border: 1px solid rgba(255,255,255,0.34);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.09);
+      font-size: 0.8rem;
+      font-weight: 750;
+    }
+
+    .page {
+      display: grid;
+      grid-template-columns: 245px minmax(0, 1fr);
+      gap: 30px;
+      width: min(1260px, calc(100% - 40px));
+      margin: 34px auto 70px;
+      align-items: start;
+    }
+
+    nav {
+      position: sticky;
+      top: 20px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.94);
+      box-shadow: var(--shadow);
+    }
+
+    nav strong {
+      color: var(--navy);
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    nav ol {
+      margin: 0.8rem 0 0;
+      padding-left: 1.2rem;
+      font-size: 0.89rem;
+    }
+
+    nav li { margin: 0.36rem 0; }
+    nav a { color: #385169; text-decoration: none; }
+    nav a:hover { color: var(--blue); text-decoration: underline; }
+
+    main { min-width: 0; }
+
+    section {
+      margin-bottom: 26px;
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    h2 {
+      margin: 0 0 1rem;
+      color: var(--navy);
+      font-size: 1.65rem;
+      line-height: 1.2;
+    }
+
+    h3 {
+      margin: 1.8rem 0 0.7rem;
+      color: #174b6e;
+      font-size: 1.08rem;
+    }
+
+    p { margin: 0.65rem 0; }
+
+    .lead { color: #334a61; font-size: 1.06rem; }
+
+    .callout {
+      margin: 1.2rem 0;
+      padding: 1rem 1.1rem;
+      border-left: 5px solid var(--blue);
+      border-radius: 8px;
+      background: #edf6fd;
+    }
+
+    .callout.warning { border-left-color: var(--amber); background: #fff7e6; }
+    .callout.blocker { border-left-color: var(--red); background: #fff0f0; }
+    .callout.success { border-left-color: var(--green); background: #edf8f1; }
+    .callout strong { display: block; margin-bottom: 0.28rem; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 1rem 0;
+    }
+
+    .card {
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fbfdff;
+    }
+
+    .card h3 { margin-top: 0; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      align-items: stretch;
+      margin: 1.2rem 0;
+    }
+
+    .flow div {
+      display: grid;
+      place-items: center;
+      min-height: 84px;
+      padding: 0.75rem;
+      border: 1px solid #b9cfdf;
+      border-radius: 10px;
+      background: #f3f8fc;
+      color: #153b5e;
+      font-size: 0.86rem;
+      font-weight: 750;
+      text-align: center;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.85rem 0;
+      font-size: 0.91rem;
+    }
+
+    th, td {
+      padding: 0.7rem 0.75rem;
+      border: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th { color: #143e5e; background: #edf4f9; }
+    tr:nth-child(even) td { background: #fbfdff; }
+
+    .req {
+      margin: 0.8rem 0;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      overflow: hidden;
+    }
+
+    .req-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      align-items: center;
+      padding: 0.8rem 0.95rem;
+      background: #edf4f9;
+    }
+
+    .req-id {
+      padding: 0.2rem 0.48rem;
+      border-radius: 5px;
+      color: white;
+      background: var(--navy);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .tag {
+      margin-left: auto;
+      padding: 0.18rem 0.48rem;
+      border-radius: 999px;
+      color: #315068;
+      background: white;
+      border: 1px solid #c9d6e1;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .req-body { padding: 0.75rem 0.95rem 0.9rem; }
+    .req-body p:first-child { margin-top: 0; }
+    .req-body ul { margin-bottom: 0; }
+
+    ul, ol { padding-left: 1.35rem; }
+    li { margin: 0.3rem 0; }
+
+    .status-observed { color: #195f3a; font-weight: 800; }
+    .status-required { color: #174b6e; font-weight: 800; }
+    .status-conditional { color: #8a5900; font-weight: 800; }
+    .status-excluded { color: #6a4b57; font-weight: 800; }
+
+    .footer-note {
+      margin-top: 1.4rem;
+      color: var(--muted);
+      font-size: 0.86rem;
+      text-align: center;
+    }
+
+    @media (max-width: 920px) {
+      .page { grid-template-columns: 1fr; }
+      nav { position: static; }
+      .flow { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 660px) {
+      .hero, .page { width: min(100% - 22px, 1260px); }
+      .hero { padding-top: 38px; }
+      section { padding: 21px; }
+      .grid { grid-template-columns: 1fr; }
+      .tag { margin-left: 0; }
+    }
+
+    @media print {
+      body { background: white; }
+      header { background: var(--navy); }
+      .page { display: block; width: 100%; margin: 0; }
+      nav { display: none; }
+      section { box-shadow: none; break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <div class="eyebrow">ODP Market Steward</div>
+      <h1>Technical Requirements</h1>
+      <p class="subtitle">
+        Engineering baseline for a ChatGPT MCP App and governed service on Cloudflare, using the
+        existing FXLive Worker as an independent read-only market-data origin.
+      </p>
+      <div class="badges" aria-label="Document status">
+        <span class="badge">Draft 0.1</span>
+        <span class="badge">20 July 2026</span>
+        <span class="badge">Status: Proposed</span>
+        <span class="badge">Runtime: Not implemented</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="page">
+    <nav aria-label="Document contents">
+      <strong>Contents</strong>
+      <ol>
+        <li><a href="#control">Document control</a></li>
+        <li><a href="#baseline">Observed baseline</a></li>
+        <li><a href="#architecture">Target architecture</a></li>
+        <li><a href="#resources">Cloud resources</a></li>
+        <li><a href="#arch-reqs">Architecture requirements</a></li>
+        <li><a href="#mcp">MCP and app requirements</a></li>
+        <li><a href="#data">Data requirements</a></li>
+        <li><a href="#state">Session and state</a></li>
+        <li><a href="#ai">GPT-5.6 integration</a></li>
+        <li><a href="#security">Security and privacy</a></li>
+        <li><a href="#operations">Operations and deployment</a></li>
+        <li><a href="#testing">Verification</a></li>
+        <li><a href="#quality">Performance and cost</a></li>
+        <li><a href="#traceability">Traceability</a></li>
+        <li><a href="#references">References</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section id="control">
+        <h2>1. Document control</h2>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><th>Document</th><td>ODP Market Steward — Technical Requirements</td></tr>
+              <tr><th>Version</th><td>Draft 0.1</td></tr>
+              <tr><th>Product</th><td><strong>ODP Market Steward</strong></td></tr>
+              <tr><th>Competition title</th><td><strong>ODP Market Steward — Governed Live Market Data in ChatGPT</strong></td></tr>
+              <tr><th>Functional baseline</th><td><a href="FuncitionalRequirements.html"><code>FuncitionalRequirements.html</code></a>, Draft 0.3. The historical filename is retained for bundle compatibility.</td></tr>
+              <tr><th>Governed manifest</th><td><a href="../bundle.yaml"><code>../bundle.yaml</code></a></td></tr>
+              <tr><th>Product contract</th><td><a href="../product/fxlive.odps.yaml"><code>../product/fxlive.odps.yaml</code></a>, ODPS 4.1 product version 1.1.0.</td></tr>
+              <tr><th>Time convention</th><td>UTC only; public temporal values use RFC 3339 with trailing <code>Z</code>.</td></tr>
+              <tr><th>Requirement state</th><td>All <code>TR-*</code> requirements are proposed. None is an implementation or deployment claim.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warning">
+          <strong>Evidence boundary</strong>
+          This draft is based on read-only inspection of the existing FXLive Worker source and configuration,
+          a focused live API sample, and current official OpenAI and Cloudflare documentation. It is not a
+          Cloudflare account audit, load test, penetration test, deployed MCP test, or ChatGPT developer-mode test.
+        </div>
+
+        <div class="callout blocker">
+          <strong>Public-release blocker</strong>
+          Written rights for public display, judge access, screenshots, video, attribution treatment, capture,
+          retention, and redistribution must be confirmed before release. Recorded fallback remains disabled until
+          its additional storage and redistribution rights are explicitly approved.
+        </div>
+      </section>
+
+      <section id="baseline">
+        <h2>2. Observed FXLive baseline</h2>
+        <p class="lead">
+          The existing service is already a Cloudflare Worker-backed JSON/HTML API. OpenAPI describes that API;
+          it does not require the existing Worker to be rewritten merely because the description is added.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Observed item</th><th>Read-only finding</th><th>Consequence</th></tr></thead>
+            <tbody>
+              <tr><td>Public origin</td><td><code>https://fxlive.qmvp.workers.dev</code></td><td>The MCP service uses this fixed origin; it never accepts a user-supplied upstream URL.</td></tr>
+              <tr><td>Routes</td><td><code>GET /</code>, <code>GET /health</code>, <code>GET /meta</code>, <code>GET /latest?ticker=…</code>, <code>GET /latest?bar=…</code>, and <code>OPTIONS</code>.</td><td>The bundled OpenAPI contract controls routes and parameters used by the MCP adapter.</td></tr>
+              <tr><td>Cache behavior</td><td>Observed responses declare no-store behavior.</td><td>The MCP layer does not persist or cache live responses.</td></tr>
+              <tr><td>Source cloud state</td><td>The Worker uses an existing KV binding, with environment-specific configuration.</td><td>That KV remains private to the source service; the MCP Worker does not receive its binding or namespace identifiers.</td></tr>
+              <tr><td>Validation behavior</td><td>The source is a transport/data service; exact FX-35 allowlisting, governed schema checks, coherence, freshness, and OHLC plausibility are not assumed there.</td><td>The new MCP service performs contract validation and deterministic assessment.</td></tr>
+              <tr><td>Application resources</td><td>No MCP endpoint, Apps SDK resource, Durable Object, R2 archive, model call, or app observability contract was observed in the source project.</td><td>These are new ODP Market Steward resources and must not be reported as already deployed.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>Boundary decision</strong>
+          FXLive remains the data service. ODP Market Steward is a separate consumer and governance layer. The
+          existing source Worker and its KV binding are not modified or coupled to the MCP deployment.
+        </div>
+      </section>
+
+      <section id="architecture">
+        <h2>3. Target architecture</h2>
+        <div class="flow" role="img" aria-label="ODP Market Steward request path">
+          <div>ChatGPT conversation</div>
+          <div>Versioned MCP App component</div>
+          <div>Cloudflare MCP Worker<br><code>/mcp</code></div>
+          <div>Session Durable Object</div>
+          <div>FXLive API + optional OpenAI Responses API</div>
+        </div>
+        <p>
+          ChatGPT selects a small read-only domain tool. The service uses the already verified governed bundle,
+          validates the request, verifies the session disclaimer acknowledgement, retrieves permitted evidence from the fixed FXLive API, normalizes and validates
+          it deterministically, and optionally asks GPT-5.6 to explain the already-calculated result. The app component
+          renders the returned structured content and never talks directly to FXLive or OpenAI.
+        </p>
+
+        <h3>Request lifecycle</h3>
+        <ol>
+          <li>Receive a Streamable HTTP MCP request at the stable public <code>/mcp</code> endpoint.</li>
+          <li>Resolve a bounded MCP session object and require the startup-verified <code>bundle.yaml</code>, artifacts, versions, references, and digests.</li>
+          <li>Validate the tool input against a standalone JSON Schema and the FX-35 value set.</li>
+          <li>If acknowledgement is absent, return evidence mode <code>NONE</code>, the exact disclaimer, a session/policy-bound signed challenge, the validated pending request in component-only metadata for continuity, and the component without calling FXLive.</li>
+          <li>After explicit user action, the component-only acknowledgement tool commits bounded policy state and returns <code>ACKNOWLEDGED</code>; the component then reissues the previously validated pending domain request, which the server validates normally.</li>
+          <li>Fetch only the declared FXLive route with a timeout, size limit, and no-store behavior.</li>
+          <li>Normalize the response, retain source timestamps, calculate deterministic metrics, and evaluate rules.</li>
+          <li>Optionally call the OpenAI Responses API with a minimized evidence object after deterministic evaluation.</li>
+          <li>Return concise <code>content</code>, model-useful <code>structuredContent</code>, and component-only <code>_meta</code>.</li>
+        </ol>
+      </section>
+
+      <section id="resources">
+        <h2>4. Cloudflare resource decision record</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Resource</th><th>Decision</th><th>Purpose and boundary</th></tr></thead>
+            <tbody>
+              <tr><td>Existing FXLive Worker</td><td class="status-observed">Observed; unchanged</td><td>Independent public source API. Not the MCP server and not modified by this requirements package.</td></tr>
+              <tr><td>Existing source KV</td><td class="status-observed">Observed; source-only</td><td>Continues to support FXLive. No binding, namespace ID, or direct read is granted to ODP Market Steward.</td></tr>
+              <tr><td>ODP Market Steward Worker</td><td class="status-required">Required</td><td>Hosts Streamable HTTP <code>/mcp</code>, health/readiness, governed bundle loading, retrieval adapter, deterministic evaluation, app resource, and optional model call.</td></tr>
+              <tr><td>Durable Object with SQLite-backed storage</td><td class="status-required">Required</td><td>A pinned Cloudflare Agents SDK <code>Agent</code> using <code>createMcpHandler</code> and a persistent <code>WorkerTransport</code> maps each server-issued opaque MCP session to one strongly consistent object for acknowledgement, expiry, and replay protection. It stores no prompts or market responses.</td></tr>
+              <tr><td>Worker secrets or Secrets Store</td><td class="status-required">Required when secret-bearing features are enabled</td><td>Server-side OpenAI key and acknowledgement signing secret. No secret is bundled into HTML, tool metadata, or committed artifacts.</td></tr>
+              <tr><td>Workers Logs and Traces</td><td class="status-required">Required</td><td>Sanitized operational evidence, dependency timings, state counts, failures, and release diagnostics.</td></tr>
+              <tr><td>Versioned component asset</td><td class="status-required">Required</td><td>Built with the MCP service and exposed as a versioned <code>ui://</code> resource. A separate Static Assets binding is optional, not assumed.</td></tr>
+              <tr><td>R2 bucket</td><td class="status-conditional">Conditional</td><td>Only for rights-approved recorded evidence with create-only conditional writes, content and manifest digests, an approved retention class, and explicit lifecycle/immutability controls. Disabled until written capture, storage, display, retention, and redistribution rights exist.</td></tr>
+              <tr><td>Custom domain</td><td class="status-conditional">Recommended for production publication</td><td>A <code>workers.dev</code> URL is sufficient for a POC; production/plugin publication should use a stable verified domain and the unique app domain declared in component metadata.</td></tr>
+              <tr><td>D1, Queues, Vectorize, Workers AI</td><td class="status-excluded">Not selected for MVP</td><td>No approved MVP requirement needs a relational application database, async pipeline, vector retrieval, or a second inference provider.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="arch-reqs">
+        <h2>5. Architecture requirements</h2>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-ARCH-001</span><strong>Preserve service separation</strong><span class="tag">Must</span></div><div class="req-body"><p>The implementation shall deploy ODP Market Steward as a separate Cloudflare project and security boundary from FXLive.</p><ul><li>Only the public HTTPS API joins the services.</li><li>No source KV binding, namespace identifier, deployment credential, or internal operational identifier is copied into the MCP project.</li><li>Each service can deploy and roll back independently.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-ARCH-002</span><strong>Use contracts as runtime inputs</strong><span class="tag">Must</span></div><div class="req-body"><p>The runtime shall load the bundle manifest first and resolve product, API, value-set, rule, monitoring, publication, and app behavior from the responsibility-owning artifact.</p><ul><li>Required files remain within the bundle root and match their manifest digests.</li><li>Contract errors are typed and cannot be silently replaced by implementation defaults.</li><li>ODPS remains the product contract and is not treated as the API, execution, monitoring, AI, or presentation contract.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-ARCH-003</span><strong>Make deterministic evaluation authoritative</strong><span class="tag">Must</span></div><div class="req-body"><p>Retrieval, parsing, decimal calculations, coverage checks, state classification, and hard verdicts shall execute in deterministic server code before any model explanation.</p><ul><li>Model output cannot override a raw value, rule result, timestamp, state, or fitness verdict.</li><li>Failure of the optional model path leaves deterministic results available.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-ARCH-004</span><strong>Use UTC end to end</strong><span class="tag">Must</span></div><div class="req-body"><p>Parsing, calendar evaluation, freshness calculation, storage metadata, logs, test fixtures, and public output shall use UTC.</p><ul><li>Public times are RFC 3339 UTC with trailing <code>Z</code>.</li><li>Deployment region, browser locale, and developer workstation timezone cannot change results.</li></ul></div></article>
+      </section>
+
+      <section id="mcp">
+        <h2>6. MCP and ChatGPT App requirements</h2>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-MCP-001</span><strong>Expose current MCP transport</strong><span class="tag">Must</span></div><div class="req-body"><p>The service shall expose a public HTTPS Streamable HTTP MCP endpoint at <code>/mcp</code>.</p><ul><li>Transport behavior follows the supported MCP SDK and Cloudflare Agents integration selected and pinned during implementation.</li><li>Legacy SSE is not the primary transport.</li><li>TLS, request size, timeout, concurrency, origin, and method behavior are explicit and tested.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-MCP-002</span><strong>Register a small typed tool surface</strong><span class="tag">Must</span></div><div class="req-body"><p>The server shall register five model-visible domain tools plus one component-only acknowledgement tool with unique verb-led names, narrow inputs, standalone JSON Schemas, exact outputs, and truthful annotations.</p><ul><li>Unknown fields, arbitrary URLs, and instruments outside the exact 35-member value set are rejected.</li><li>All public tools declare <code>securitySchemes: [{type: noauth}]</code> and the compatibility metadata required by the pinned SDK.</li><li>The five domain tools are read-only; the hidden acknowledgement tool declares its bounded session-state mutation and non-idempotent replay behavior.</li><li>All market-data tools enforce the same acknowledgement and policy checks in server code.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-MCP-003</span><strong>Register a versioned UI resource</strong><span class="tag">Must</span></div><div class="req-body"><p>The server shall register the market component under a cache-busting versioned <code>ui://</code> URI with the MCP App HTML media type and associate it with every gated market-data tool.</p><ul><li>Component metadata declares the least-privilege CSP and, for public distribution, a unique app domain.</li><li>The component uses the MCP Apps bridge for tool results and follow-up actions.</li><li>It never calls FXLive or the OpenAI API directly.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-MCP-004</span><strong>Separate result channels</strong><span class="tag">Must</span></div><div class="req-body"><p>Tool results shall use <code>content</code> for concise narration, <code>structuredContent</code> for model-relevant facts, and protected <code>_meta</code> only for component hydration, signed acknowledgement material, or the bounded validated pending request used for post-acknowledgement continuity.</p><ul><li>The pending request is not authorization and is validated normally when reissued.</li><li>The text and structured result remain sufficient when the component cannot render.</li><li>Secrets, credentials, internal identifiers, and unrestricted raw payloads are never returned.</li><li>Output is validated against the declared schema before transmission.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-MCP-005</span><strong>Return typed safe errors</strong><span class="tag">Must</span></div><div class="req-body"><p>Protocol, policy, validation, dependency, and model failures shall return stable error codes, safe user guidance, and a correlation identifier.</p><ul><li>Errors do not expose stack traces, keys, bindings, upstream private identity, or raw response bodies.</li><li>A failed market request never reuses stale in-memory data as if it were live.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-MCP-006</span><strong>Keep the public MVP authless</strong><span class="tag">Must</span></div><div class="req-body"><p>The public, read-only MVP shall not require OAuth or a user account.</p><ul><li>Disclaimer acknowledgement is a policy gate, not authentication.</li><li>If private accounts, entitlements, portfolios, or user-specific data are added later, a separate authentication and authorization design is required.</li></ul></div></article>
+      </section>
+
+      <section id="data">
+        <h2>7. Data access and calculation requirements</h2>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-DATA-001</span><strong>Bind retrieval to OpenAPI</strong><span class="tag">Must</span></div><div class="req-body"><p>The FXLive adapter shall use <a href="../interface/fxlive.openapi.yaml"><code>../interface/fxlive.openapi.yaml</code></a> as the route, parameter, and response-shape contract.</p><ul><li>The base URL is configuration-controlled and allowlisted; a tool argument cannot replace it.</li><li>Only declared GET routes are called.</li><li>Contract drift produces a typed validation result and operational alert.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-DATA-002</span><strong>Enforce the standard 35-instrument set</strong><span class="tag">Must</span></div><div class="req-body"><p>The server shall resolve allowed instrument membership exclusively from <a href="../value-sets/fx35-instrument-set.yaml"><code>../value-sets/fx35-instrument-set.yaml</code></a>.</p><ul><li>A standard-set snapshot contains exactly 35 unique members or is marked partial/incoherent.</li><li>Unknown, duplicated, missing, or additional identifiers are reported; they are not silently normalized into membership.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-DATA-003</span><strong>Normalize numbers safely</strong><span class="tag">Must</span></div><div class="req-body"><p>OHLC values shall be parsed and calculated with an approved decimal strategy and integer nanosecond timestamps shall avoid unsafe JavaScript number coercion.</p><ul><li>Raw source values and normalized values remain distinguishable in test evidence.</li><li>Open, high, low, close, change, range, body, basis-point, and ratio calculations follow versioned rule IDs in <a href="../rules/ohlc-rules.yaml"><code>../rules/ohlc-rules.yaml</code></a>.</li><li>Rounding and display precision remain unresolved until OD-008 is approved.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-DATA-004</span><strong>Use bounded upstream requests</strong><span class="tag">Must</span></div><div class="req-body"><p>Every call shall apply a deadline, maximum response size, JSON content validation, redirect policy, and finite retry policy appropriate to a read-only current-data request.</p><ul><li>Retries do not extend beyond the approved user-facing latency budget.</li><li>Network and parsing failures preserve the exact attempt time and return evidence mode <code>NONE</code> unless an approved recorded fallback is selected.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-DATA-005</span><strong>Honor no-store live data</strong><span class="tag">Must</span></div><div class="req-body"><p>Live FXLive responses shall not be written to Cache API, KV, Durable Objects, R2, analytics payloads, or application logs.</p><ul><li>Only the explicitly allowlisted sanitized operational fields in <code>operations/monitoring.yaml#/observability</code> may be retained: non-reversible request correlation, tool/result/state categories, build and model-path states, aggregated counters, and sanitized dependency/request timings. No price, instrument, bar, raw upstream timestamp, or reconstructable market payload is retained.</li><li>Any telemetry <code>snapshotId</code> is a server-generated opaque non-reversible surrogate, not an upstream identifier or encoded market value.</li><li>Recorded evidence is a separate rights-gated workflow and cannot be created opportunistically from ordinary user calls.</li></ul></div></article>
+      </section>
+
+      <section id="state">
+        <h2>8. Acknowledgement and runtime-state requirements</h2>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-ACK-001</span><strong>Issue a signed challenge before retrieval</strong><span class="tag">Must</span></div><div class="req-body"><p>When the current session lacks a valid acknowledgement, the server shall return the exact publication-policy disclaimer and a server-signed challenge without retrieving market data.</p><ul><li>The signed material binds session identifier, policy version, disclaimer digest, nonce, issued time, and expiry time.</li><li>The component may retain the validated pending request for continuity, but it is not part of the authorization decision.</li><li>HMAC-SHA-256 or an equivalently reviewed server-side construction is used with a rotatable secret.</li><li>The maximum challenge lifetime is 600 seconds unless a stricter value is approved.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-ACK-002</span><strong>Use one strongly consistent object per server-owned MCP session</strong><span class="tag">Must</span></div><div class="req-body"><p>The implementation shall pin the Cloudflare Agents SDK <code>Agent</code>, <code>createMcpHandler</code>, and persistent <code>WorkerTransport</code> contract and use one Durable Object to serialize challenge issue, acknowledgement, replay rejection, and expiry for each server-issued opaque MCP session identifier.</p><ul><li>The client cannot choose a business identifier as the Durable Object key; the Worker validates or creates the opaque MCP session identifier and maps it deterministically to the Agent namespace.</li><li><code>WorkerTransport</code> state is persisted in the same Durable Object so a reconnect presenting the same valid unexpired server-issued session identifier reaches the same object and restores protocol initialization state; a missing, invalid, rotated, or expired identifier starts a new session and requires acknowledgement again.</li><li>The simpler <code>McpAgent</code> per-client-session pattern is not used for this guarantee because its documented state resets after that MCP session ends.</li><li>Application state is restricted to challenge and policy fields defined in <code>FR-ACK-002</code>, using the exact field names in the MCP application contract.</li><li>Alarm- or TTL-based cleanup removes expired state, and cross-session, reconnect, expiry, concurrent, and replay behavior is tested.</li><li>KV is not an acknowledgement-state substitute because replay-sensitive state requires strong per-session consistency.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-ACK-003</span><strong>Fail closed on acknowledgement errors</strong><span class="tag">Must</span></div><div class="req-body"><p>Missing, expired, invalid, modified, replayed, or cross-session challenges shall return the canonical <code>DISCLOSURE_REQUIRED</code> result with a specific safe reason and shall perform no upstream retrieval.</p><ul><li>A policy or disclaimer digest change invalidates prior acknowledgement.</li><li>Clock-skew behavior is bounded and tested in UTC.</li><li>The component-only acknowledgement tool returns <code>ACKNOWLEDGED</code> only after the Durable Object commits the transition, then the component reissues the previously validated pending market request for continuity; the server validates that call normally.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-STATE-001</span><strong>Implement the request workflow and total classifier</strong><span class="tag">Must</span></div><div class="req-body"><p>The runtime shall implement both the four-step request/evidence workflow and the separate total eight-branch service-state classifier in Functional Requirements Section 10 and the decision tables in the monitoring and rules artifacts.</p><ul><li>Availability, service state, freshness, fitness, plausibility, provenance, and bundle validity remain separate fields.</li><li>Mandatory <code>UNKNOWN</code>/<code>NOT_EVALUATED</code> and catch-all parseable states map safely to <code>UNKNOWN</code>.</li><li>A health response alone cannot yield <code>OPEN</code> or <code>FIT</code>.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-STATE-002</span><strong>Separate requested and returned evidence modes</strong><span class="tag">Must</span></div><div class="req-body"><p>Requests use <code>LIVE_ONLY</code> or <code>ALLOW_RECORDED_FALLBACK</code>; results use <code>LIVE</code>, <code>RECORDED</code>, or <code>NONE</code>.</p><ul><li><code>LAST_AVAILABLE</code> is rejected until separately defined and governed.</li><li>Synthetic fixtures are available only to the test harness.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-STATE-003</span><strong>Use manual refresh in the MVP</strong><span class="tag">Must</span></div><div class="req-body"><p>The MVP shall refresh only after an explicit user or model tool action.</p><ul><li>The component compares the prior and returned completed <code>BarEnd</code> and returns <code>INITIAL</code>, <code>SAME_BAR</code>, <code>NEW_BAR</code>, or <code>NOT_EVALUATED</code> when no comparison is possible.</li><li>Protocol and dependency failures use the typed error contract rather than a refresh outcome.</li><li>No background polling, timer loop, or hidden automatic upstream request is enabled in the first release.</li></ul></div></article>
+      </section>
+
+      <section id="ai">
+        <h2>9. GPT-5.6 integration requirements</h2>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-AI-001</span><strong>Call GPT-5.6 server-side and only when requested</strong><span class="tag">Must</span></div><div class="req-body"><p>When <code>includeStewardBrief=true</code>, the Worker shall call the OpenAI Responses API with the current <code>gpt-5.6</code> alias after deterministic assessment.</p><ul><li>The OpenAI API key is a server-side secret.</li><li>The implementation records requested and returned model identifiers in sanitized evaluation evidence.</li><li>Model selection is configuration-controlled and covered by contract tests.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-AI-002</span><strong>Minimize and constrain model input</strong><span class="tag">Must</span></div><div class="req-body"><p>The model receives only the bounded user purpose, relevant governed declarations, calculated metrics, typed rule results, UTC evidence times, and limitations required for the brief.</p><ul><li>No full transcript, secret, source-private identity, unrestricted raw payload, or unnecessary personal data is sent.</li><li>A structured output contract distinguishes answer, evidence references, limitations, safe next step, and model metadata.</li><li>Schema-invalid or fact-changing output is rejected.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-AI-003</span><strong>Degrade without changing evidence</strong><span class="tag">Must</span></div><div class="req-body"><p>A model timeout, rate limit, refusal, malformed result, or provider outage shall return the deterministic data and verdict with a typed Steward Brief state.</p><ul><li>The model path has its own timeout and retry budget.</li><li>No fallback model is silently selected.</li><li>A failed brief cannot downgrade, upgrade, hide, or replace the deterministic result.</li></ul></div></article>
+      </section>
+
+      <section id="security">
+        <h2>10. Security, privacy, and publication requirements</h2>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-SEC-001</span><strong>Apply strict input and egress controls</strong><span class="tag">Must</span></div><div class="req-body"><p>The Worker shall validate MCP inputs before use and permit server-side egress only to the fixed FXLive origin and, for requested Steward Briefs, the OpenAI API.</p><ul><li>URL, host, scheme, path, method, redirect, header, and instrument allowlists prevent SSRF and confused-deputy behavior.</li><li>Response content type, size, structure, and time fields are validated before processing.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-SEC-002</span><strong>Use a least-privilege component CSP</strong><span class="tag">Must</span></div><div class="req-body"><p>The component metadata shall declare only origins required by the compiled component.</p><ul><li>No direct FXLive or OpenAI connection is permitted from the component.</li><li><code>frameDomains</code> is omitted unless a separately approved embedded origin is essential.</li><li>Inline/eval behavior, external scripts, fonts, images, and styles are minimized and documented.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-SEC-003</span><strong>Protect secrets and challenge keys</strong><span class="tag">Must</span></div><div class="req-body"><p>Secrets shall be provisioned through Cloudflare Worker secrets or Secrets Store and accessed only by the server runtime.</p><ul><li>Separate values are used per environment.</li><li>Rotation and revocation are documented and tested without source changes.</li><li>Build output, logs, errors, screenshots, video, and public bundles pass a secret scan.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-SEC-004</span><strong>Exclude restricted public identity</strong><span class="tag">Must</span></div><div class="req-body"><p>Public code, schemas, manifests, UI, logs shown in demonstrations, screenshots, video, and model responses shall use only identities permitted by <code>policies/publication-policy.yaml#/identity/permittedPublicIdentities</code>—ODP Market Steward, FXLive, and QMVP—and shall not disclose prohibited upstream provider identity or private operational identifiers.</p><ul><li>The app name, product identity, organization identity, and competition title are used in their appropriate contexts rather than collapsed into one label.</li><li>A case-insensitive release scan covers public text and generated artifacts.</li><li>Sanitized errors use product-owned language rather than upstream implementation details.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-PRIV-001</span><strong>Minimize retention</strong><span class="tag">Must</span></div><div class="req-body"><p>The service shall not retain prompts, transcripts, user profiles, account identifiers, precise location, or live market payloads.</p><ul><li>Operational telemetry uses non-reversible correlation identifiers and aggregated status fields where possible.</li><li>A public privacy policy states actual collection, processing, retention, subprocessors, and deletion behavior before publication.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-PUB-001</span><strong>Enforce publication policy consistently</strong><span class="tag">Must</span></div><div class="req-body"><p>The exact versioned publication-policy disclaimer shall appear in the component and be acknowledged before first retrieval.</p><ul><li>Tool text, structured output, component, listing copy, screenshots, video, and support materials preserve the MARKET DATA DEMO boundary.</li><li>No surface supplies trading advice, prediction, recommendation, ranking, order execution, or portfolio-specific guidance.</li></ul></div></article>
+      </section>
+
+      <section id="operations">
+        <h2>11. Operations and deployment requirements</h2>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-OPS-001</span><strong>Isolate environments</strong><span class="tag">Must</span></div><div class="req-body"><p>Local, staging, and production deployments shall use explicit Cloudflare configuration with distinct service names, URLs, Durable Object state, secrets, observability datasets, and optional R2 buckets.</p><ul><li>Production never shares test acknowledgement state or synthetic fixtures.</li><li>Configuration files contain no secret values or provider-private identifiers intended for public release.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-OPS-002</span><strong>Expose safe health and readiness evidence</strong><span class="tag">Must</span></div><div class="req-body"><p>A non-sensitive endpoint such as <code>/healthz</code> shall report service build/version and local readiness without retrieving market data or leaking dependency details.</p><ul><li>Dependency health and deep diagnostics remain internal or authenticated operational evidence.</li><li>A healthy endpoint does not imply market availability, freshness, validity, or fitness.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-OPS-003</span><strong>Use reproducible deployment gates</strong><span class="tag">Must</span></div><div class="req-body"><p>Deployment shall be built from pinned dependencies and blocked unless static checks, tests, bundle verification, prohibited-content scanning, secret scanning, and a staging smoke test pass.</p><ul><li>Release evidence records source revision, build identifier, dependency lock digest, configuration target, UTC deployment time, and test result references.</li><li>No document claims success until the exact deployed endpoint has been exercised.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-OPS-004</span><strong>Support independent rollback</strong><span class="tag">Must</span></div><div class="req-body"><p>The MCP Worker and app resource shall support rollback to the last verified compatible release without rolling back or changing FXLive.</p><ul><li>Durable Object migrations are forward-safe and tested.</li><li>Tool schemas and versioned component URIs remain compatible with the rollback target.</li><li>Rollback evidence includes post-rollback MCP and ChatGPT smoke tests.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-OBS-001</span><strong>Collect sanitized operational telemetry</strong><span class="tag">Must</span></div><div class="req-body"><p>Workers Logs and Traces shall record request correlation, tool name, result code, evidence mode, state categories, dependency duration, model-brief state, and build version.</p><ul><li>Telemetry excludes prompts, instrument payloads, secrets, full challenges, source-private identity, and user identifiers.</li><li>Retention, sampling, access, alert thresholds, and deletion are configured per environment.</li><li>Alerts distinguish MCP service failure, FXLive dependency failure, contract drift, Durable Object failure, and OpenAI dependency failure.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-R2-001</span><strong>Gate immutable recorded evidence</strong><span class="tag">Conditional</span></div><div class="req-body"><p>If and only if rights approval enables recorded fallback, an environment-specific private R2 bucket shall store immutable evidence objects and manifests.</p><ul><li>Ordinary live requests do not write the bucket.</li><li>Object names are content-addressed or version-immutable, with content SHA-256, capture UTC, product, bundle, policy, and artifact versions, validation result, immutable manifest digest, and retention class.</li><li>Writes are create-only with a conditional non-existence precondition; overwrite and mutation of an existing evidence key are prohibited.</li><li>Public access is disabled; the MCP service returns only approved bounded evidence.</li><li>Lifecycle and any object-lock or retention mechanism are approved explicitly; deletion behavior follows the authorized retention policy.</li></ul></div></article>
+      </section>
+
+      <section id="testing">
+        <h2>12. Verification and acceptance requirements</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Required evidence</th><th>Acceptance boundary</th></tr></thead>
+            <tbody>
+              <tr><td><code>TR-TEST-001</code></td><td>Unit tests for decimal calculations, 35-member coverage, UTC parsing, ordered state classification, fallback gates, and output-schema validation.</td><td>All deterministic branches and boundary values pass with fixed fixtures.</td></tr>
+              <tr><td><code>TR-TEST-002</code></td><td>Bundle and contract tests for ODPS schema, OpenAPI syntax/semantics, companion-artifact syntax, cross-references, digests, tool schemas, and responsibility mapping.</td><td>No missing required artifact, ambiguous owner, stale digest, or silent compatibility claim.</td></tr>
+              <tr><td><code>TR-TEST-003</code></td><td>Acknowledgement and Durable Object tests for expiry, replay, mutation, cross-session use, policy change, cleanup, and concurrent requests.</td><td>No rejected case causes an FXLive request; no duplicate accepted transition bypasses replay policy.</td></tr>
+              <tr><td><code>TR-TEST-004</code></td><td>Adapter integration tests using recorded contract fixtures plus a bounded live sample against the exact public endpoint when available.</td><td>Fixture tests are reproducible; live checks are labelled point-in-time and never presented as an SLA test.</td></tr>
+              <tr><td><code>TR-TEST-005</code></td><td>MCP Inspector tests covering initialize, list tools, call each tool, UI resource retrieval, invalid input, typed errors, and transport behavior.</td><td>No protocol, schema, or resource errors on the exact staged release.</td></tr>
+              <tr><td><code>TR-TEST-006</code></td><td>ChatGPT developer-mode golden prompts covering direct, vague, indirect, negative, market-closed, unavailable, and policy-boundary cases on desktop and mobile.</td><td>Correct routing, disclosure, rendering, grounding, and safe refusal; one complete professional job is demonstrated.</td></tr>
+              <tr><td><code>TR-TEST-007</code></td><td>Failure tests for timeout, malformed JSON, extra/missing instruments, mixed minutes, unsafe numeric timestamps, bundle mismatch, model failure, and R2-disabled fallback.</td><td>Every case yields its declared typed state without fabricated or relabelled evidence.</td></tr>
+              <tr><td><code>TR-TEST-008</code></td><td>Release scans for secrets, restricted public identity, non-UTC public labels, disclaimer mismatch, broken local references, and unauthorized assets.</td><td>Zero release-blocking findings in the exact public package, screenshots, and video.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warning">
+          <strong>Claim discipline</strong>
+          Static HTML/YAML checks, live endpoint sampling, deployed MCP behavior, ChatGPT rendering, load behavior,
+          and public-submission readiness are separate evidence scopes and shall be reported separately.
+        </div>
+      </section>
+
+      <section id="quality">
+        <h2>13. Performance, reliability, and cost</h2>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-PERF-001</span><strong>Measure before setting service targets</strong><span class="tag">Must</span></div><div class="req-body"><p>A deployed staging vertical slice shall measure Worker cold/warm latency, Durable Object operations, FXLive dependency time, deterministic evaluation time, component load time, optional model time, and end-to-end ChatGPT completion time.</p><ul><li>Targets are approved only after representative measurements exist.</li><li>Model and non-model paths have separate latency budgets.</li><li>No unmeasured production performance claim appears in public material.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-REL-001</span><strong>Keep deterministic service available during optional dependency failure</strong><span class="tag">Must</span></div><div class="req-body"><p>The market-data and deterministic evaluation path shall not depend on GPT-5.6 availability, R2, or any unselected cloud resource.</p><ul><li>FXLive unavailability returns a typed non-live result.</li><li>R2 unavailability cannot affect <code>LIVE_ONLY</code> requests.</li><li>Dependency circuit-breaking and retry behavior are measured and documented.</li></ul></div></article>
+
+        <article class="req"><div class="req-head"><span class="req-id">TR-COST-001</span><strong>Define a measured Cloudflare and model budget</strong><span class="tag">Must</span></div><div class="req-body"><p>Before public release, measured usage shall support monthly and per-demonstration estimates for Worker invocations and CPU, Durable Object requests/storage, logs/traces, optional R2 operations/storage/egress, and OpenAI tokens.</p><ul><li>Budgets, alerts, and abuse controls are configured from measured use rather than assumed free-tier capacity.</li><li>The optional model brief can be disabled independently without disabling deterministic tools.</li></ul></div></article>
+      </section>
+
+      <section id="traceability">
+        <h2>14. Artifact and requirement traceability</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Technical area</th><th>Primary governed source</th><th>Functional linkage</th></tr></thead>
+            <tbody>
+              <tr><td>Product identity and commitments</td><td><code>product/fxlive.odps.yaml</code></td><td><code>FR-ODP-002</code>, <code>FR-ODP-003</code> for ODPS-owned facts</td></tr>
+              <tr><td>Bundle loading, responsibility resolution, cross-artifact discovery, and validation reporting</td><td><code>bundle.yaml</code>, <code>application/mcp-application.yaml</code>, and this technical baseline</td><td><code>FR-ODP-001..004</code></td></tr>
+              <tr><td>HTTP routes, parameters, and response shapes</td><td><code>interface/fxlive.openapi.yaml</code></td><td><code>FR-LIVE-001</code>, <code>FR-LIVE-003</code>, <code>FR-LIVE-005</code>, <code>FR-BAR-001</code></td></tr>
+              <tr><td>Exact instrument membership</td><td><code>value-sets/fx35-instrument-set.yaml</code></td><td><code>FR-LIVE-002</code></td></tr>
+              <tr><td>Calculations and verdict logic</td><td><code>rules/ohlc-rules.yaml</code></td><td><code>FR-BAR-002..004</code>, <code>FR-QUAL-001..005</code></td></tr>
+              <tr><td>Availability, session, and freshness</td><td><code>operations/monitoring.yaml</code></td><td><code>FR-TIME-001</code>, <code>FR-STATE-001..004</code></td></tr>
+              <tr><td>Disclaimer and public restrictions</td><td><code>policies/publication-policy.yaml</code></td><td><code>FR-LIVE-001</code>, <code>FR-EVID-001</code>, <code>FR-PUB-001..003</code>, <code>FR-ACK-001</code></td></tr>
+              <tr><td>MCP tools, schemas, acknowledgement, AI stewardship, and component contract</td><td><code>application/mcp-application.yaml</code></td><td><code>FR-LIVE-001</code>, <code>FR-LIVE-004</code>, <code>FR-AI-001..004</code>, <code>FR-EVAL-001</code>, <code>FR-CHAT-001..006</code>, <code>FR-ACK-001..002</code>, <code>FR-EVID-001</code>, <code>FR-DEP-001..004</code>, <code>FR-PLUG-001..002</code></td></tr>
+              <tr><td>Cloudflare architecture and operations</td><td><code>requirements/TechnicalRequirements.html</code></td><td><code>FR-DEP-001..004</code>, <code>FR-ACK-002</code>, all <code>NFR-*</code></td></tr>
+              <tr><td>Packaging, load order, integrity</td><td><code>bundle.yaml</code></td><td><code>FR-ODP-001</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Unresolved dependencies</h3>
+        <ul>
+          <li>Authoritative UTC FX calendar and maintenance-window implementation.</li>
+          <li>Written market-data display, demonstration, capture, retention, redistribution, and attribution rights.</li>
+          <li>Pinned ODP SDK version and verified compatibility behavior.</li>
+          <li>Approved decimal strategy, rounding, display precision, and plausibility baseline.</li>
+          <li>Measured latency, availability, retry, observability-retention, and cost targets.</li>
+          <li>Final GPT-5.6 structured output, prompt, refusal, retry, and evaluation contract.</li>
+          <li>Final public domain, privacy policy, support contact, listing metadata, and submission evidence.</li>
+        </ul>
+      </section>
+
+      <section id="references">
+        <h2>15. Controlling implementation references</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>OpenAI Apps SDK</h3>
+            <ul>
+              <li><a href="https://developers.openai.com/apps-sdk/concepts/mcp-server">MCP server concepts</a></li>
+              <li><a href="https://developers.openai.com/apps-sdk/build/mcp-server">Build an MCP server</a></li>
+              <li><a href="https://developers.openai.com/apps-sdk/build/chatgpt-ui">Build the ChatGPT UI</a></li>
+              <li><a href="https://developers.openai.com/apps-sdk/deploy">Deploy the app</a></li>
+              <li><a href="https://developers.openai.com/apps-sdk/deploy/connect-chatgpt">Connect from ChatGPT</a></li>
+              <li><a href="https://developers.openai.com/apps-sdk/deploy/testing">Test the integration</a></li>
+              <li><a href="https://developers.openai.com/apps-sdk/guides/security-privacy">Security and privacy</a></li>
+              <li><a href="https://developers.openai.com/api/docs/guides/latest-model">Latest model guidance</a></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Cloudflare</h3>
+            <ul>
+              <li><a href="https://developers.cloudflare.com/agents/model-context-protocol/guides/remote-mcp-server/">Remote MCP server</a></li>
+              <li><a href="https://developers.cloudflare.com/agents/model-context-protocol/apis/handler-api/#stateful-mcp-servers">Stateful Agent with persistent WorkerTransport</a></li>
+              <li><a href="https://developers.cloudflare.com/agents/model-context-protocol/protocol/transport/">MCP transport</a></li>
+              <li><a href="https://developers.cloudflare.com/durable-objects/">Durable Objects</a></li>
+              <li><a href="https://developers.cloudflare.com/kv/concepts/how-kv-works/">Workers KV consistency</a></li>
+              <li><a href="https://developers.cloudflare.com/workers/configuration/secrets/">Worker secrets</a></li>
+              <li><a href="https://developers.cloudflare.com/workers/observability/">Workers observability</a></li>
+              <li><a href="https://developers.cloudflare.com/r2/">R2 object storage</a></li>
+            </ul>
+          </article>
+        </div>
+
+        <h3>Required public disclaimer</h3>
+        <div class="callout warning">
+          <strong>MARKET DATA DEMO</strong>
+          MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed,
+          incomplete, unavailable, or contain errors. Nothing presented is investment advice,
+          a recommendation, or an offer to buy or sell any financial instrument. The product
+          must not be used for live trading or order execution.
+        </div>
+
+        <h3>Change log</h3>
+        <table>
+          <thead><tr><th>Version</th><th>Date</th><th>Status</th><th>Change</th></tr></thead>
+          <tbody><tr><td>0.1</td><td>2026-07-20</td><td>Proposed</td><td>Initial technical baseline for a separate Cloudflare MCP Worker, versioned ChatGPT component, Durable Object session acknowledgement, fixed FXLive OpenAPI adapter, optional GPT-5.6 brief, sanitized observability, and rights-gated R2 evidence.</td></tr></tbody>
+        </table>
+
+        <p class="footer-note">Draft 0.1 requirements only · No implementation, deployment, runtime, or public-submission readiness is claimed.</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

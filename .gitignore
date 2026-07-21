@@ -13,3 +13,4 @@ coverage/
 *.iml
 tmp/
 temp/
+Documentation/Import/

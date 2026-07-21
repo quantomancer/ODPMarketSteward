@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ODP Market Steward Bundle Documentation</title>
+  <style>
+    :root{
+      color-scheme:light;--ink:#172033;--muted:#5c667a;--line:#dce2eb;--paper:#fff;
+      --page:#f3f6f9;--navy:#142b4a;--teal:#087f75;--teal2:#0b6b75;
+      --teal-soft:#e7f6f3;--blue-soft:#eaf2ff;--amber:#9b5b06;--amber-soft:#fff4dc;
+      --red:#922f3e;--red-soft:#fdecef;--shadow:0 16px 42px rgba(20,43,74,.09)
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--page);color:var(--ink);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    a{color:#086d75;text-decoration-thickness:1px;text-underline-offset:2px}code{padding:2px 5px;border-radius:5px;background:#eef2f6;color:#183a5a;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .shell{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1440px;margin:0 auto}.side{position:sticky;top:0;height:100vh;padding:28px 20px;background:#10283e;color:#dcecf3;overflow:auto}.side .brand{font-size:20px;font-weight:800;color:#fff}.side .small{font-size:12px;color:#a9c0cf;margin-top:4px}.side nav{margin-top:28px}.side a{display:block;padding:7px 8px;color:#cce0ea;text-decoration:none;border-radius:7px}.side a:hover{background:rgba(255,255,255,.08);color:#fff}.content{min-width:0;padding:34px 34px 70px}.hero{padding:38px;color:#fff;background:linear-gradient(125deg,var(--navy),#174c67 68%,var(--teal));border-radius:19px;box-shadow:var(--shadow)}
+    .eyebrow{margin:0 0 8px;text-transform:uppercase;letter-spacing:.13em;font-size:12px;font-weight:750;opacity:.82}.hero h1{margin:0;font-size:clamp(32px,5vw,52px);line-height:1.06;letter-spacing:-.038em}.hero p{max-width:850px;margin:16px 0 0;font-size:18px;color:#e6f4f5}.hero .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.hero .badge{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff}
+    section{margin-top:24px;padding:29px;background:var(--paper);border:1px solid var(--line);border-radius:15px;box-shadow:0 8px 24px rgba(20,43,74,.045)}h2{margin:0 0 13px;color:var(--navy);font-size:24px;letter-spacing:-.018em}h3{margin:24px 0 8px;color:#1c3f58;font-size:17px}p{margin:8px 0}.lead{font-size:17px;color:var(--muted)}
+    .status-grid,.artifact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:18px}.status-card,.artifact{padding:17px;border:1px solid var(--line);border-radius:12px;background:#fbfcfe}.status-card strong{display:block;color:var(--navy);font-size:19px}.status-card span{color:var(--muted);font-size:13px}.artifact{grid-column:span 2;border-top:4px solid var(--teal)}.artifact h3{margin:2px 0 7px}.artifact p{color:var(--muted)}
+    .badge,.pill{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.06em}.ok{background:var(--teal-soft);color:#075e57}.info{background:var(--blue-soft);color:#285b99}.warn{background:var(--amber-soft);color:var(--amber)}.block{background:var(--red-soft);color:var(--red)}
+    .callout{margin-top:16px;padding:17px 18px;border-left:5px solid var(--teal);background:var(--teal-soft);border-radius:8px}.callout.warn{border-left-color:#c68021;background:var(--amber-soft);color:var(--ink)}.callout.block{border-left-color:var(--red);background:var(--red-soft);color:var(--ink)}
+    .table-wrap{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f5f8fb;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}tr:last-child td{border-bottom:0}
+    pre{margin:14px 0 0;padding:17px;overflow:auto;border-radius:10px;background:#10283e;color:#dbeaf2;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:12px;align-items:stretch;margin-top:17px}.flow article{padding:17px;border:1px solid var(--line);border-radius:11px;background:#f8fafc}.flow h3{margin:0 0 6px}.arrow{align-self:center;color:var(--teal);font-size:28px;font-weight:800}ul,ol{padding-left:22px}li+li{margin-top:5px}.two{display:grid;grid-template-columns:1fr 1fr;gap:15px}.checks{list-style:none;padding:0}.checks li{position:relative;padding-left:24px}.checks li:before{content:"✓";position:absolute;left:0;color:var(--teal);font-weight:900}.gaps{counter-reset:gap;list-style:none;padding:0}.gaps li{counter-increment:gap;padding:13px 14px;border:1px solid var(--line);border-radius:9px}.gaps li:before{content:"GAP " counter(gap);display:block;color:var(--red);font-size:11px;font-weight:800;letter-spacing:.06em}.footer{margin-top:24px;padding:20px;text-align:center;color:var(--muted);font-size:12px}
+    @media(max-width:1000px){.shell{display:block}.side{position:relative;height:auto}.side nav{display:none}.content{padding:22px}.status-grid{grid-template-columns:1fr 1fr}.artifact-grid{grid-template-columns:1fr}.artifact{grid-column:auto}}
+    @media(max-width:680px){.content{padding:12px}.hero,section{padding:21px}.status-grid,.two{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.arrow{justify-self:center;transform:rotate(90deg)}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    @media print{body{background:#fff}.shell{display:block}.side{display:none}.content{padding:0}.hero,section{box-shadow:none;break-inside:avoid}.hero{background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="side">
+      <div class="brand">ODP Market Steward</div>
+      <div class="small">Bundle Documentation · v1.1.0</div>
+      <nav aria-label="Document sections">
+        <a href="#executive">Executive summary</a>
+        <a href="#scope">Scope and terminology</a>
+        <a href="#critique">Critique response</a>
+        <a href="#structure">Package structure</a>
+        <a href="#artifacts">Artifact review</a>
+        <a href="#authority">Authority model</a>
+        <a href="#runtime">Runtime consumption</a>
+        <a href="#chatgpt">ChatGPT app contract</a>
+        <a href="#requirements">Requirements alignment</a>
+        <a href="#competition">Build Week readiness</a>
+        <a href="#validation">Validation</a>
+        <a href="#gaps">Open gaps</a>
+        <a href="#implementation">Implementation path</a>
+        <a href="#disclaimer">Disclaimer</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <header class="hero">
+        <p class="eyebrow">Professional architecture and governance documentation</p>
+        <h1>ODP Market Steward Bundle</h1>
+        <p>A responsibility-separated specification package for the FXLive Market Data Demo and the planned ChatGPT MCP App and Cloudflare service.</p>
+        <div class="badges"><span class="badge">MARKET DATA DEMO</span><span class="badge">UTC</span><span class="badge">ODPS 4.1</span><span class="badge">OpenAPI 3.1.2</span><span class="badge">Draft bundle v1.1.0</span></div>
+      </header>
+
+      <section id="executive">
+        <h2>Executive summary</h2>
+        <p class="lead">The bundle corrects the architectural overloading identified in external feedback while keeping ODPS central to the product.</p>
+        <div class="status-grid">
+          <article class="status-card"><strong>1</strong><span>ODP-family artifact claimed: ODPS</span></article>
+          <article class="status-card"><strong>1</strong><span>companion standard: OpenAPI</span></article>
+          <article class="status-card"><strong>5</strong><span>runtime project companion contracts</span></article>
+          <article class="status-card"><strong>14</strong><span>package files including manifest</span></article>
+        </div>
+        <div class="callout"><strong>Outcome.</strong> ODPS describes the product and its commitments. OpenAPI describes the existing HTTP surface. The product-defined instrument set, runtime rules, monitoring, publication policy, MCP behavior, Functional Requirements Draft 0.3, Technical Requirements Draft 0.1, and migration traceability each have an explicit responsibility. Detailed Level Design Draft 0.1 translates them into non-normative modules, interfaces, sequences, test layers, release gates, and implementation work packages. The technical baseline selects a separate Cloudflare MCP Worker, a strongly consistent per-session Durable Object, a versioned MCP App component, sanitized Workers observability, server-side GPT-5.6 access, and rights-gated R2 only for optional recorded evidence.</div>
+        <div class="callout warn"><strong>Boundary.</strong> This is the proposed artifact set for the current draft scope, with unresolved decisions recorded instead of invented. It is not a decision-complete production specification, a complete ODP-family implementation, an ODPI certification, or proof that the Cloudflare MCP service, component, Durable Object, model integration, or R2 path has been implemented or deployed.</div>
+      </section>
+
+      <section id="scope">
+        <h2>Scope and terminology</h2>
+        <table>
+          <thead><tr><th>Term</th><th>Meaning in this package</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Product</strong></td><td>FXLive Market Data Demo — Standard FX-35.</td></tr>
+            <tr><td><strong>Application</strong></td><td>ODP Market Steward, the planned MCP-backed ChatGPT app/connector.</td></tr>
+            <tr><td><strong>Bundle</strong></td><td>The project-defined governed package containing contracts, policies, configuration, documentation, and integrity metadata.</td></tr>
+            <tr><td><strong>ODPS</strong></td><td>The official ODP-family product contract used here.</td></tr>
+            <tr><td><strong>OpenAPI</strong></td><td>A separate, non-ODP standard describing the HTTP API.</td></tr>
+            <tr><td><strong>Companion artifact</strong></td><td>A project contract with one assigned responsibility; it is not presented as an ODP standard.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>ODP-family coverage</h3>
+        <table>
+          <thead><tr><th>Component</th><th>Status</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td>ODPS 4.1</td><td><span class="pill ok">Included</span></td><td>Defines the FXLive data product.</td></tr>
+            <tr><td>ODPC 1.0</td><td><span class="pill info">Not in scope</span></td><td>No multi-product catalog or portfolio is implemented.</td></tr>
+            <tr><td>ODPG 1.0</td><td><span class="pill info">Not present</span></td><td>No relationship graph exists. Package references are not graph claims.</td></tr>
+            <tr><td>ODPV 1.0</td><td><span class="pill info">Not present</span></td><td>The FX-35 list is a domain value set, not the shared family vocabulary.</td></tr>
+            <tr><td>ODPR 1.0 Draft</td><td><span class="pill info">Not present</span></td><td>The calculation file is a project rule contract, not an ODPR execution claim.</td></tr>
+          </tbody>
+        </table>
+        <p>Primary references: <a href="https://opendataproducts.org/v4.1/">ODPS 4.1</a>, <a href="https://opendataproducts.org/">Open Data Products standards family</a>, and <a href="https://spec.openapis.org/oas/v3.1.2.html">OpenAPI 3.1.2</a>.</p>
+      </section>
+
+      <section id="critique">
+        <h2>How the bundle answers the critique</h2>
+        <table>
+          <thead><tr><th>Critique</th><th>Resolution</th><th>Artifact</th></tr></thead>
+          <tbody>
+            <tr><td>ODPS had become the source for product, execution, monitoring, AI, and presentation.</td><td>ODPS is slimmed to product declarations, product commitments, high-level access, and compact executable-quality references.</td><td><code>product/fxlive.odps.yaml</code></td></tr>
+            <tr><td>Routes and parameters belong in OpenAPI.</td><td>All implemented operations, query modes, response shapes, error families, CORS, and no-store behavior are documented separately.</td><td><code>interface/fxlive.openapi.yaml</code></td></tr>
+            <tr><td>The currency set needs a vocabulary artifact.</td><td>A project domain controlled value set defines exact FX-35 membership and ISO 4217 alignment without falsely claiming ODPV status.</td><td><code>value-sets/fx35-instrument-set.yaml</code></td></tr>
+            <tr><td>Calculations need an executable recipe.</td><td>A deterministic project rule contract defines formulas and verdict rules. It explicitly does not claim ODPR, whose current draft is not the runtime execution engine.</td><td><code>rules/ohlc-rules.yaml</code></td></tr>
+            <tr><td>Session and freshness logic need operational monitoring.</td><td>UTC, calendar integration, freshness, coherent retrieval, state classification, evidence modes, and cache constraints are separated.</td><td><code>operations/monitoring.yaml</code></td></tr>
+            <tr><td>Disclaimer and UI requirements need publication policy.</td><td>Exact wording, surfaces, the requirement for explicit verifiable acknowledgement, identity, UTC, semantic labels, reduced motion, accessibility, and financial-safety boundaries are separated. The signing and session mechanism remains in the app and technical contracts.</td><td><code>policies/publication-policy.yaml</code></td></tr>
+            <tr><td>AI and presentation behavior should not be product metadata.</td><td>MCP tools, schemas, server/model/component responsibilities, and ChatGPT delivery status are defined outside ODPS.</td><td><code>application/mcp-application.yaml</code></td></tr>
+            <tr><td>Cloud hosting, session state, security, and deployment should not be hidden in product metadata.</td><td>A separate technical baseline identifies the exact Cloudflare resource decisions, protocol behavior, security boundaries, environments, observability, rollback, tests, and conditional storage.</td><td><code>requirements/TechnicalRequirements.html</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="structure">
+        <h2>Package structure</h2>
+        <pre>ODPMarketStewardBundle/
+├── bundle.yaml
+├── README.html
+├── ODPMarketStewardBundleDocumentation.html
+├── design/
+│   └── DetailedLevelDesign.html
+├── product/
+│   └── fxlive.odps.yaml
+├── interface/
+│   └── fxlive.openapi.yaml
+├── value-sets/
+│   └── fx35-instrument-set.yaml
+├── rules/
+│   └── ohlc-rules.yaml
+├── operations/
+│   └── monitoring.yaml
+├── policies/
+│   └── publication-policy.yaml
+├── application/
+│   └── mcp-application.yaml
+└── requirements/
+    ├── FuncitionalRequirements.html
+    ├── TechnicalRequirements.html
+    └── bundle-requirements.yaml</pre>
+        <p><code>bundle.yaml</code> is the machine-readable entrypoint. It assigns authority, load order, validation layers, checksums, ODP-family coverage, and known implementation gaps. It deliberately excludes itself from its checksum inventory to prevent recursion.</p>
+      </section>
+
+      <section id="artifacts">
+        <h2>Artifact-by-artifact review</h2>
+        <div class="artifact-grid">
+          <article class="artifact"><span class="pill ok">ODP standard</span><h3>ODPS product contract</h3><p>Contains the mandatory schema/version/product envelope, product identity, testing lifecycle, value proposition, use cases, conditional declarative SLA, declarative quality objectives, compact external-rule references, and API access metadata. It omits a product-strategy claim because the required higher-level KPI contribution was not supplied and must not be invented. Numeric <code>version: 4.1</code> follows the published schema.</p></article>
+          <article class="artifact"><span class="pill info">Companion standard</span><h3>OpenAPI interface contract</h3><p>Documents the exact Worker paths, both mutually exclusive <code>/latest</code> query modes, optional debug behavior, JSON/HTML outputs, errors, CORS, anonymous access, and <code>Cache-Control: no-store</code>. It says “latest stored,” not “live.” Raw stored timestamps are explicitly untrusted because the Worker forwards rather than enforces them; the governed wrapper rejects non-UTC-Z values.</p></article>
+          <article class="artifact"><span class="pill info">Project companion</span><h3>FX-35 controlled value set</h3><p>Defines 35 unique alphabetically ordered symbols, base/quote decomposition, exact membership, count, notation, and ISO 4217 alignment. “FX-35” is explicitly product-defined, not claimed as an external industry standard.</p></article>
+          <article class="artifact"><span class="pill info">Project companion</span><h3>OHLC rules</h3><p>Defines coherent snapshot assembly, required fields, projected FX-35 symbols, mathematical integrity, descriptive formulas, cross-bar continuity, freshness linkage, and purpose-specific fitness. Rule <code>FAIL</code> and availability <code>INCOHERENT</code> are separate. Closed-market, recorded, synthetic, and missing-evidence cases have explicit outcomes. Statistical plausibility remains <code>NOT_EVALUATED</code> while unconfigured.</p></article>
+          <article class="artifact"><span class="pill info">Project companion</span><h3>Monitoring profile</h3><p>Defines UTC handling, authoritative-calendar requirements, inclusive two-minute freshness, availability and service states, evidence modes, cache age, recorded/synthetic separation, source-aligned no-store constraints, and observability. <code>LIVE</code> means current retrieval provenance; only <code>LIVE + OPEN + freshness PASS</code> permits a live badge. Calendar absence produces <code>UNKNOWN</code>.</p></article>
+          <article class="artifact"><span class="pill info">Project companion</span><h3>Publication policy</h3><p>Contains exact demo wording, the requirement for explicit verifiable session acknowledgement, required surfaces, permitted public identities, UTC presentation, evidence labels, semantic accessibility requirements, and prohibited financial behavior. It delegates the signing and runtime mechanism to the app and technical contracts and makes data rights a release condition rather than pretending a disclaimer grants permission.</p></article>
+          <article class="artifact"><span class="pill info">Project companion</span><h3>MCP application contract</h3><p>Defines five model-visible read-only domain tools plus one component-only acknowledgement action, bounded inputs, twelve standalone-schema materializations, a signed disclosure gate backed by bounded per-session state, public result modes <code>LIVE</code>, <code>RECORDED</code>, and <code>NONE</code>, six per-artifact validation layers, separate plausibility, manual component-identified refresh outcomes, a bounded server-side <code>gpt-5.6</code> Steward Brief, the exact 35-value enum, the versioned MCP Apps resource, and an explicit reference to the separately authoritative technical delivery baseline.</p></article>
+          <article class="artifact"><span class="pill warn">Proposed requirements</span><h3>Functional requirements Draft 0.3</h3><p>The current <code>FuncitionalRequirements.html</code> incorporates the responsibility critique directly. Its 49 functional and 12 non-functional requirements define the governed bundle, acknowledgement, evidence, Cloudflare delivery, ChatGPT experience, quality, safety, acceptance, and competition constraints. Every requirement remains <strong>Proposed</strong>.</p></article>
+          <article class="artifact"><span class="pill warn">Proposed requirements</span><h3>Technical requirements Draft 0.1</h3><p>Defines 47 proposed <code>TR-*</code> requirements for service separation, Streamable HTTP MCP, the Apps SDK resource, Cloudflare Worker and Durable Object behavior, fixed-origin ingestion, deterministic rules, optional GPT-5.6, secrets, privacy, observability, environments, rollback, verification, performance, reliability, and cost. R2 is conditional on written rights; D1, Queues, Vectorize, and Workers AI are not selected for the MVP.</p></article>
+          <article class="artifact"><span class="pill info">Migration mapping</span><h3>Requirements normalization</h3><p>Records how all five Draft 0.2 responsibility issues were incorporated into Draft 0.3, maps the current functional, non-functional, and technical requirements to their owning artifacts, and separates resolved from unresolved decisions. It is traceability evidence rather than a hidden override.</p></article>
+          <article class="artifact"><span class="pill warn">Proposed design</span><h3>Detailed Level Design Draft 0.1</h3><p>Provides the non-normative implementation-planning baseline for the Cloudflare edge router, stateful Agent and persistent WorkerTransport, signed session and acknowledgement flow, contract registry, fixed-origin source adapter, coherent snapshot pipeline, deterministic evaluation, six MCP tools, versioned component, optional Steward Brief, security, privacy, observability, failure handling, test layers, release gates, and delivery work packages. It records rather than guesses pre-coding blockers, including typed tool errors, session and challenge semantics, the component fitness projection, automatic fetch-trace query privacy, Cloudflare plan limits, and immutable validation-evidence provenance.</p></article>
+          <article class="artifact"><span class="pill info">Documentation</span><h3>Professional documentation</h3><p>This document explains scope, artifact ownership, runtime consumption, critique resolution, validation evidence, implementation gaps, and competition readiness. It is descriptive, not normative, and its digest is recorded by the manifest.</p></article>
+          <article class="artifact"><span class="pill info">Entry point</span><h3>README</h3><p>The compact HTML entry point identifies the bundle, links every principal artifact, carries the exact disclaimer, and states that the MCP runtime and component are not yet implemented.</p></article>
+        </div>
+
+        <h3>Product-governance gaps intentionally not invented</h3>
+        <ul>
+          <li><strong>License:</strong> public visibility is not a license; owner-approved usage terms are absent.</li>
+          <li><strong>Data holder:</strong> legal entity, address, and accountable contact facts are not supplied.</li>
+          <li><strong>Market calendar:</strong> no authoritative UTC adapter has been selected.</li>
+          <li><strong>CreatedAt semantics:</strong> the Worker mapping is known, but producer-level semantic confirmation is pending. The field is nullable in governed snapshot evidence; missing or unconfirmed values force freshness to <code>UNKNOWN</code> rather than suppressing an otherwise valid bar.</li>
+          <li><strong>Decimal presentation:</strong> deterministic decimal arithmetic is required; rounding mode and display precision remain unresolved.</li>
+        </ul>
+      </section>
+
+      <section id="authority">
+        <h2>Authority and conflict model</h2>
+        <p>No single file is allowed to silently override every other responsibility.</p>
+        <table>
+          <thead><tr><th>Question</th><th>Authoritative artifact</th></tr></thead>
+          <tbody>
+            <tr><td>What is the product and what does it promise?</td><td>ODPS product contract</td></tr>
+            <tr><td>How does the HTTP API behave?</td><td>OpenAPI interface contract</td></tr>
+            <tr><td>Which 35 instruments are governed?</td><td>FX-35 controlled value set</td></tr>
+            <tr><td>Which calculations and quality rules apply?</td><td>OHLC rule contract</td></tr>
+            <tr><td>How are freshness and operational state evaluated?</td><td>Monitoring profile</td></tr>
+            <tr><td>How must public output be labelled and constrained?</td><td>Publication policy</td></tr>
+            <tr><td>Which MCP tools and model boundaries apply?</td><td>MCP application contract</td></tr>
+            <tr><td>How is the app hosted, secured, observed, deployed, and verified?</td><td>Technical Requirements Draft 0.1</td></tr>
+          </tbody>
+        </table>
+        <h3>Bundle dependency map</h3>
+        <pre>product-contract (ODPS)
+├── api-contract (OpenAPI)
+├── instrument-set
+├── publication-policy
+├── ohlc-rules ── depends on api-contract + instrument-set
+├── monitoring ── depends on api-contract + instrument-set + ohlc-rules
+└── mcp-application-contract ── consumes all six other runtime artifacts
+
+source-functional-requirements
+└── technical-requirements
+    └── requirements-normalization
+        ├── detailed-level-design
+        └── professional-documentation
+            └── README</pre>
+        <p>This is the manifest’s directed dependency map and conflict model, not an ODPG claim. It answers package resolution and ownership questions; a future ODPG would model richer product relationships only if the portfolio grows beyond this single product.</p>
+        <div class="callout block"><strong>Integrity failure.</strong> A missing or hash-mismatched required artifact prevents a governed <code>FIT</code> verdict. Market values may remain visible only with an explicit governance-unavailable state identifying the failed artifact and validation layer.</div>
+      </section>
+
+      <section id="runtime">
+        <h2>Runtime consumption model</h2>
+        <div class="flow">
+          <article><h3>FXLive Worker</h3><p>Returns process health and the latest stored snapshot through a fixed public origin.</p></article><div class="arrow">→</div>
+          <article><h3>Cloudflare MCP service</h3><p>A separate Worker loads the bundle, coordinates signed acknowledgement through a per-session Durable Object, retrieves evidence, validates fields, performs decimal calculations, and optionally calls GPT-5.6 after deterministic evaluation.</p></article><div class="arrow">→</div>
+          <article><h3>ChatGPT</h3><p>Selects the approved tool, renders the component, and explains supplied evidence without recalculating or overriding it.</p></article>
+        </div>
+        <h3>Approved MCP surface</h3>
+        <table>
+          <thead><tr><th>Tool</th><th>Job</th><th>External interaction</th></tr></thead>
+          <tbody>
+            <tr><td><code>get_fx_market_board</code></td><td>Coherent FX-35 board and governed state</td><td>Yes, fixed read-only origin</td></tr>
+            <tr><td><code>get_fx_instrument</code></td><td>One completed bar, rules, and metrics</td><td>Yes, fixed read-only origin</td></tr>
+            <tr><td><code>summarize_fx_movements</code></td><td>Descriptive comparisons without recommendations</td><td>Yes, fixed read-only origin</td></tr>
+            <tr><td><code>assess_fx_data_service</code></td><td>Purpose-specific deterministic fitness</td><td>Yes, fixed read-only origin</td></tr>
+            <tr><td><code>acknowledge_market_data_demo</code> <em>(component-only)</em></td><td>Verify the signed disclosure challenge and record bounded session policy state</td><td>No external system; one scoped Durable Object mutation</td></tr>
+            <tr><td><code>get_fx_product_profile</code></td><td>Governed declarations and artifact pointers</td><td>No</td></tr>
+          </tbody>
+        </table>
+        <div class="callout"><strong>Cloud resource boundary.</strong> The existing FXLive Worker and its KV binding remain source-service resources. The new application requires a separate MCP Worker, a Durable Object for bounded replay-sensitive session state, Worker secrets or Secrets Store, and sanitized Workers Logs and Traces. A private R2 bucket is conditional on written recording and redistribution rights; D1, Queues, Vectorize, and Workers AI are not selected for the MVP.</div>
+        <div class="callout warn"><strong>Source constraints.</strong> The Worker publishes <code>Cache-Control: no-store</code>, so the bundle permits only in-flight coalescing and request-scoped reuse; immutable recorded evidence needs a separately authorized capture mechanism. The Worker also forwards stored timestamps without enforcing UTC. OpenAPI documents that raw behavior, while the governed MCP adapter rejects any public evidence timestamp that does not parse as RFC 3339 UTC ending in <code>Z</code>.</div>
+      </section>
+
+      <section id="chatgpt">
+        <h2>ChatGPT-native MCP application contract</h2>
+        <p class="lead">The app is designed as a small set of conversational powers, not as a financial terminal transplanted into ChatGPT.</p>
+        <div class="two">
+          <div>
+            <h3>User value</h3>
+            <ul>
+              <li><strong>Know:</strong> retrieve latest stored completed-bar evidence and governed product metadata that base ChatGPT cannot fetch on its own.</li>
+              <li><strong>Show:</strong> render an FX-35 market board with UTC intervals, availability, service state, quality evidence, and progressive detail.</li>
+              <li><strong>Do:</strong> perform read-only deterministic domain evaluation. The only state mutation is the explicit component-only policy acknowledgement; the first release has no orders, execution, advice, or financial-system write action.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>First-turn behavior</h3>
+            <ul>
+              <li>Explain the app’s role in one sentence and provide useful evidence immediately after acknowledgement.</li>
+              <li>Act directly on a complete request; ask no more than two essential clarifying questions when purpose is materially ambiguous.</li>
+              <li>Return control to the conversation after one bounded job and expose stable fields another tool or app can reuse.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Protocol and component requirements</h3>
+        <table>
+          <thead><tr><th>Concern</th><th>Bundle decision</th><th>Implementation consequence</th></tr></thead>
+          <tbody>
+            <tr><td>Transport and hosting</td><td>A separate Cloudflare Worker exposes a stable public HTTPS Streamable HTTP <code>/mcp</code> endpoint and safe <code>/healthz</code> endpoint.</td><td>The source Worker remains unchanged; development, staging, and production have isolated configuration, state, secrets, evidence, and rollback targets.</td></tr>
+            <tr><td>Tool discovery</td><td>Five unique verb-led model-visible domain tools are read-only, and one component-only acknowledgement action declares its bounded session-state mutation truthfully. Every tool advertises public <code>noauth</code> security metadata. A deterministic versioned materializer converts each local source reference into one standalone JSON Schema.</td><td>The deployed server must advertise all twelve materialized schemas, with their reachable definitions under <code>$defs</code>, and pass routing plus handler-type parity tests.</td></tr>
+            <tr><td>Tool results</td><td><code>structuredContent</code> carries every model-relevant fact; <code>content</code> is one brief consistent summary; <code>_meta</code> is component-only hydration and never a hiding place for required evidence.</td><td>Handlers must validate outputs against their advertised schema. Domain handlers are retry-safe; the single-use acknowledgement action is intentionally non-idempotent and replay-protected.</td></tr>
+            <tr><td>Component resource</td><td>Every gated market-data tool links <code>ui://odp-market-steward/market-board-v1.html</code>, which uses <code>text/html;profile=mcp-app</code>.</td><td>Register that exact versioned URI, render disclosure and all market result modes from tool results, and do not call the market-data API directly from the iframe.</td></tr>
+            <tr><td>Sandbox policy</td><td>The component does not call FXLive or OpenAI directly and the draft CSP has no direct network or frame origins.</td><td>A unique app domain and exact least-privilege asset/CSP allowlists are required before public distribution.</td></tr>
+            <tr><td>Disclosure gate</td><td>The first market-data call returns <code>DISCLOSURE_REQUIRED</code> without upstream retrieval and places a short-lived session/policy-bound signed challenge plus the validated pending request in component-only <code>_meta</code>. The explicit user action calls <code>acknowledge_market_data_demo</code> with the token, affirmation, policy version, and disclaimer digest.</td><td>The server verifies signature, expiry, session, policy, and disclaimer binding, commits only bounded replay-sensitive policy state, and returns <code>ACKNOWLEDGED</code>. The component then reissues the previously validated pending market request for continuity, and the server validates it normally. A pinned Cloudflare Agents SDK <code>Agent</code> with <code>createMcpHandler</code> and persistent <code>WorkerTransport</code> owns opaque session IDs and deterministic Durable Object mapping; session loss, expiry, or policy change gates again.</td></tr>
+            <tr><td>Evidence contract</td><td>Requests use <code>LIVE_ONLY</code> or <code>ALLOW_RECORDED_FALLBACK</code>; returned evidence is <code>LIVE</code>, <code>RECORDED</code>, or <code>NONE</code>. <code>LAST_AVAILABLE</code> is reserved and prohibited; synthetic evidence is test-harness-only.</td><td><code>LIVE</code> identifies current-call retrieval only. The UI may show a live badge solely when service state is <code>OPEN</code> and freshness is <code>PASS</code>; a <code>NONE</code> result carries no prices and gives a typed reason.</td></tr>
+            <tr><td>Governance evidence</td><td>Syntax, controlling-schema, semantic-policy, cross-reference, source-alignment, and SDK-compatibility results are keyed by artifact and layer, with status, validator name/version, evaluation time, schema URI/hash when applicable, and evidence.</td><td>Represent inapplicable and unexecuted layers explicitly; never collapse schema validity into SDK compatibility or hide <code>NOT_TESTED</code>.</td></tr>
+            <tr><td>Augmented value</td><td>Plausibility is a separate typed result. Refresh compares the component-supplied prior <code>BarEnd</code> with the new result. The Steward Brief has generated, unavailable, rejected, and not-requested states.</td><td>Deterministic results survive model failure. A generated brief identifies the actual OpenAI API response model and includes evidence pointers, limitations, safe next steps, and rejection reasons.</td></tr>
+            <tr><td>Model boundary</td><td>The ChatGPT host may narrate tool results but cannot mutate them. When requested, the MCP server makes a bounded Responses API call using <code>gpt-5.6</code> to generate the typed Steward Brief after deterministic assessment.</td><td>The server owns calculations and verdicts; neither host narration nor the server-side brief may override, recalculate, infer missing evidence, or produce financial advice. API failure returns <code>UNAVAILABLE</code> for the brief while preserving the assessment.</td></tr>
+          </tbody>
+        </table>
+        <p>Design and implementation references: <a href="https://developers.openai.com/blog/what-makes-a-great-chatgpt-app">What makes a great ChatGPT app</a>, <a href="https://developers.openai.com/apps-sdk/concepts/mcp-server">Apps SDK MCP concepts</a>, <a href="https://developers.openai.com/apps-sdk/build/mcp-server">Build your MCP server</a>, <a href="https://developers.openai.com/apps-sdk/build/chatgpt-ui">Build the ChatGPT UI</a>, <a href="https://developers.openai.com/apps-sdk/deploy/testing">Test the app</a>, <a href="https://developers.cloudflare.com/agents/model-context-protocol/guides/remote-mcp-server/">Cloudflare remote MCP server</a>, <a href="https://developers.cloudflare.com/agents/model-context-protocol/apis/handler-api/#stateful-mcp-servers">stateful Agent with persistent WorkerTransport</a>, and <a href="https://developers.cloudflare.com/durable-objects/">Cloudflare Durable Objects</a>.</p>
+      </section>
+
+      <section id="requirements">
+        <h2>Requirements alignment</h2>
+        <p>Functional Requirements Draft 0.3 incorporates the responsibility critique directly. Technical Requirements Draft 0.1 turns the selected ChatGPT MCP App and Cloudflare service architecture into an acceptance baseline. The normalization file now records the migration and traceability; it no longer overrides the current drafts.</p>
+        <table>
+          <thead><tr><th>Requirement area</th><th>Configuration owner</th><th>Implementation state</th></tr></thead>
+          <tbody>
+            <tr><td>Product governance and discovery</td><td>Manifest + responsibility-owning product and companion artifacts + application contract</td><td>Specified, app not implemented</td></tr>
+            <tr><td>API retrieval and shapes</td><td>OpenAPI</td><td>Specified and source-reviewed</td></tr>
+            <tr><td>FX-35 exact membership</td><td>Value set</td><td>Specified</td></tr>
+            <tr><td>OHLC integrity and calculations</td><td>Rule contract</td><td>Specified; display rounding unresolved</td></tr>
+            <tr><td>Freshness, state, and evidence modes</td><td>Monitoring</td><td>Specified; calendar and CreatedAt semantics unresolved</td></tr>
+            <tr><td>Public display and safety</td><td>Publication policy</td><td>Specified; current root page non-compliant</td></tr>
+            <tr><td>MCP tools and ChatGPT component</td><td>Application contract</td><td>Specified, not implemented</td></tr>
+            <tr><td>Cloudflare hosting, session state, security, operations, and verification</td><td>Technical requirements</td><td>Specified, resources not provisioned</td></tr>
+          </tbody>
+        </table>
+        <p>The bundle does not change any requirement from <strong>Proposed</strong> to <strong>Verified</strong>. Specification coverage and runtime verification are different states.</p>
+      </section>
+
+      <section id="competition">
+        <h2>OpenAI Build Week readiness</h2>
+        <p class="lead">The current official rules were rechecked on 20 July 2026. The intended category remains <strong>Work &amp; Productivity</strong>, but this bundle alone is not an eligible working submission.</p>
+        <div class="callout block"><strong>Current readiness: not submission-ready.</strong> The rules require a project built with Codex and GPT-5.6 that installs and runs consistently as depicted. This package supplies the architecture and contracts; the runnable MCP server, component, deployment, demonstration, test access, and submission evidence still have to be produced.</div>
+        <table>
+          <thead><tr><th>Official requirement</th><th>Bundle coverage</th><th>Work still required</th></tr></thead>
+          <tbody>
+            <tr><td>Working project using Codex and GPT-5.6</td><td>Roles, tools, model boundary, and implementation requirements are specified.</td><td>Implement, deploy, test, and document meaningful eligible-period Codex/GPT-5.6 work.</td></tr>
+            <tr><td>Pre-existing project separation</td><td>FXLive is clearly treated as the existing market-data service and the ODP Market Steward application as the new build.</td><td>Provide dated evidence distinguishing prior Worker work from new eligible implementation.</td></tr>
+            <tr><td>Third-party API and data authorization</td><td>Rights and attribution are explicit release blockers.</td><td>Obtain written authorization before public display, recording, judge access, or submission.</td></tr>
+            <tr><td>Repository, README, and free judge access</td><td>The bundle defines the required evidence and a package README entry point; the local implementation repository now exists.</td><td>Add build/test/Codex collaboration instructions, publish an approved judge-accessible remote, and provide a stable free demo.</td></tr>
+            <tr><td>Public narrated YouTube demo under three minutes</td><td>Demo behavior and disclaimer surfaces are specified.</td><td>Record the working app, explain Codex and GPT-5.6 use, and use only authorized assets.</td></tr>
+            <tr><td>Codex <code>/feedback</code> Session ID</td><td>Tracked as CR-BW-007.</td><td>Use the task containing the majority of core implementation and retain its required session ID.</td></tr>
+            <tr><td>English submission materials</td><td>This package and requirements baseline are in English.</td><td>Keep the final description, video narration, README, and testing instructions in English.</td></tr>
+          </tbody>
+        </table>
+        <h3>Judging fit</h3>
+        <p>The four equally weighted criteria are technological implementation, design, potential impact, and quality of the idea. The professional case is strongest when the demo proves one end-to-end question—“Can I use this observed FX product for one-minute descriptive analysis?”—with market evidence first, deterministic governance second, and a concise model explanation last.</p>
+        <p>Controlling references: <a href="https://openai.devpost.com/rules">Build Week Official Rules</a>, <a href="https://openai.devpost.com/details/faqs">Build Week FAQ</a>, and <a href="https://openai.com/build-week/">OpenAI Build Week</a>. The official rules control if any summary differs.</p>
+      </section>
+
+      <section id="validation">
+        <h2>Validation model and current evidence</h2>
+        <p class="lead">Validation is layered so a permissive schema pass cannot conceal a responsibility or implementation failure.</p>
+        <ol>
+          <li><strong>Syntax:</strong> duplicate-key-aware YAML parsing and focused HTML structure checks.</li>
+          <li><strong>Controlling schema:</strong> bundled ODPS against the exact declared official YAML schema; OpenAPI against OAS 3.1 structure and primary specification review.</li>
+          <li><strong>Semantic policy:</strong> ODP responsibility separation, UTC, disclaimer, public identity, state, and safety rules.</li>
+          <li><strong>Cross-reference:</strong> paths, pointers, enum equality, versions, dependencies, and SHA-256 inventory.</li>
+          <li><strong>Source alignment:</strong> Worker route branches and focused deployed response samples.</li>
+          <li><strong>SDK compatibility:</strong> separate and not equivalent to ODPS schema validity.</li>
+        </ol>
+        <ul class="checks" id="validated-checks">
+          <li>All 9 YAML documents parsed with duplicate-key detection; all 14 package files were present and non-empty.</li>
+          <li>The bundled ODPS instance passed full evaluation against every validation keyword used by the refreshed official ODPS 4.1 YAML schema. The schema bytes used had SHA-256 <code>b7e75d7b1f967efc58d178cc58222a5b81d90bfe6f9fd228e283a049bf9e16a5</code>.</li>
+          <li>The OpenAPI contract passed focused OAS 3.1.2 structural review across 4 paths, 8 operations, 3 query parameters, anonymous access, and 60 local reference occurrences resolving to 21 unique targets.</li>
+          <li>All 13 manifest artifacts, dependency IDs, bundle-relative paths, cross-file pointers, versions, and final SHA-256 values agreed. Draft 0.3 uses the correct <code>../product/fxlive.odps.yaml</code> reference and product version 1.1.0; all five Draft 0.2 migration issues are recorded as incorporated. Detailed Level Design Draft 0.1 is explicitly non-normative and depends on the accepted requirements, normalization, and MCP application contract.</li>
+          <li>The exact 35-symbol value set was unique, alphabetical, correctly decomposed into base/quote codes, and byte-for-value equal to the MCP instrument enum.</li>
+          <li>All 61 current FR/NFR identifiers, all 47 technical requirement identifiers, all 10 Build Week constraints, and every resolved or unresolved review decision were represented in the traceability contract.</li>
+          <li>The exact disclaimer was present in the public governed specifications and visible HTML; UTC and prohibited-public-identity scans passed for the complete bundle.</li>
+          <li>The six MCP tools had unique names and titles, valid artifact IDs, public <code>noauth</code> metadata, truthful annotations, mandatory disclaimer branches for gated market retrieval, coherent MCP Apps resource metadata, and 12 source schemas materialized in memory as standalone JSON Schemas with no unresolved references. Five tools are model-visible domain capabilities; the acknowledgement action is component-only.</li>
+          <li>Focused semantic checks covered request/result evidence separation, typed <code>NONE</code> behavior, rights-gated create-only recorded manifests, cache/calendar timestamps, separate plausibility, closed-market fitness, validation layers, canonical manual refresh outcomes, Steward Brief failure states, exact-set symbol projection, the component-only signed acknowledgement contract, persistent <code>WorkerTransport</code> session mapping, separate Cloudflare Worker boundary, and Durable Object session state.</li>
+          <li>Focused Worker-source alignment confirmed routes, methods, selectors, debug behavior, no-store/CORS handling, and the last-array-entry implementation assumption.</li>
+          <li>A 9-request deployed sample started at <code>2026-07-20T21:20:02Z</code>: health, metadata, EURUSD bar/ticker, selector failures, unknown route, and OPTIONS matched the focused contract checks. The sample metadata contained the exact ordered FX-35 set and the EURUSD bar matched its metadata minute.</li>
+        </ul>
+        <div class="callout warn"><strong>Validation limitations.</strong> No independent third-party OpenAPI linter or pinned ODP SDK was installed, so those results are respectively <code>NOT_RUN</code> and <code>NOT_TESTED</code>. The live test was one instrument at one point in time, not a full-board or longitudinal claim. MCP Inspector, ChatGPT developer mode, component rendering, accessibility, browser visual QA, and runtime fitness were not tested because those artifacts do not yet exist. HTML validation was source/structure-only; visual rendering remains unverified.</div>
+      </section>
+
+      <section id="gaps">
+        <h2>Known gaps and release blockers</h2>
+        <ol class="gaps">
+          <li><strong>Public HTML disclosure.</strong> The current Worker-generated root page lacks the mandatory MARKET DATA DEMO label and full disclaimer.</li>
+          <li><strong>Data rights.</strong> Public display, recording, redistribution, judge access, and attribution treatment require written confirmation.</li>
+          <li><strong>Calendar.</strong> No authoritative UTC market calendar is configured; session-dependent state remains <code>UNKNOWN</code>.</li>
+          <li><strong>CreatedAt.</strong> Producer-level semantics remain pending; governed freshness cannot pass until resolved.</li>
+          <li><strong>Decimal display.</strong> Rounding mode and display precision remain unresolved under FR-BAR-003.</li>
+          <li><strong>Plausibility.</strong> Lookback, sample size, and MAD threshold are unset; the only valid result is <code>NOT_EVALUATED</code>.</li>
+          <li><strong>License and accountable data holder.</strong> Owner-approved facts are not present and must not be invented.</li>
+          <li><strong>Application delivery.</strong> The separate Cloudflare MCP Worker, pinned Agents SDK version, Durable Object binding and migration, secrets, sanitized observability, Apps SDK component, public HTTPS endpoint, deployed standalone tool descriptors, privacy policy, support contact, unique app domain/CSP, and ChatGPT developer-mode tests do not yet exist.</li>
+          <li><strong>Worker validation.</strong> Stored fields are forwarded without governed validation, and the last array entry is assumed to be the selected bar.</li>
+          <li><strong>Cache policy.</strong> <code>no-store</code> prohibits persistent or cross-tool response caching; recorded evidence needs a separately authorized immutable capture mechanism.</li>
+          <li><strong>Unhandled exceptions.</strong> An uncaught storage or JSON failure may produce a platform-generated <code>500</code> outside the stable JSON error envelopes.</li>
+          <li><strong>OpenAPI publication.</strong> The contract is bundled but is not served from the Worker.</li>
+        </ol>
+      </section>
+
+      <section id="implementation">
+        <h2>Implementation path</h2>
+        <ol>
+          <li><strong>Resolve blockers:</strong> data rights, public attribution treatment, accountable owner facts, calendar adapter, CreatedAt semantics, and decimal presentation policy.</li>
+          <li><strong>Align public Worker surface:</strong> add the exact demo disclosure to the HTML page, remove internal timing from public presentation, and decide whether to publish OpenAPI.</li>
+          <li><strong>Scaffold the separate Cloudflare application:</strong> create isolated development, staging, and production Worker configuration, Durable Object state and migration, Worker secrets, sanitized logs/traces, and safe <code>/healthz</code>; do not bind the source KV.</li>
+          <li><strong>Build the deterministic MCP vertical slice:</strong> load and verify the bundle, materialize all tool schemas, expose Streamable HTTP at <code>/mcp</code>, implement one selected bar and one versioned governed component.</li>
+          <li><strong>Implement the disclosure protocol:</strong> pin the Agents SDK <code>Agent</code>, <code>createMcpHandler</code>, and persistent <code>WorkerTransport</code> versions, map each server-issued opaque session identifier deterministically to one Durable Object, issue a signed session/policy-bound challenge, let the component-only acknowledgement tool commit the bounded state, reissue the previously validated pending request for continuity and validate it normally, guarantee zero upstream retrieval before acknowledgement, and test expiry, replay, reconnect, wrong-session, changed-policy, session-loss, concurrency, cleanup, and fabricated-token failures.</li>
+          <li><strong>Implement coherent FX-35 retrieval:</strong> metadata-before/after fan-out, bounded rollover reread, exact set enforcement, and no-store-compliant evidence handling.</li>
+          <li><strong>Implement rule and state engines:</strong> decimal calculations, hard validity, calendar-aware freshness, separated availability/service/fitness/plausibility states.</li>
+          <li><strong>Add honest recorded fallback:</strong> provision private R2 only after written capture, storage, display, retention, and redistribution rights and an approved create-only manifest, lifecycle, retention-class, and immutability design exist; otherwise return evidence mode <code>NONE</code>.</li>
+          <li><strong>Complete ChatGPT delivery:</strong> Apps SDK UI, advertised standalone schemas, typed evidence and validation layers, GPT-5.6 Steward Brief state handling, MCP Inspector, developer-mode golden prompts, accessibility, reduced-motion, mobile, failure, and negative-financial tests.</li>
+        </ol>
+      </section>
+
+      <section id="disclaimer">
+        <h2>Required public disclaimer</h2>
+        <div class="callout warn"><strong>MARKET DATA DEMO.</strong> For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.</div>
+      </section>
+
+      <div class="footer">ODP Market Steward — Governed Live Market Data in ChatGPT · Bundle documentation v1.1.0 · Proposed specification package, not runtime certification</div>
+    </main>
+  </div>
+</body>
+</html>

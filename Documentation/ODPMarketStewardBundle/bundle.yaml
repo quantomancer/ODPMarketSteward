@@ -1,0 +1,473 @@
+apiVersion: odp-market-steward.qmvp/v1
+kind: GovernedProductBundle
+
+metadata:
+  id: odp-market-steward-fxlive-bundle
+  name: "ODP Market Steward — FXLive governed product bundle"
+  version: "1.1.0"
+  status: draft
+  classification: project_bundle_manifest
+  constructName: ODPS-centred-market-data-product-package
+  description: >-
+    Versioned specification package for the FXLive Market Data Demo and its planned
+    ODP Market Steward ChatGPT MCP App and Cloudflare service. This manifest is
+    project-defined and is not an ODPI specification, ODPG graph, ODPC catalog,
+    ODPV vocabulary, or ODPR recipe.
+
+product:
+  id: fxlive-market-data-demo-fx35
+  version: "1.1.0"
+  lifecycleStatus: testing
+  contract: product/fxlive.odps.yaml
+
+standards:
+  - name: Open Data Product Specification
+    abbreviation: ODPS
+    version: "4.1"
+    role: product contract
+    artifact: product/fxlive.odps.yaml
+    schema: https://opendataproducts.org/v4.1/schema/odps.yaml
+  - name: OpenAPI Specification
+    abbreviation: OAS
+    version: "3.1.2"
+    role: HTTP API interface contract
+    artifact: interface/fxlive.openapi.yaml
+    specification: https://spec.openapis.org/oas/v3.1.2.html
+
+odpFamilyCoverage:
+  ODPS:
+    status: included
+    version: "4.1"
+    path: product/fxlive.odps.yaml
+  ODPC:
+    status: not_in_scope
+    reason: One product package does not currently implement a product catalog or portfolio.
+  ODPG:
+    status: not_present
+    reason: No relationship graph exists; manifest dependencies are not graph claims.
+  ODPV:
+    status: not_present
+    reason: >-
+      The product-defined FX-35 membership list is a project domain value set, not
+      the shared Open Data Products family vocabulary.
+  ODPR:
+    status: not_present
+    reason: >-
+      Runtime calculation rules are project rule contracts. Draft ODPR is not used
+      as an execution engine or implementation claim.
+
+artifacts:
+  - id: product-contract
+    role: product identity, value, use cases, SLA, quality objectives, and access profile
+    path: product/fxlive.odps.yaml
+    classification: ODPI_standard
+    standard: ODPS
+    standardVersion: "4.1"
+    artifactVersion: "1.1.0"
+    mediaType: application/yaml
+    normative: true
+    requiredAtRuntime: true
+    sha256: b2b5b7db76cbbc830fcec7fe2ce17323d54f8387b40a32817ad1875dac5c7ced
+    dependsOn: []
+
+  - id: api-contract
+    role: HTTP operations, parameters, response schemas, errors, and transport headers
+    path: interface/fxlive.openapi.yaml
+    classification: companion_standard
+    standard: OpenAPI
+    standardVersion: "3.1.2"
+    artifactVersion: "1.0.0"
+    mediaType: application/yaml
+    normative: true
+    requiredAtRuntime: true
+    sha256: 415a90a4fc62222dedcf1d0b99a589899bd28dfa436c5e256abc632adcf341d4
+    dependsOn: [product-contract]
+
+  - id: instrument-set
+    role: exact product-governed FX-35 identifiers and membership invariants
+    path: value-sets/fx35-instrument-set.yaml
+    classification: project_companion
+    artifactVersion: "1.0.0"
+    mediaType: application/yaml
+    normative: true
+    requiredAtRuntime: true
+    sha256: e60107ab9f2cde95ad8f08b2b87556e3436005df8ecdd928514d0899f64d6a07
+    dependsOn: [product-contract]
+
+  - id: ohlc-rules
+    role: deterministic quality, calculation, plausibility, and fitness contract
+    path: rules/ohlc-rules.yaml
+    classification: project_companion
+    artifactVersion: "1.0.0"
+    mediaType: application/yaml
+    normative: true
+    requiredAtRuntime: true
+    sha256: dbe34f24c77ee5916f5c2be3704258e056485442833367a2ee7838d18e846218
+    dependsOn: [product-contract, api-contract, instrument-set]
+
+  - id: monitoring
+    role: UTC, calendar, freshness, coherent retrieval, state, evidence, and observability policy
+    path: operations/monitoring.yaml
+    classification: project_companion
+    artifactVersion: "1.1.0"
+    mediaType: application/yaml
+    normative: true
+    requiredAtRuntime: true
+    sha256: 8355e07f284ab1c0a8500d8f93556b3cb3b103dbfc913529e3f3715456397182
+    dependsOn: [product-contract, api-contract, instrument-set, ohlc-rules]
+
+  - id: publication-policy
+    role: public identity, disclaimer, UTC presentation, evidence labels, and financial-safety boundaries
+    path: policies/publication-policy.yaml
+    classification: project_companion
+    artifactVersion: "1.1.0"
+    mediaType: application/yaml
+    normative: true
+    requiredAtRuntime: true
+    sha256: 398878e3b48a204fd7406e74ebaab43c27303d15000eed54dd3642d7b71eaa7e
+    dependsOn: [product-contract]
+
+  - id: mcp-application-contract
+    role: MCP tools, schemas, acknowledgement contract, responsibility boundaries, application safety, and ChatGPT delivery target
+    path: application/mcp-application.yaml
+    classification: project_companion
+    artifactVersion: "1.1.0"
+    mediaType: application/yaml
+    normative: true
+    requiredAtRuntime: true
+    sha256: 0fb476105b10e0e4104b8750fe6652a169daeda5f74fb03da0e2b2363c3b56f2
+    dependsOn: [product-contract, api-contract, instrument-set, ohlc-rules, monitoring, publication-policy]
+
+  - id: source-functional-requirements
+    role: current functional requirements and acceptance baseline
+    path: requirements/FuncitionalRequirements.html
+    classification: project_requirements_document
+    artifactVersion: "Draft 0.3"
+    mediaType: text/html
+    normative: true
+    requiredAtRuntime: false
+    sha256: 6542d254cbb611e22e076cbc137cb12b88c9452427d674d5b73fb9e859e5bb1b
+    dependsOn: []
+
+  - id: technical-requirements
+    role: Cloudflare, MCP, component, security, operations, deployment, and verification requirements
+    path: requirements/TechnicalRequirements.html
+    classification: project_requirements_document
+    artifactVersion: "Draft 0.1"
+    mediaType: text/html
+    normative: true
+    requiredAtRuntime: false
+    sha256: 1ed8a7afaff5b9a92412b444c2a07bee8e321f11dd91711df37ecffb8122ff19
+    dependsOn: [source-functional-requirements]
+
+  - id: requirements-normalization
+    role: Draft 0.2 to Draft 0.3 migration record and responsibility traceability mapping
+    path: requirements/bundle-requirements.yaml
+    classification: project_requirements_mapping
+    artifactVersion: "1.1.0"
+    mediaType: application/yaml
+    normative: false
+    requiredAtRuntime: false
+    sha256: 42ec3487bab1be3fb7aecfbd87751e2e9d8f2bac8a635ea5feb49f774064ba74
+    dependsOn: [source-functional-requirements, technical-requirements]
+
+  - id: detailed-level-design
+    role: proposed implementation-planning component, sequence, contract, security, operations, testing, and delivery design
+    path: design/DetailedLevelDesign.html
+    classification: project_design_document
+    artifactVersion: "Draft 0.1"
+    mediaType: text/html
+    normative: false
+    requiredAtRuntime: false
+    sha256: ed203329965980a461a76d3272617b26144dde21d4f9c2ab30eb5d4347bb9293
+    dependsOn: [source-functional-requirements, technical-requirements, requirements-normalization, mcp-application-contract]
+
+  - id: professional-documentation
+    role: human-readable architecture, compliance, artifact, validation, and implementation guide
+    path: ODPMarketStewardBundleDocumentation.html
+    classification: project_documentation
+    artifactVersion: "1.1.0"
+    mediaType: text/html
+    normative: false
+    requiredAtRuntime: false
+    sha256: 74f61b6aef30ea038828ccab4f5747cb1948d8e98b4b1c313496ae985e65a9e3
+    dependsOn: [source-functional-requirements, technical-requirements, requirements-normalization, detailed-level-design]
+
+  - id: readme
+    role: package entry point
+    path: README.html
+    classification: project_documentation
+    artifactVersion: "1.1.0"
+    mediaType: text/html
+    normative: false
+    requiredAtRuntime: false
+    sha256: 14582317783824bf7d008c3ef52084bd61b5bb5d54c3de1850e97b4d27b28d33
+    dependsOn: [professional-documentation]
+
+runtimePolicy:
+  resolutionMode: two_phase_parse_then_link
+  loadOrder:
+    - bundle.yaml
+    - product/fxlive.odps.yaml
+    - interface/fxlive.openapi.yaml
+    - value-sets/fx35-instrument-set.yaml
+    - rules/ohlc-rules.yaml
+    - operations/monitoring.yaml
+    - policies/publication-policy.yaml
+    - application/mcp-application.yaml
+  conflictPolicy:
+    productFacts: product/fxlive.odps.yaml
+    httpInterface: interface/fxlive.openapi.yaml
+    instrumentMembership: value-sets/fx35-instrument-set.yaml
+    calculationsAndRules: rules/ohlc-rules.yaml
+    runtimeStateAndFreshness: operations/monitoring.yaml
+    publicPresentation: policies/publication-policy.yaml
+    mcpToolsAndModelBoundary: application/mcp-application.yaml
+    functionalRequirements: requirements/FuncitionalRequirements.html
+    technicalArchitectureAndOperations: requirements/TechnicalRequirements.html
+    requirementsMigrationAndTraceability: requirements/bundle-requirements.yaml
+    implementationDetailedDesign: design/DetailedLevelDesign.html
+    precedenceRule: >-
+      A specialized companion artifact controls its assigned responsibility. ODPS
+      remains authoritative for product declarations and commitments and must not be
+      treated as the implementation source for other responsibilities. Functional and
+      technical requirements govern acceptance and delivery but do not override
+      versioned product or companion facts. The detailed-level design is non-normative,
+      may expose implementation blockers, and cannot override any controlling artifact
+      or requirement.
+  integrityFailurePolicy:
+    marketValuesMayRemainViewable: true
+    governedFitnessVerdictPermitted: false
+    requiredDisclosure: identify failing artifact, expected digest, observed digest, and validation layer
+  fixedMarketDataOrigin: https://fxlive.qmvp.workers.dev
+  permittedMarketDataOperations: [getHealth, getSnapshotMetadata, getLatestObservation]
+
+validationModel:
+  layers:
+    - id: syntax
+      description: YAML or HTML parses according to the relevant file format.
+    - id: controlling-schema
+      description: ODPS is evaluated against its declared official schema; OpenAPI against OAS 3.1 semantics.
+    - id: semantic-policy
+      description: Artifact responsibility, public wording, UTC, state, and financial-safety rules are checked.
+    - id: cross-reference
+      description: >-
+        Every normative relative path, pointer, dependency, enum, and digest agrees
+        across the package; the normalization artifact records the completed Draft
+        0.2 to Draft 0.3 migration without acting as a hidden override.
+    - id: source-alignment
+      description: API operations and response shapes are compared with the authoritative Worker source and focused live samples.
+    - id: sdk-compatibility
+      description: Pinned ODP SDK compatibility is reported separately and is not equivalent to controlling-schema validity.
+  certificationClaim: none
+  odpiCertificationClaimPermitted: false
+  projectArtifactStructuralContracts:
+    value-sets/fx35-instrument-set.yaml:
+      apiVersion: odp-market-steward.qmvp/v1
+      kind: ControlledValueSet
+      requiredSections: [metadata, semanticAlignment, spec, references]
+    rules/ohlc-rules.yaml:
+      apiVersion: odp-market-steward.qmvp/v1
+      kind: DeterministicRuleSet
+      requiredSections: [metadata, governance, dependencies, spec, presentationConstraints, requirementIDs]
+    operations/monitoring.yaml:
+      apiVersion: odp-market-steward.qmvp/v1
+      kind: OperationalMonitoringProfile
+      requiredSections: [metadata, dependencies, spec, observability, requirementIDs]
+    policies/publication-policy.yaml:
+      apiVersion: odp-market-steward.qmvp/v1
+      kind: PublicationPolicy
+      requiredSections: [metadata, identity, disclaimer, temporalPresentation, evidencePresentation, contentBoundaries, componentRequirements, releaseGates, requirements]
+    application/mcp-application.yaml:
+      apiVersion: odp-market-steward.qmvp/v1
+      kind: MCPApplicationContract
+      requiredSections: [metadata, distribution, productExperience, componentResources, serverInitialization, sessionControls, bundleConsumption, responsibilityBoundary, apiAdapter, tools, mcpDescriptorMaterialization, evidenceModeContract, marketResultStateContract, stewardBriefContract, mcpResultEnvelope, schemas, securityAndPrivacy, requirements]
+    requirements/bundle-requirements.yaml:
+      apiVersion: odp-market-steward.qmvp/v1
+      kind: RequirementsNormalization
+      requiredSections: [metadata, purpose, authority, normalizations, artifactResponsibility, coverage, technicalRequirementsCoverage, resolvedDecisions, unresolvedRequirements, competitionConstraintCoverage, odpFamilyScope]
+  htmlStructuralContracts:
+    requiredLanguage: en
+    requiredMeta: [charset, viewport]
+    requiredNonEmptyElements: [title, h1]
+  projectArtifactSemanticValidation:
+    algorithmVersion: "1.0.0"
+    executionOrder:
+      - parse all YAML with duplicate-key rejection
+      - enforce each declared apiVersion, kind, and required section
+      - resolve normative bundle-relative paths and JSON Pointers without leaving the bundle root
+      - enforce artifact-specific invariants below
+      - verify manifest versions, dependencies, and SHA-256 digests
+      - >-
+        emit one typed result for every artifact and applicable validation-layer pair,
+        represent inapplicable or unexecuted layers explicitly, and fail closed for
+        governed fitness when a required layer fails or is missing
+    runtimeEvidenceContract:
+      layerVocabulary: [syntax, controlling-schema, semantic-policy, cross-reference, source-alignment, sdk-compatibility]
+      resultIdentity: unique_artifactId_plus_layer
+      inapplicableLayerStatus: NOT_APPLICABLE
+      unexecutedLayerStatus: NOT_TESTED
+      everyRuntimeArtifactMustHaveSyntaxSemanticPolicyAndCrossReferenceResults: true
+    artifactChecks:
+      instrument-set:
+        - member count equals 35
+        - symbols are unique and alphabetically ordered
+        - every symbol equals base plus quote and both codes are declared
+        - symbol projection equals the MCP Instrument enum exactly
+      ohlc-rules:
+        - every referenced rule identifier exists
+        - formulas, required inputs, zero-denominator behavior, and state vocabularies are explicit
+        - snapshot failure maps rule state FAIL separately from availability INCOHERENT
+        - closed-market, recorded, synthetic, and missing-evidence fitness outcomes are deterministic
+      monitoring:
+        - canonical timezone and public timestamps are UTC with Z suffix
+        - service, availability, evidence, freshness, and cache-age semantics are non-overlapping
+        - unavailable calendar and unconfirmed CreatedAt semantics use safe non-PASS defaults
+        - network operations are restricted to the fixed origin and declared OpenAPI operations
+      publication-policy:
+        - exact disclaimer text and required public surfaces match the product contract
+        - explicit verifiable component-mediated acknowledgement is mandatory before market-data retrieval, while the mechanism is delegated to the app and technical contracts
+        - public identity, accessibility, financial-safety, and data-rights release gates are present
+      mcp-application-contract:
+        - tool names and titles are unique and every consumes ID exists in this manifest
+        - twelve advertised schemas materialize as standalone JSON Schemas with no unresolved references
+        - five model-visible domain tools are read-only and one component-only acknowledgement tool owns the bounded session-state mutation
+        - every tool advertises public no-auth security metadata and truthful read, mutation, and idempotency annotations
+        - every market-data output has disclosure-required and success branches with the exact disclaimer
+        - success branches expose typed evidence, cache age, calendar time, plausibility, and validation layers
+        - product-profile sections have all responsibility-owning artifacts in consumes
+        - public result evidence modes are LIVE, RECORDED, or NONE and request modes are independently typed
+        - no-evidence, manual component-identified refresh, and Steward Brief failure paths are explicit
+        - every gated market-data tool links the disclosure component and uses the signed Durable Object session challenge contract
+        - the pinned Cloudflare Agents SDK Agent plus persistent WorkerTransport contract owns opaque session identifiers and deterministic Durable Object mapping
+        - recorded evidence requires artifact, bundle, product, policy, content, retention, validation, and create-only integrity metadata
+        - the Cloudflare MCP Worker uses only the public source API and never receives the source KV binding
+        - optional Steward Brief generation is a bounded server-side gpt-5.6 Responses API call
+      requirements-normalization:
+        - every source FR and NFR identifier appears exactly in normalized coverage
+        - every source TR identifier appears exactly in technical requirements coverage
+        - every competition constraint and review decision is represented as resolved or unresolved
+        - ODPI-family responsibilities are not assigned to project companion artifacts
+        - all five Draft 0.2 normalization issues are marked incorporated in Draft 0.3 with no pending source revision
+
+validationEvidence:
+  evaluatedAtUtc: "2026-07-21T03:35:04Z"
+  certification: none
+  odpsControllingSchema:
+    status: PASS
+    schemaURL: https://opendataproducts.org/v4.1/schema/odps.yaml
+    schemaSha256: b7e75d7b1f967efc58d178cc58222a5b81d90bfe6f9fd228e283a049bf9e16a5
+    method: >-
+      Purpose-built Draft 2020-12 subset evaluator covering every validation keyword
+      present in the published 4.1 YAML schema; the schema was refreshed and its
+      bytes matched the validation copy.
+  openapiPrimarySpecificationReview:
+    status: PASS_FOCUSED
+    specification: https://spec.openapis.org/oas/v3.1.2.html
+    scope: >-
+      paths, operations, parameters, responses, anonymous access, and 60 local
+      reference occurrences across 21 unique targets
+    independentThirdPartyLinter: NOT_RUN
+  projectBundleValidation:
+    status: PASS
+    scope: >-
+      Duplicate-key YAML parsing, manifest structural contracts, normative relative
+      paths, JSON pointers, artifact dependencies, digests, exact FX-35 equality, exact
+      disclaimer, UTC/public-identity scans, requirements traceability, state and
+      fitness semantics, signed disclosure branches, and twelve in-memory standalone
+      MCP schema materializations; five HTML documents, including Detailed Level
+      Design Draft 0.1, passed focused source-structure and internal-anchor checks.
+  workerSourceAlignment:
+    status: PASS_FOCUSED
+    scope: routes, methods, selector normalization, debug, transport headers, and selected-bar behavior
+  deployedApiSample:
+    status: PASS_FOCUSED
+    sampledAtUtc: "2026-07-20T21:20:02Z"
+    requestCount: 9
+    instrument: EURUSD
+    scope: health, metadata, bar, ticker, selector errors, unknown route, and OPTIONS
+    limitations: one instrument at one point in time; no full-board or longitudinal claim
+  odpSdkCompatibility:
+    status: NOT_TESTED
+    reason: no pinned SDK runtime was selected or installed
+  mcpAndComponentRuntime:
+    status: NOT_TESTED
+    reason: MCP server and Apps SDK component are not implemented
+  htmlVisualRendering:
+    status: NOT_TESTED
+    sourceStructureStatus: PASS_FOCUSED
+    reason: local browser preview was unavailable; no visual or interaction claim is made
+
+knownImplementationGaps:
+  - id: GAP-001
+    severity: release_blocker
+    topic: public HTML disclosure
+    detail: >-
+      The current Worker-generated root HTML page does not display the required
+      MARKET DATA DEMO label and full disclaimer.
+  - id: GAP-002
+    severity: release_blocker
+    topic: data rights and attribution
+    detail: >-
+      Public display, redistribution, recording, judge access, and attribution
+      treatment require written confirmation. The disclaimer is not authorization.
+  - id: GAP-003
+    severity: governed_state_blocker
+    topic: market calendar
+    detail: No authoritative UTC market-calendar adapter is selected or contract-tested.
+  - id: GAP-004
+    severity: governed_freshness_blocker
+    topic: CreatedAt semantics
+    detail: Producer-level confirmation of CreatedAt semantics remains pending.
+  - id: GAP-005
+    severity: requirement_blocker
+    topic: decimal presentation policy
+    detail: Rounding mode and display precision remain unresolved under FR-BAR-003.
+  - id: GAP-006
+    severity: feature_blocker
+    topic: plausibility configuration
+    detail: Lookback, minimum sample size, and MAD threshold are unconfigured; result must be NOT_EVALUATED.
+  - id: GAP-007
+    severity: governance_gap
+    topic: product license and data holder
+    detail: >-
+      ODPS does not contain owner-approved license or data-holder facts. They are
+      optional for schema validity but important before professional public release.
+  - id: GAP-008
+    severity: implementation_gap
+    topic: MCP application
+    detail: >-
+      The separate Cloudflare MCP Worker, Durable Object session state, secrets,
+      sanitized observability, Apps SDK component, GPT-5.6 call, and public /mcp
+      endpoint are not implemented, provisioned, or deployed. The Agents SDK version,
+      Durable Object migration, public app domain, and exact CSP remain release blockers.
+  - id: GAP-009
+    severity: interface_risk
+    topic: stored data forwarding
+    detail: >-
+      The Worker forwards stored labels, timestamps, epoch, and prices without
+      governed validation and selects the last stored bar-array entry.
+  - id: GAP-010
+    severity: implementation_constraint
+    topic: cache control
+    detail: >-
+      The API publishes Cache-Control no-store; persistent or cross-tool response
+      caching is prohibited and LAST_AVAILABLE is therefore unavailable in v1.
+  - id: GAP-011
+    severity: interface_risk
+    topic: unhandled platform exceptions
+    detail: >-
+      The Worker does not wrap every storage or JSON exception in a stable documented
+      error envelope; an uncaught failure may produce a platform-generated 500 response.
+  - id: GAP-012
+    severity: implementation_gap
+    topic: OpenAPI publication
+    detail: The contract is packaged locally but is not served from a public API documentation URL.
+
+releaseStatus:
+  bundleArtifactSetCompleteForCurrentDraft: true
+  specificationDecisionComplete: false
+  runtimeImplementationComplete: false
+  publicationReady: false
+  competitionSubmissionReady: false
+  reason: unresolved release blockers and unimplemented MCP application

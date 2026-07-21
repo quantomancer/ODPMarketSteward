@@ -1,0 +1,193 @@
+# MARKET DATA DEMO - ODPS 4.1 product contract
+---
+schema: https://opendataproducts.org/v4.1/schema/odps.yaml
+version: 4.1
+
+product:
+  details:
+    en:
+      name: "FXLive Market Data Demo - Standard FX-35"
+      productID: "fxlive-market-data-demo-fx35"
+      valueProposition: >-
+        Provides analysts, governance teams, developers, and data applications with
+        a governed, machine-readable demonstration of latest-completed one-minute
+        foreign-exchange OHLC market data, product metadata, quality objectives,
+        and service expectations.
+      description: >-
+        FXLive provides the latest completed one-minute OHLC bar and product metadata
+        for the governed standard set of 35 currency instruments. Public timestamps
+        use UTC. The product supports technical evaluation of data discovery,
+        governance, validation, integrity, descriptive movement, and contextual
+        plausibility; it does not provide trading signals, recommendations, or
+        execution services. Detailed API, instrument-set, calculation, monitoring,
+        publication, and MCP application contracts are maintained as versioned
+        companion artifacts referenced by this product. MARKET DATA DEMO. For
+        technical demonstration and evaluation only. Data may be delayed, incomplete,
+        unavailable, or contain errors. Nothing presented is investment advice, a
+        recommendation, or an offer to buy or sell any financial instrument. The
+        product must not be used for live trading or order execution.
+      visibility: public
+      status: testing
+      type: derived data
+      productVersion: "1.1.0"
+      portfolioPriority: high
+      governanceProfile: structured
+      standards:
+        - "Open Data Product Specification (ODPS) 4.1"
+        - "RFC 3339 UTC timestamps"
+        - "ISO 4217 alphabetic currency codes"
+      tags:
+        - market data demo
+        - foreign exchange
+        - OHLC
+        - data quality
+        - data governance
+        - agentic discovery
+      useCases:
+        - useCase:
+            useCaseTitle: "Governed market-data discovery"
+            useCaseDescription: >-
+              Ask natural-language questions about product identity, purpose,
+              access, service objectives, and quality expectations.
+        - useCase:
+            useCaseTitle: "Deterministic OHLC integrity assessment"
+            useCaseDescription: >-
+              Evaluate completed-bar evidence against externally maintained,
+              versioned quality and monitoring rules.
+        - useCase:
+            useCaseTitle: "Descriptive movement and plausibility review"
+            useCaseDescription: >-
+              Calculate transparent, non-predictive movement metrics and distinguish
+              mathematical validity from contextual plausibility warnings.
+
+  SLA:
+    declarative:
+      default:
+        name:
+          en: "Market-open demo service objective"
+        x-monitoring-profile-ref: "../operations/monitoring.yaml"
+        x-applicability:
+          appliesWhen: authoritative_calendar_state_is_OPEN
+          marketClosedResult: NOT_APPLICABLE
+          calendarUnavailableResult: UNKNOWN
+          interpretation: >-
+            The one-minute objective is a conditional product commitment, not an
+            unconditional availability guarantee or an observed performance result.
+        dimensions:
+          - dimension: updateFrequency
+            objective: 1
+            weight: 100
+            unit: minutes
+
+  dataQuality:
+    declarative:
+      default:
+        displaytitle:
+          en: "FXLive governed quality profile"
+        dimensions:
+          - dimension: validity
+            objective: 100
+            weight: 25
+            unit: percentage
+          - dimension: completeness
+            objective: 100
+            weight: 20
+            unit: percentage
+          - dimension: coverage
+            objective: 100
+            weight: 20
+            unit: percentage
+          - dimension: timeliness
+            objective: 100
+            weight: 20
+            unit: percentage
+          - dimension: consistency
+            objective: 100
+            weight: 15
+            unit: percentage
+    executable:
+      - dimension: completeness
+        type: Custom
+        version: "1.0.0"
+        spec:
+          ruleID: "bar-required-fields"
+          rulesetRef: "../rules/ohlc-rules.yaml#/spec/hardRules/bar-required-fields"
+      - dimension: coverage
+        type: Custom
+        version: "1.0.0"
+        spec:
+          ruleID: "exact-standard-instrument-set"
+          rulesetRef: "../rules/ohlc-rules.yaml#/spec/hardRules/exact-standard-instrument-set"
+      - dimension: validity
+        type: Custom
+        version: "1.0.0"
+        spec:
+          ruleID: "completed-bar-mathematical-integrity"
+          rulesetRef: "../rules/ohlc-rules.yaml#/spec/hardRules/completed-bar-mathematical-integrity"
+      - dimension: timeliness
+        type: Custom
+        version: "1.0.0"
+        spec:
+          ruleID: "market-open-freshness"
+          rulesetRef: "../rules/ohlc-rules.yaml#/spec/contextualRules/market-open-freshness"
+      - dimension: consistency
+        type: Custom
+        version: "1.0.0"
+        spec:
+          ruleID: "contextual-ohlc-plausibility"
+          rulesetRef: "../rules/ohlc-rules.yaml#/spec/contextualRules/contextual-ohlc-plausibility"
+
+  dataAccess:
+    default:
+      name:
+        en: "FXLive public JSON API"
+      description:
+        en: >-
+          Read-only access to service health, latest stored snapshot metadata, a
+          compact close observation, and the latest stored completed one-minute OHLC
+          bar.
+      outputPorttype: API
+      format: JSON
+      authenticationMethod: none
+      specification: OAS
+      accessURL: https://fxlive.qmvp.workers.dev
+      x-interface-contract:
+        standard: "OpenAPI"
+        version: "3.1.2"
+        path: "../interface/fxlive.openapi.yaml"
+
+  x-companion-artifacts:
+    manifest:
+      classification: project_manifest
+      path: "../bundle.yaml"
+    interface:
+      classification: external_standard
+      standard: "OpenAPI"
+      version: "3.1.2"
+      path: "../interface/fxlive.openapi.yaml"
+    instrumentSet:
+      classification: project_controlled_value_set
+      path: "../value-sets/fx35-instrument-set.yaml"
+    qualityAndCalculations:
+      classification: project_rule_set
+      path: "../rules/ohlc-rules.yaml"
+    monitoring:
+      classification: project_operational_configuration
+      path: "../operations/monitoring.yaml"
+    publication:
+      classification: project_publication_policy
+      path: "../policies/publication-policy.yaml"
+    application:
+      classification: project_mcp_application_contract
+      path: "../application/mcp-application.yaml"
+    functionalRequirements:
+      classification: project_requirements_document
+      version: "Draft 0.3"
+      path: "../requirements/FuncitionalRequirements.html"
+    technicalRequirements:
+      classification: project_requirements_document
+      version: "Draft 0.1"
+      path: "../requirements/TechnicalRequirements.html"
+    requirementsNormalization:
+      classification: project_requirements_mapping
+      path: "../requirements/bundle-requirements.yaml"

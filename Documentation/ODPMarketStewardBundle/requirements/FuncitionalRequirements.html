@@ -1,0 +1,2566 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>ODP Market Steward — Functional Requirements Draft v0.3</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --text: #172033;
+      --muted: #5d6878;
+      --line: #d8e0ea;
+      --accent: #125a72;
+      --accent-soft: #e4f3f7;
+      --must: #8b2635;
+      --must-soft: #fae8eb;
+      --should: #7a5311;
+      --should-soft: #fff3d8;
+      --could: #315f40;
+      --could-soft: #e7f4ea;
+      --draft: #5d3e9d;
+      --draft-soft: #f0ebfb;
+      --warning: #8a4b08;
+      --warning-soft: #fff4e5;
+      --shadow: 0 12px 30px rgba(28, 45, 70, 0.08);
+      --radius: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1520;
+        --surface: #171f2c;
+        --surface-soft: #111925;
+        --text: #edf3fb;
+        --muted: #aeb9c8;
+        --line: #334054;
+        --accent: #6dc8e2;
+        --accent-soft: #173442;
+        --must: #ff9aa8;
+        --must-soft: #49222a;
+        --should: #f4cc79;
+        --should-soft: #44361b;
+        --could: #9bd2a7;
+        --could-soft: #203a28;
+        --draft: #c5abff;
+        --draft-soft: #32264b;
+        --warning: #ffc477;
+        --warning-soft: #402d17;
+        --shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.58;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    a:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.92em;
+      overflow-wrap: anywhere;
+    }
+
+    .page-header {
+      color: #fff;
+      background:
+        radial-gradient(circle at 85% 10%, rgba(111, 207, 232, 0.34), transparent 28rem),
+        linear-gradient(135deg, #102538, #123f52 58%, #125a72);
+      padding: 52px 24px 42px;
+    }
+
+    .header-inner,
+    .layout {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+
+    .eyebrow,
+    .badge,
+    .priority,
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 750;
+      letter-spacing: 0.035em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .eyebrow {
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 11px;
+    }
+
+    h1 {
+      max-width: 880px;
+      margin: 18px 0 12px;
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      line-height: 1.04;
+      letter-spacing: -0.035em;
+    }
+
+    .subtitle {
+      max-width: 860px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.84);
+      font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+
+    .header-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .header-meta .badge {
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 10px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 230px minmax(0, 1fr);
+      gap: 28px;
+      padding: 28px 20px 72px;
+    }
+
+    .toc {
+      position: sticky;
+      top: 18px;
+      align-self: start;
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .toc strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .toc ol {
+      margin: 0;
+      padding-left: 21px;
+    }
+
+    .toc li {
+      margin: 5px 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .toc a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .toc a:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    section {
+      scroll-margin-top: 18px;
+      margin-bottom: 26px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 4vw, 34px);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: clamp(1.45rem, 3vw, 2rem);
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      margin: 26px 0 10px;
+      font-size: 1.17rem;
+    }
+
+    h4 {
+      margin: 18px 0 8px;
+      font-size: 1rem;
+    }
+
+    p:first-child {
+      margin-top: 0;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 1.06rem;
+    }
+
+    .callout {
+      margin: 18px 0;
+      border-left: 5px solid var(--accent);
+      border-radius: 9px;
+      background: var(--accent-soft);
+      padding: 16px 18px;
+    }
+
+    .callout.warning {
+      border-left-color: var(--warning);
+      background: var(--warning-soft);
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--surface-soft);
+      padding: 16px;
+    }
+
+    .card h3,
+    .card h4 {
+      margin-top: 0;
+    }
+
+    .card p:last-child,
+    .card ul:last-child {
+      margin-bottom: 0;
+    }
+
+    .metadata {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .metadata th,
+    .metadata td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .metadata th {
+      width: 190px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .metadata tr:last-child th,
+    .metadata tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0 20px;
+    }
+
+    .priority,
+    .status {
+      padding: 5px 8px;
+      white-space: nowrap;
+    }
+
+    .priority.must {
+      color: var(--must);
+      background: var(--must-soft);
+    }
+
+    .priority.should {
+      color: var(--should);
+      background: var(--should-soft);
+    }
+
+    .priority.could {
+      color: var(--could);
+      background: var(--could-soft);
+    }
+
+    .status.proposed {
+      color: var(--draft);
+      background: var(--draft-soft);
+    }
+
+    .req-group {
+      margin-top: 24px;
+    }
+
+    .requirements {
+      display: grid;
+      gap: 12px;
+    }
+
+    .requirement {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .requirement-head {
+      display: grid;
+      grid-template-columns: 130px 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-soft);
+      padding: 12px 14px;
+    }
+
+    .req-id {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.86rem;
+      font-weight: 750;
+    }
+
+    .requirement-head strong {
+      line-height: 1.25;
+    }
+
+    .requirement-body {
+      padding: 14px;
+    }
+
+    .shall {
+      margin: 0 0 10px;
+      font-weight: 650;
+    }
+
+    .criteria {
+      margin: 8px 0 0;
+      padding-left: 21px;
+      color: var(--muted);
+    }
+
+    .criteria li {
+      margin: 4px 0;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    .flow-step {
+      display: grid;
+      place-items: center;
+      min-height: 88px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-soft);
+      padding: 10px;
+      text-align: center;
+      font-size: 0.86rem;
+      font-weight: 650;
+    }
+
+    .flow-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      font-size: 1.2rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+    }
+
+    table.matrix {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      background: var(--surface);
+    }
+
+    .matrix th,
+    .matrix td {
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      padding: 10px 11px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.9rem;
+    }
+
+    .matrix th {
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.025em;
+      text-transform: uppercase;
+    }
+
+    .matrix tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .matrix th:last-child,
+    .matrix td:last-child {
+      border-right: 0;
+    }
+
+    .instrument-list {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(78px, 1fr));
+      gap: 7px;
+      margin: 14px 0;
+    }
+
+    .instrument-list code {
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-soft);
+      padding: 7px;
+      text-align: center;
+    }
+
+    .formula {
+      display: block;
+      margin: 5px 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-soft);
+      padding: 8px 10px;
+      font-family: var(--mono);
+      font-size: 0.86rem;
+      overflow-wrap: anywhere;
+    }
+
+    .checklist {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .checklist li {
+      position: relative;
+      margin: 8px 0;
+      padding-left: 28px;
+    }
+
+    .checklist li::before {
+      content: "□";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 1.15rem;
+      line-height: 1.3;
+    }
+
+    details {
+      margin: 12px 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-soft);
+      padding: 12px 14px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+        max-height: none;
+      }
+
+      .grid.three {
+        grid-template-columns: 1fr;
+      }
+
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+      }
+
+      .instrument-list {
+        grid-template-columns: repeat(4, minmax(72px, 1fr));
+      }
+    }
+
+    @media (max-width: 650px) {
+      .page-header {
+        padding: 38px 18px 32px;
+      }
+
+      .layout {
+        padding: 18px 12px 48px;
+      }
+
+      section {
+        padding: 20px 16px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .requirement-head {
+        grid-template-columns: 1fr auto;
+      }
+
+      .requirement-head strong {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+
+      .instrument-list {
+        grid-template-columns: repeat(3, minmax(68px, 1fr));
+      }
+
+      .metadata th,
+      .metadata td {
+        display: block;
+        width: 100%;
+      }
+
+      .metadata th {
+        padding-bottom: 0;
+        border-bottom: 0;
+      }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+        --bg: #ffffff;
+        --surface: #ffffff;
+        --surface-soft: #f7f8fa;
+        --text: #111827;
+        --muted: #4b5563;
+        --line: #d1d5db;
+        --accent: #0f5269;
+      }
+
+      body {
+        background: #fff;
+        font-size: 10pt;
+      }
+
+      .page-header {
+        color: #111827;
+        background: #fff;
+        padding: 20px 0;
+      }
+
+      .subtitle,
+      .page-header .badge,
+      .eyebrow {
+        color: #374151;
+        border-color: #9ca3af;
+        background: #fff;
+      }
+
+      .layout {
+        display: block;
+        width: 100%;
+        padding: 0;
+      }
+
+      .toc {
+        position: static;
+        box-shadow: none;
+        margin-bottom: 18px;
+      }
+
+      section {
+        break-inside: avoid;
+        box-shadow: none;
+        margin-bottom: 14px;
+        padding: 18px;
+      }
+
+      .requirement {
+        break-inside: avoid;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      details {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="header-inner">
+      <span class="eyebrow">MARKET DATA DEMO · Requirements baseline</span>
+      <h1>ODP Market Steward</h1>
+      <p class="subtitle">
+        Governed Live Market Data in ChatGPT — functional requirements for a ChatGPT plugin
+        and MCP service that deliver latest-completed-bar FX data from an ODPS-centred governed
+        bundle with deterministic evidence and GPT-5.6 stewardship.
+      </p>
+      <div class="header-meta" aria-label="Document status">
+        <span class="badge">Draft v0.3</span>
+        <span class="badge">20 July 2026</span>
+        <span class="badge">Status: Proposed</span>
+        <span class="badge">Review: Iterative</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Document contents">
+      <strong>Contents</strong>
+      <ol>
+        <li><a href="#control">Document control</a></li>
+        <li><a href="#vision">Product vision</a></li>
+        <li><a href="#scope">Scope and boundaries</a></li>
+        <li><a href="#differentiator">Contract-driven differentiator</a></li>
+        <li><a href="#chatgpt-fit">ChatGPT-native experience</a></li>
+        <li><a href="#actors">Users and use cases</a></li>
+        <li><a href="#context">System context</a></li>
+        <li><a href="#requirements">Functional requirements</a></li>
+        <li><a href="#tools">MCP tool surface</a></li>
+        <li><a href="#states">State and verdict model</a></li>
+        <li><a href="#mvp">MVP definition of done</a></li>
+        <li><a href="#nonfunctional">Non-functional requirements</a></li>
+        <li><a href="#competition">Competition constraints</a></li>
+        <li><a href="#decisions">Review decisions</a></li>
+        <li><a href="#changelog">Change log</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section id="control">
+        <h2>1. Document control</h2>
+        <table class="metadata">
+          <tr>
+            <th>Document title</th>
+            <td>ODP Market Steward — Functional Requirements</td>
+          </tr>
+          <tr>
+            <th>Document version</th>
+            <td>Draft 0.3</td>
+          </tr>
+          <tr>
+            <th>Product and plugin name</th>
+            <td><strong>ODP Market Steward</strong></td>
+          </tr>
+          <tr>
+            <th>Competition title</th>
+            <td><strong>ODP Market Steward — Governed Live Market Data in ChatGPT</strong></td>
+          </tr>
+          <tr>
+            <th>Market-data service identity</th>
+            <td>FXLive by QMVP</td>
+          </tr>
+          <tr>
+            <th>Delivery architecture</th>
+            <td>Published ChatGPT plugin containing an MCP-backed app/connector, a public HTTPS Streamable HTTP <code>/mcp</code> service on Cloudflare, and an Apps SDK component.</td>
+          </tr>
+          <tr>
+            <th>Controlling product artifact</th>
+            <td>
+              <a href="../product/fxlive.odps.yaml"><code>../product/fxlive.odps.yaml</code></a>,
+              product <code>fxlive-market-data-demo-fx35</code>, version <code>1.1.0</code>
+            </td>
+          </tr>
+          <tr>
+            <th>Declared standard</th>
+            <td>
+              <a href="https://opendataproducts.org/v4.1/schema/odps.yaml">ODPS 4.1 YAML schema</a>
+            </td>
+          </tr>
+          <tr>
+            <th>Requirement status</th>
+            <td>Every functional requirement in Draft 0.3 remains <strong>Proposed</strong>, not implemented or verified.</td>
+          </tr>
+          <tr>
+            <th>Purpose</th>
+            <td>Create a stable, reviewable baseline that can be accepted, changed, split, or deferred requirement by requirement.</td>
+          </tr>
+          <tr>
+            <th>ChatGPT design sources</th>
+            <td>
+              <a href="https://developers.openai.com/blog/what-makes-a-great-chatgpt-app">What makes a great ChatGPT app</a>,
+              <a href="https://developers.openai.com/apps-sdk/concepts/ux-principles">Apps SDK UX principles</a>, and
+              <a href="https://developers.openai.com/apps-sdk/app-guidelines">App guidelines</a>
+            </td>
+          </tr>
+          <tr>
+            <th>Governed bundle</th>
+            <td>
+              <a href="../bundle.yaml"><code>../bundle.yaml</code></a> with separate ODPS,
+              OpenAPI, value-set, rules, monitoring, publication, MCP application, and
+              requirements artifacts.
+            </td>
+          </tr>
+          <tr>
+            <th>Technical baseline</th>
+            <td><a href="TechnicalRequirements.html"><code>TechnicalRequirements.html</code></a>, Draft 0.1.</td>
+          </tr>
+        </table>
+
+        <div class="callout warning">
+          <strong>Validation boundary</strong>
+          This file is a requirements draft. It does not prove that the planned Cloudflare MCP service,
+          Durable Object session store, ChatGPT component, GPT-5.6 integration, market calendar,
+          live refresh cycle, recorded-evidence store, or public deployment exists.
+        </div>
+
+        <div class="legend" aria-label="Requirement legend">
+          <span class="priority must">Must · MVP</span>
+          <span class="priority should">Should · Competitive release</span>
+          <span class="priority could">Could · Later</span>
+          <span class="status proposed">Proposed</span>
+        </div>
+      </section>
+
+      <section id="vision">
+        <h2>2. Product vision</h2>
+        <p class="lead">
+          ODP Market Steward shall be a professional ChatGPT plugin for governed market data. Its primary value is
+          immediate access to the latest completed one-minute OHLC bars for the standard FX-35 set.
+          Governed bundle discovery, deterministic validation, descriptive calculations, fitness evidence,
+          and GPT-5.6 explanation shall augment the live data rather than obstruct access to it.
+        </p>
+
+        <div class="grid">
+          <article class="card">
+            <h3>Input</h3>
+            <p>
+              The versioned ODPS-centred governed bundle, the public FXLive JSON routes, an authoritative
+              UTC market-calendar state, an optional immutable recorded-evidence bundle,
+              and a user's bounded professional question.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Output</h3>
+            <p>
+              A live market board or instrument view, deterministic OHLC metrics and quality
+              results, traceable governed-bundle evidence, and a governed natural-language explanation.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Benefit</h3>
+            <p>
+              Users receive usable market data immediately and can understand whether the
+              observed snapshot is complete, valid, timely, and suitable for a stated purpose.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Primary users</h3>
+            <p>
+              Analysts, governance and data-quality teams, and developers integrating or
+              interrogating a governed market-data product.
+            </p>
+          </article>
+        </div>
+
+        <div class="callout">
+          <strong>Primary product promise</strong>
+          “Show me the current FXLive market” shall produce market data first. Governance evidence
+          shall be visible with the result and expandable through conversation.
+        </div>
+
+        <div class="callout warning">
+          <strong>Meaning of “MARKET DATA DEMO”</strong>
+          The label defines the permitted data-use and financial-safety boundary. It shall not be
+          used to excuse an incomplete, unreliable, or non-runnable application.
+        </div>
+      </section>
+
+      <section id="scope">
+        <h2>3. Scope and boundaries</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>In scope for the first working release</h3>
+            <ul>
+              <li>Latest completed one-minute OHLC bars for the exact FX-35 set.</li>
+              <li>Single-instrument detail and deterministic descriptive metrics.</li>
+              <li>Coverage, completeness, validity, consistency, and session-aware freshness evidence.</li>
+              <li>Governed product discovery with evidence references to the responsibility-owning bundle artifact.</li>
+              <li>GPT-5.6 governed explanations grounded in deterministic results.</li>
+              <li>Live, market-closed, degraded, unavailable, unknown, and recorded-evidence presentation.</li>
+              <li>A ChatGPT plugin containing an MCP-backed app/connector with five read-only domain tools, one component-only policy acknowledgement action, and a selective Apps SDK interface.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Explicitly out of scope</h3>
+            <ul>
+              <li>Streaming tick prices or claims of tick-level realtime service.</li>
+              <li>Trading signals, forecasts, recommendations, portfolio advice, or opportunity rankings.</li>
+              <li>Order entry, trade execution, money transfer, or brokerage functionality.</li>
+              <li>User portfolios, positions, account balances, or personal financial profiles.</li>
+              <li>Backtesting, historical strategy simulation, or predictive modelling.</li>
+              <li>A commercial availability guarantee or production trading SLA.</li>
+              <li>Unbounded ingestion of arbitrary ODP portfolios in the first release.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="differentiator">
+        <h2>4. Contract-driven differentiator</h2>
+        <p class="lead">
+          The central differentiating requirement is that the application shall not merely
+          display prices. It shall use a machine-readable data-product contract to explain
+          what the product and companion contracts declare, what was observed, which deterministic rule was applied,
+          and what conclusion follows.
+        </p>
+
+        <div class="flow" role="img" aria-label="Declaration to explanation flow">
+          <div class="flow-step">Governed bundle declaration</div>
+          <div class="flow-arrow" aria-hidden="true">→</div>
+          <div class="flow-step">Runtime observation</div>
+          <div class="flow-arrow" aria-hidden="true">→</div>
+          <div class="flow-step">Deterministic evaluation</div>
+          <div class="flow-arrow" aria-hidden="true">→</div>
+          <div class="flow-step">GPT-5.6 explanation</div>
+        </div>
+
+        <div class="grid three">
+          <article class="card">
+            <h3>Declared</h3>
+            <p>ODPS product identity and commitments plus responsibility-separated interface, instrument, rule, monitoring, publication, and application declarations.</p>
+          </article>
+          <article class="card">
+            <h3>Observed</h3>
+            <p>Actual service responses, bar values, UTC timestamps, coverage, coherence, cache state, and evidence mode.</p>
+          </article>
+          <article class="card">
+            <h3>Evaluated and explained</h3>
+            <p>Rule-by-rule deterministic results followed by a model explanation that cites the evidence and preserves unknowns.</p>
+          </article>
+        </div>
+
+        <div class="callout">
+          <strong>Accepted product boundary</strong>
+          Live data is the service; contract-driven trust and explanation are its augmented value.
+        </div>
+      </section>
+
+      <section id="chatgpt-fit">
+        <h2>5. ChatGPT-native experience</h2>
+        <p class="lead">
+          ODP Market Steward shall expose a few precise powers that ChatGPT can invoke at the
+          right moment. It shall not reproduce an external website, navigation hierarchy, or
+          trading terminal inside the conversation.
+        </p>
+
+        <div class="callout">
+          <strong>One-sentence job</strong>
+          Interrogate live FX market data and the data-product contract that governs it without leaving ChatGPT.
+        </div>
+
+        <div class="grid three">
+          <article class="card">
+            <h3>Know</h3>
+            <p>Bring current completed-bar values, runtime quality evidence, and governed bundle declarations into the conversation—context base ChatGPT does not possess.</p>
+          </article>
+          <article class="card">
+            <h3>Do</h3>
+            <p>Retrieve, normalize, validate, calculate, and assess evidence. The first release intentionally performs no external write, trade, order, or account action.</p>
+          </article>
+          <article class="card">
+            <h3>Show</h3>
+            <p>Render the market board, selected-bar details, state, and rule evidence more clearly than prose while keeping the conversation primary.</p>
+          </article>
+        </div>
+
+        <h3>Selected powers</h3>
+        <ol>
+          <li>Show the coherent current FX-35 completed-bar market.</li>
+          <li>Explain one instrument using server-calculated descriptive metrics.</li>
+          <li>Assess runtime evidence against the governed data-product contract.</li>
+          <li>Answer bounded product-discovery questions with stable evidence references.</li>
+        </ol>
+
+        <div class="callout warning">
+          <strong>Design consequence</strong>
+          The model owns conversational routing and explanation. The MCP server owns retrieval,
+          normalization, calculations, rules, and structured evidence. The component is used only
+          when it materially improves comprehension over a concise text answer.
+        </div>
+      </section>
+
+      <section id="actors">
+        <h2>6. Users and principal use cases</h2>
+        <div class="grid three">
+          <article class="card">
+            <h3>Analyst</h3>
+            <p>Views the current completed-bar market, selects an instrument, and receives transparent movement and range calculations.</p>
+          </article>
+          <article class="card">
+            <h3>Governance specialist</h3>
+            <p>Checks whether the snapshot satisfies the declared product contract and asks for exact rule and evidence references.</p>
+          </article>
+          <article class="card">
+            <h3>Developer</h3>
+            <p>Discovers product metadata, access routes, expected fields, quality rules, limitations, and machine-readable results.</p>
+          </article>
+        </div>
+
+        <h3>Principal use cases</h3>
+        <div class="table-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User intent</th>
+                <th>Primary result</th>
+                <th>Failure-safe result</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>UC-01</code></td>
+                <td>“Show the current FXLive market.”</td>
+                <td>Latest coherent completed-minute board for the standard set.</td>
+                <td>Truthful partial, unavailable, closed, unknown, or recorded state.</td>
+              </tr>
+              <tr>
+                <td><code>UC-02</code></td>
+                <td>“Explain the latest EURUSD bar.”</td>
+                <td>OHLC values, interval, C−O, basis points, range, wicks, and validity.</td>
+                <td>Invalid fields are identified and dependent calculations are not produced.</td>
+              </tr>
+              <tr>
+                <td><code>UC-03</code></td>
+                <td>“Is this data fit for one-minute monitoring?”</td>
+                <td>Purpose-specific fitness, decisive rules, evidence, limitations, and remediation.</td>
+                <td><code>INDETERMINATE</code> when required evidence is missing.</td>
+              </tr>
+              <tr>
+                <td><code>UC-04</code></td>
+                <td>“Why is freshness not applicable?”</td>
+                <td>Market-closed explanation using the authoritative UTC calendar state.</td>
+                <td><code>UNKNOWN</code> when the calendar state is unavailable.</td>
+              </tr>
+              <tr>
+                <td><code>UC-05</code></td>
+                <td>“Which mandatory rule failed?”</td>
+                <td>Rule ID, expected value, observed value, rules-artifact pointer, and affected instruments.</td>
+                <td>No unsupported diagnosis when evidence is incoherent or unavailable.</td>
+              </tr>
+              <tr>
+                <td><code>UC-06</code></td>
+                <td>“What does this product provide?”</td>
+                <td>Governed catalog answer from the responsibility-owning bundle artifacts.</td>
+                <td>Artifact validation status and compatibility limitations remain visible.</td>
+              </tr>
+              <tr>
+                <td><code>UC-07</code></td>
+                <td>“What can ODP Market Steward help me with?”</td>
+                <td>One-line role explanation, one immediately useful market or product result, and a relevant next prompt.</td>
+                <td>No long onboarding, feature catalogue, or requirement to leave ChatGPT.</td>
+              </tr>
+              <tr>
+                <td><code>UC-08</code></td>
+                <td>“How does the FX market look?”</td>
+                <td>Concrete progress from available thread context, with at most one or two essential clarifications.</td>
+                <td>Ambiguity is stated; the system does not invent an instrument, purpose, or advice request.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="context">
+        <h2>7. System context and source contract</h2>
+        <h3>7.1 Public data access</h3>
+        <div class="table-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th>Route</th>
+                <th>Method</th>
+                <th>Functional purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>/health</code></td>
+                <td>GET</td>
+                <td>Retrieve service reachability and product identity evidence.</td>
+              </tr>
+              <tr>
+                <td><code>/meta</code></td>
+                <td>GET</td>
+                <td>Retrieve current completed-bar timing, one-minute granularity, instrument count, and available identifiers.</td>
+              </tr>
+              <tr>
+                <td><code>/latest?bar={instrument}</code></td>
+                <td>GET</td>
+                <td>Retrieve the latest completed one-minute OHLC bar for one declared instrument.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>7.2 Standard FX-35 set</h3>
+        <p>
+          The application shall use the following alphabetically ordered, versioned set.
+          A missing, duplicate, or unexpected identifier is a coverage failure.
+        </p>
+        <div class="instrument-list" aria-label="Standard 35 currency instruments">
+          <code>AUDCAD</code><code>AUDCHF</code><code>AUDJPY</code><code>AUDNZD</code><code>AUDUSD</code>
+          <code>CADCHF</code><code>CADJPY</code><code>CHFHUF</code><code>CHFJPY</code><code>EURAUD</code>
+          <code>EURCAD</code><code>EURCHF</code><code>EURGBP</code><code>EURHUF</code><code>EURJPY</code>
+          <code>EURNZD</code><code>EURPLN</code><code>EURUSD</code><code>GBPAUD</code><code>GBPCAD</code>
+          <code>GBPCHF</code><code>GBPJPY</code><code>GBPNZD</code><code>GBPUSD</code><code>NZDCAD</code>
+          <code>NZDCHF</code><code>NZDJPY</code><code>NZDUSD</code><code>USDCAD</code><code>USDCHF</code>
+          <code>USDHUF</code><code>USDJPY</code><code>USDMXN</code><code>USDPLN</code><code>USDZAR</code>
+        </div>
+
+        <h3>7.3 Required completed-bar fields</h3>
+        <p>
+          <code>Currency</code>, <code>Epoch</code>, <code>BarStart</code>, <code>BarEnd</code>,
+          <code>Granularity</code>, <code>Open</code>, <code>High</code>, <code>Low</code>,
+          and <code>Close</code>.
+        </p>
+
+        <h3>7.4 Governed bundle and responsibility map</h3>
+        <div class="table-wrap">
+          <table class="matrix">
+            <thead>
+              <tr><th>Artifact</th><th>Assigned responsibility</th><th>Standard status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>bundle.yaml</code></td><td>Inventory, versions, dependency order, authority, validation layers, and SHA-256 integrity.</td><td>Project manifest; not an ODP standard.</td></tr>
+              <tr><td><code>product/fxlive.odps.yaml</code></td><td>Product identity, purpose, value, lifecycle, commitments, access profile, and exact disclaimer.</td><td>ODPS 4.1; the only official ODP-family artifact claimed by this bundle.</td></tr>
+              <tr><td><code>interface/fxlive.openapi.yaml</code></td><td>Implemented HTTP routes, parameters, response schemas, transport headers, and errors.</td><td>OpenAPI 3.1.2 companion standard.</td></tr>
+              <tr><td><code>value-sets/fx35-instrument-set.yaml</code></td><td>Exact product-governed FX-35 membership and notation.</td><td>Project value set; not ODPV.</td></tr>
+              <tr><td><code>rules/ohlc-rules.yaml</code></td><td>Deterministic formulas, validity, plausibility, and fitness decisions.</td><td>Project rule contract; not ODPR.</td></tr>
+              <tr><td><code>operations/monitoring.yaml</code></td><td>UTC, coherent retrieval, freshness, evidence, availability, service state, and observability.</td><td>Project operational profile.</td></tr>
+              <tr><td><code>policies/publication-policy.yaml</code></td><td>Disclaimer surfaces, acknowledgement, identity, evidence labels, accessibility, and financial safety.</td><td>Project publication policy.</td></tr>
+              <tr><td><code>application/mcp-application.yaml</code></td><td>MCP tools, schemas, component resources, server/model boundary, and ChatGPT behavior.</td><td>Project MCP application contract.</td></tr>
+              <tr><td><code>TechnicalRequirements.html</code></td><td>Cloudflare topology, runtime, storage, secrets, security, observability, deployment, and testing requirements.</td><td>Project technical requirements.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>7.5 Runtime components</h3>
+        <ul>
+          <li>The existing FXLive Cloudflare Worker remains the independently deployed, read-only market-data service. Its public OpenAPI surface is consumed unchanged.</li>
+          <li>A separate ODP Market Steward Cloudflare Worker shall expose the public HTTPS Streamable HTTP <code>/mcp</code> endpoint, load and verify the governed bundle, call only the fixed FXLive origin, execute deterministic rules, and optionally call the OpenAI Responses API.</li>
+          <li>A per-MCP-session Cloudflare Durable Object shall coordinate short-lived acknowledgement state; stateless Worker memory shall not be treated as durable session state.</li>
+          <li>The ChatGPT host selects tools and narrates structured results. The Apps SDK component renders the disclosure and market evidence through the MCP Apps bridge and shall not call FXLive or OpenAI directly.</li>
+          <li>A private R2 bucket is conditional on written recording and redistribution rights. Without those rights and a verified immutable manifest, recorded fallback remains unavailable.</li>
+        </ul>
+      </section>
+
+      <section id="requirements">
+        <h2>8. Functional requirements</h2>
+        <p class="lead">
+          “Shall” indicates required behavior. Acceptance criteria describe the minimum
+          observable evidence needed before a requirement can move from Proposed to Verified.
+        </p>
+
+        <div class="req-group">
+          <h3>8.1 Live market-data service</h3>
+          <div class="requirements">
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-LIVE-001</span>
+                <strong>Present the market board first</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">After the MCP service verifies the required one-time app-session acknowledgement, the system shall return a market-data view as the primary result for a request to show the current FXLive market.</p>
+                <ul class="criteria">
+                  <li>An unacknowledged gated call performs no FXLive or OpenAI request and returns <code>DISCLOSURE_REQUIRED</code> with the disclosure-capable component.</li>
+                  <li>A verified acknowledgement is reusable only within the same MCP session and policy version.</li>
+                  <li>The result contains the selected or standard-set market values before extended governance explanation.</li>
+                  <li>The view states that values are latest completed one-minute bars rather than streaming ticks.</li>
+                  <li>The view contains an observation timestamp and bar interval in UTC.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-LIVE-002</span>
+                <strong>Retrieve the exact standard set</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall request and represent each member of the versioned FX-35 set exactly once for a full-board request.</p>
+                <ul class="criteria">
+                  <li>Expected, returned, missing, duplicate, and unexpected identifiers are reported.</li>
+                  <li>The application does not silently substitute or omit an instrument.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-LIVE-003</span>
+                <strong>Establish a coherent completed-minute snapshot</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall avoid scoring a mixed-minute snapshot as one coherent market state.</p>
+                <ul class="criteria">
+                  <li>Metadata is read before and after the instrument fan-out.</li>
+                  <li>Both metadata observations and every accepted bar identify the same completed <code>BarEnd</code>.</li>
+                  <li>One bounded reread is allowed during a rollover; continued mismatch returns <code>INCOHERENT</code>.</li>
+                  <li>Retrieval availability, service state, freshness, fitness, plausibility, provenance, and bundle validation remain separately typed outcomes.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-LIVE-004</span>
+                <strong>Refresh without misrepresenting recency</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall provide a user-visible manual refresh action and replace evidence only after the new result is complete.</p>
+                <ul class="criteria">
+                  <li>The previous result remains visibly timestamped while refresh is in progress.</li>
+                  <li>The component supplies its prior <code>BarEnd</code>; the server returns <code>INITIAL</code>, <code>SAME_BAR</code>, <code>NEW_BAR</code>, or <code>NOT_EVALUATED</code> when no comparable bar exists. Protocol and dependency failures use the separate typed error contract.</li>
+                  <li>Manual refresh is the MVP default. Automatic refresh, if later enabled, is visible, pausable, and limited to an active component.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-LIVE-005</span>
+                <strong>Expose partial and unavailable results honestly</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall never convert a partial, unparseable, unreachable, or no-evidence retrieval into a complete live market board.</p>
+                <ul class="criteria">
+                  <li>Partial results identify missing instruments and failed checks.</li>
+                  <li>Unreachable or unparseable service responses produce <code>UNAVAILABLE</code>.</li>
+                  <li>Cached or recorded values are never relabelled as newly fetched live values.</li>
+                  <li>A no-evidence result contains no market values and includes <code>attemptedAtUtc</code> plus a typed reason.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="req-group">
+          <h3>8.2 Instrument detail and descriptive calculations</h3>
+          <div class="requirements">
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-BAR-001</span>
+                <strong>Display a selected completed bar</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall display the selected instrument, UTC interval, granularity, Open, High, Low, and Close.</p>
+                <ul class="criteria">
+                  <li>The instrument belongs to the exact FX-35 enum.</li>
+                  <li>The displayed numbers are the normalized server values used by the rule engine.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-BAR-002</span>
+                <strong>Calculate declared OHLC metrics</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The server shall calculate descriptive metrics using the formulas governed by <code>rules/ohlc-rules.yaml</code> and referenced from the ODPS executable-quality entries.</p>
+                <span class="formula">closeMinusOpen = Close − Open</span>
+                <span class="formula">basisPointMovement = 10000 × (Close − Open) ÷ Open</span>
+                <span class="formula">absoluteRange = High − Low</span>
+                <span class="formula">rangeBasisPoints = 10000 × (High − Low) ÷ Open</span>
+                <span class="formula">upperWick = High − max(Open, Close)</span>
+                <span class="formula">lowerWick = min(Open, Close) − Low</span>
+                <span class="formula">bodyToRangeRatio = abs(Close − Open) ÷ (High − Low), or 0 for zero range</span>
+                <span class="formula">crossBarGap = Current Open − previous completed-bar Close</span>
+                <ul class="criteria">
+                  <li>Open is the denominator for both basis-point calculations.</li>
+                  <li>The displayed bar timestamp and instrument accompany every metric result.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-BAR-003</span>
+                <strong>Use deterministic decimal arithmetic</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The server shall calculate and round financial values using a declared decimal policy rather than binary floating-point display assumptions.</p>
+                <ul class="criteria">
+                  <li>The rounding mode and displayed precision are defined before implementation is accepted.</li>
+                  <li>Display precision respects the instrument value and does not force every instrument to the same number of decimal places.</li>
+                  <li>The model receives completed values and does not recalculate them from prose.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-BAR-004</span>
+                <strong>Require a genuine preceding bar for gap analysis</strong>
+                <span class="priority should">Should</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall return <code>NOT_EVALUATED</code> for cross-bar gap when the immediately preceding completed bar is unavailable.</p>
+                <ul class="criteria">
+                  <li>A non-consecutive or merely older value cannot be used as the previous close.</li>
+                  <li>The prior and current bar intervals are returned as evidence when the metric is computed.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="req-group">
+          <h3>8.3 Deterministic data quality and fitness</h3>
+          <div class="requirements">
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-QUAL-001</span>
+                <strong>Validate required fields</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall fail the completeness rule when any declared completed-bar field is absent or null.</p>
+                <ul class="criteria">
+                  <li>The result identifies each missing or null field.</li>
+                  <li>Dependent calculations are not produced when their required inputs are invalid.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-QUAL-002</span>
+                <strong>Validate mathematical OHLC integrity</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall enforce the declared notation, granularity, UTC boundary, duration, positive-finite, and OHLC-ordering rules.</p>
+                <ul class="criteria">
+                  <li><code>Currency</code> matches six uppercase letters and belongs to FX-35.</li>
+                  <li><code>Granularity</code> equals <code>1m</code>.</li>
+                  <li><code>BarEnd − BarStart</code> equals exactly 60 seconds.</li>
+                  <li>Open, High, Low, and Close are finite and greater than zero.</li>
+                  <li><code>Low ≤ Open</code>, <code>Low ≤ Close</code>, <code>High ≥ Open</code>, and <code>High ≥ Close</code>.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-QUAL-003</span>
+                <strong>Evaluate freshness only in context</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall apply the two-minute freshness rule only when an authoritative UTC market calendar reports OPEN.</p>
+                <ul class="criteria">
+                  <li>When OPEN, both current time minus <code>CreatedAt</code> and current time minus latest <code>BarEnd</code> are no greater than two minutes.</li>
+                  <li>An age of exactly 120 seconds passes; an age greater than 120 seconds fails while OPEN.</li>
+                  <li>The origin, parsing, and evidence role of <code>CreatedAt</code> are defined and contract-tested before this rule is verified.</li>
+                  <li>When CLOSED, timeliness is <code>NOT_APPLICABLE</code>.</li>
+                  <li>Without an authoritative calendar result, timeliness is <code>UNKNOWN</code>.</li>
+                  <li>Staleness alone is never used to infer that the market is closed.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-QUAL-004</span>
+                <strong>Separate plausibility from validity</strong>
+                <span class="priority should">Should</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall treat statistical unusualness as contextual review evidence, not as a hard-invalid bar or trading signal.</p>
+                <ul class="criteria">
+                  <li>Plausibility states are <code>NORMAL</code>, <code>UNUSUAL</code>, and <code>NOT_EVALUATED</code>.</li>
+                  <li>No result is produced until a UTC lookback window, minimum sample size, and alert threshold are configured.</li>
+                  <li>An unusual result preserves the hard-validity result.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-QUAL-005</span>
+                <strong>Assess fitness for a stated purpose</strong>
+                <span class="priority should">Should</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall calculate a purpose-specific fitness result from deterministic evidence without producing an opaque numeric trust score.</p>
+                <ul class="criteria">
+                  <li>Supported result states are <code>FIT</code>, <code>FIT_WITH_CONDITIONS</code>, <code>NOT_FIT</code>, and <code>INDETERMINATE</code>.</li>
+                  <li>Every result identifies the stated purpose, decisive rules, evidence, and limitations.</li>
+                  <li>Missing required evidence produces <code>INDETERMINATE</code>, not an assumed pass.</li>
+                  <li>A successful <code>/health</code> response alone can never produce <code>FIT</code> or <code>OPEN</code>.</li>
+                  <li>Every snapshot assessment states that it is point-in-time evidence rather than proof of longitudinal reliability or SLA performance.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="req-group">
+          <h3>8.4 Governed bundle and ODPS product governance</h3>
+          <div class="requirements">
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-ODP-001</span>
+                <strong>Load and verify the governed bundle</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall load <code>bundle.yaml</code> first and verify every required versioned runtime artifact before presenting a governed-valid status.</p>
+                <ul class="criteria">
+                  <li>Resolution follows the manifest load order, remains inside the bundle root, and verifies declared versions, dependencies, relative references, and SHA-256 digests.</li>
+                  <li>Results identify product ID, product version, ODPS version, bundle version, and the relevant artifact digests.</li>
+                  <li>A missing, invalid, or hash-mismatched required artifact prevents the app from presenting a governed-valid status.</li>
+                  <li>Market values may remain viewable when governance is unavailable, but no governed <code>FIT</code> verdict may be issued.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-ODP-002</span>
+                <strong>Resolve behavior by artifact responsibility</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The application shall resolve each fact and behavior from its responsibility-owning artifact rather than treating ODPS as a universal execution, monitoring, AI, or presentation contract.</p>
+                <ul class="criteria">
+                  <li>ODPS owns product declarations and commitments; OpenAPI owns HTTP behavior; the value set owns membership; rules own calculations and verdict logic; monitoring owns runtime state; publication policy owns disclosure; the MCP application contract owns tools and component behavior; and technical requirements own deployment architecture.</li>
+                  <li>A companion artifact cannot silently override an ODPS product declaration or another companion’s assigned responsibility.</li>
+                  <li>The same governed facts are not maintained independently in UI-only configuration.</li>
+                  <li>A contract change produces an explicit version or compatibility change, not silent behavior drift.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-ODP-003</span>
+                <strong>Answer governed product-discovery questions</strong>
+                <span class="priority should">Should</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall answer bounded questions about identity, users, use cases, access, SLA, quality, instruments, analysis, session policy, and disclaimer.</p>
+                <ul class="criteria">
+                  <li>Each returned declaration includes the owning artifact ID, path, stable pointer, version, and digest; ODPS pointers are used only for ODPS-owned facts.</li>
+                  <li>Unknown or omitted product facts are reported as unavailable and are not invented.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-ODP-004</span>
+                <strong>Separate validation layers</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall report syntax, controlling-schema, semantic-policy, cross-reference, source-alignment, and pinned ODP SDK compatibility as separate validation layers.</p>
+                <ul class="criteria">
+                  <li>Each applicable artifact-layer result identifies artifact ID and path, layer, status, validator and version, evaluation UTC, evidence, and nullable schema URI/hash.</li>
+                  <li>Supported statuses are <code>PASS</code>, <code>FAIL</code>, <code>WARNING</code>, <code>NOT_APPLICABLE</code>, and <code>NOT_TESTED</code>.</li>
+                  <li>Every runtime artifact receives syntax, semantic-policy, and cross-reference results; any missing or failed required layer prevents a governed <code>FIT</code> result.</li>
+                  <li>A compatibility warning is not silently converted into either an SDK pass or an ODPS failure.</li>
+                  <li>The application never claims ODPI certification.</li>
+                  <li>The exact validator and schema versions accompany results.</li>
+                </ul>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+        <div class="req-group">
+          <h3>8.5 GPT-5.6 data steward</h3>
+          <div class="requirements">
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-AI-001</span>
+                <strong>Generate an evidence-grounded Steward Brief</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">When <code>includeStewardBrief=true</code>, the MCP service shall make a bounded server-side OpenAI Responses API call using <code>gpt-5.6</code> to convert validated structured evidence into a concise professional explanation after deterministic assessment completes.</p>
+                <ul class="criteria">
+                  <li>The brief contains a governed answer, decisive evidence references, limitations, and a safe next step.</li>
+                  <li>The model receives calculated values and rule results; it does not own the calculations or hard verdict.</li>
+                  <li>The requested and actual response model identifiers are visible in implementation evidence and the typed result.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-AI-002</span>
+                <strong>Preserve declaration, observation, and inference boundaries</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Natural-language answers shall distinguish governed artifact declarations, runtime observations, deterministic evaluations, and model-authored explanation.</p>
+                <ul class="criteria">
+                  <li>Recorded evidence is never described as current.</li>
+                  <li>Missing evidence remains explicitly unknown.</li>
+                  <li>The explanation cites rule IDs and observation timestamps supplied by the server.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-AI-003</span>
+                <strong>Tailor explanations to professional intent</strong>
+                <span class="priority should">Should</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The steward shall explain the same evidence at an appropriate level for an analyst, governance specialist, or developer without changing the underlying result.</p>
+                <ul class="criteria">
+                  <li>Role selection changes terminology and emphasis only.</li>
+                  <li>If the requested purpose is materially ambiguous, the steward asks one bounded clarification rather than guessing.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-AI-004</span>
+                <strong>Keep deterministic service available without the model</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">A GPT-5.6 timeout, malformed output, or unavailable model shall not prevent the market board or deterministic quality result from being returned.</p>
+                <ul class="criteria">
+                  <li>The Steward Brief has typed states <code>NOT_REQUESTED</code>, <code>UNAVAILABLE</code>, <code>REJECTED</code>, and <code>GENERATED</code>.</li>
+                  <li>A failed or rejected Steward Brief is labelled without altering, suppressing, or replacing data or deterministic verdict states.</li>
+                  <li>Generated output is schema-validated and rejected if it changes deterministic facts or cites evidence that was not supplied.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="req-group">
+          <h3>8.6 Market state and recorded evidence</h3>
+          <div class="requirements">
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-TIME-001</span>
+                <strong>Use UTC on every public temporal field</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Every public timestamp shall use RFC 3339 UTC notation with a trailing <code>Z</code>.</p>
+                <ul class="criteria">
+                  <li>Bar start, bar end, evidence retrieval time, recorded capture time, and calendar evaluation time are separately identified.</li>
+                  <li>Host locale and host timezone do not alter parsing, calculation, comparison, or display.</li>
+                  <li>No local timezone label appears on a public app surface.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-STATE-001</span>
+                <strong>Classify service state in UTC</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The server shall classify <code>OPEN</code>, <code>MARKET_CLOSED</code>, <code>DEGRADED</code>, <code>UNAVAILABLE</code>, or <code>UNKNOWN</code> through the complete ordered decision table in Section 10 using service evidence and an authoritative UTC calendar.</p>
+                <ul class="criteria">
+                  <li>Holiday, daylight-saving, and maintenance behavior comes from the configured calendar rather than a hardcoded local opening hour.</li>
+                  <li>The classification basis is returned with the state.</li>
+                  <li>A <code>LIVE</code> badge is permitted only when the calendar is OPEN and the completed bar passes the declared freshness rule.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-STATE-002</span>
+                <strong>Keep state dimensions separate</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall represent availability, service state, freshness, fitness, plausibility, provenance, and bundle validation as separate dimensions and shall not collapse them into one “trust” or “live” state.</p>
+                <ul class="criteria">
+                  <li>When an authoritative calendar reports closed, the system may show evidence retrieved during the current call with its original bar timestamp, <code>MARKET_CLOSED</code>, and freshness <code>NOT_APPLICABLE</code>.</li>
+                  <li><code>LIVE</code> means current-call retrieval provenance only; it does not by itself imply open, fresh, complete, valid, or fit.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-STATE-003</span>
+                <strong>Provide an immutable recorded fallback</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">When the request explicitly permits recorded fallback and written capture, storage, public-display, and redistribution rights have been approved, the system shall be able to display a captured, immutable 35-instrument evidence bundle when current live evidence cannot support the demonstration.</p>
+                <ul class="criteria">
+                  <li>The manifest contains capture UTC, original bar intervals, product, bundle, policy, and artifact versions, product and content digests, response hashes, validation result, retention class, create-only write protection, and immutable manifest digest.</li>
+                  <li>The component displays the canonical banner <code>Recorded demo snapshot — captured {capturedAtUtc} — not current market data.</code>, where <code>capturedAtUtc</code> is RFC 3339 UTC ending in <code>Z</code>.</li>
+                  <li>Recorded data cannot produce a current-freshness pass.</li>
+                  <li>Without rights approval or a verified immutable manifest, the service returns no evidence rather than creating or using a recorded fallback.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-STATE-004</span>
+                <strong>Support a clearly labelled synthetic anomaly replay</strong>
+                <span class="priority should">Should</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The automated test harness may replay a synthetic fixture containing a known missing, stale, incoherent, or mathematically invalid observation.</p>
+                <ul class="criteria">
+                  <li>The fixture is visibly labelled <code>SYNTHETIC TEST FIXTURE</code>.</li>
+                  <li>It is never mixed with or presented as live evidence.</li>
+                  <li>It is never described as recorded market data.</li>
+                  <li>It is not accepted as a public request mode and is not returned to ordinary plugin users.</li>
+                  <li>The expected rule failure and actual result are covered by an automated test.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="req-group">
+          <h3>8.7 ChatGPT component and public presentation</h3>
+          <div class="requirements">
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-UI-001</span>
+                <strong>Render one coherent market-data component</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The ChatGPT component shall present evidence provenance, bar interval, retrieval or attempt time, availability, service state, freshness, fitness, market values when present, quality summary, and disclaimer as one coherent result without collapsing those dimensions into a single badge.</p>
+                <ul class="criteria">
+                  <li>The primary values are readable without opening a nested dashboard.</li>
+                  <li>Detailed rule evidence is progressively disclosed rather than hidden.</li>
+                  <li>No nested page, trading terminal, or duplicate chat composer is embedded.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-UI-002</span>
+                <strong>Provide bounded component actions</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The primary inline result shall expose no more than two prominent actions: refresh evidence and explain the selected result.</p>
+                <ul class="criteria">
+                  <li>Market, refresh, and explanation actions invoke read-only domain tools; only the explicit disclosure control may invoke the bounded component-only acknowledgement action.</li>
+                  <li>Sorting or instrument selection does not generate an investment recommendation.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-UI-003</span>
+                <strong>Make state understandable without color</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Every state and verdict shall be communicated using text and, where appropriate, an icon in addition to color.</p>
+                <ul class="criteria">
+                  <li>Keyboard navigation, visible focus, semantic labels, and WCAG AA contrast are tested.</li>
+                  <li>The market board remains usable on ChatGPT web and mobile layouts.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-PUB-001</span>
+                <strong>Display the complete demo disclaimer</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Every public tool result and component shall include the <strong>MARKET DATA DEMO</strong> label and complete approved disclaimer.</p>
+                <ul class="criteria">
+                  <li>The full statement is model-visible and user-visible, not only hidden in component metadata.</li>
+                  <li>The disclaimer appears in public specification, catalog, app UI, screenshots, video, and README.</li>
+                  <li>Interactive market-data use requires a one-time acknowledgement before the first retrieval in accordance with the publication policy and MCP application contract.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-PUB-002</span>
+                <strong>Enforce public identity policy</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Public artifacts shall identify ODP Market Steward, FXLive, and QMVP only and shall not disclose upstream source identity.</p>
+                <ul class="criteria">
+                  <li>A configured prohibited-term scan covers server responses, component bundle, screenshots, README, and video script.</li>
+                  <li>This requirement is a release gate only when the applicable data rights permit omission of attribution.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-PUB-003</span>
+                <strong>Prevent advice and execution behavior</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The system shall not generate trading signals, forecasts, recommendations, orders, or execution instructions.</p>
+                <ul class="criteria">
+                  <li>Movement comparison remains descriptive and is not framed as an opportunity ranking.</li>
+                  <li>Negative prompt tests verify refusals or safe reframing for prohibited financial actions.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="req-group">
+          <h3>8.8 ChatGPT-native discovery and orchestration</h3>
+          <div class="requirements">
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-CHAT-001</span>
+                <strong>Deliver value in the first meaningful response</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">For a user with no prior brand awareness, the first meaningful app response shall explain its role in one line, deliver useful output immediately, and offer one clear next step.</p>
+                <ul class="criteria">
+                  <li>The response does not begin with a feature tour, navigation menu, or multi-step onboarding form.</li>
+                  <li>A valid general market request returns concrete market evidence on the first tool-assisted turn.</li>
+                  <li>The role statement identifies completed-bar market data and governed evidence without claiming advice, certification, or official ODPI endorsement.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-CHAT-002</span>
+                <strong>Handle vague and specific intent conversationally</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The app shall use relevant thread context, act directly on complete requests, and ask no more than two essential clarifying questions for materially ambiguous requests.</p>
+                <ul class="criteria">
+                  <li>A specific request does not ask the user to repeat an instrument, purpose, metric, or evidence mode already present in the conversation.</li>
+                  <li>A vague request starts useful progress whenever a safe default such as the standard market board is available.</li>
+                  <li>Optional refinements follow the initial result rather than blocking it.</li>
+                  <li>The app never infers a trading objective from a general market-data question.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-CHAT-003</span>
+                <strong>Expose clear and accurately annotated tools</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Every MCP tool shall have a unique verb-led name, a plain-language description of when it applies, standalone JSON Schema input and output contracts, and annotations that match its observed behavior.</p>
+                <ul class="criteria">
+                  <li>Advertised schemas contain no references into an enclosing YAML document, and each handler’s accepted input and returned <code>structuredContent</code> match the advertised schema.</li>
+                  <li>Descriptions state what the tool does and do not manipulate selection, disparage alternatives, or recommend triggering beyond explicit user intent.</li>
+                  <li>The five model-visible domain tools declare <code>readOnlyHint: true</code> and <code>destructiveHint: false</code>; the component-only acknowledgement tool declares <code>readOnlyHint: false</code>, <code>destructiveHint: false</code>, and non-idempotent single-use challenge behavior.</li>
+                  <li>External FXLive retrieval is represented with the applicable <code>openWorldHint</code> and a submission justification consistent with actual network behavior.</li>
+                  <li>Direct, indirect, and negative prompt tests demonstrate correct tool selection and non-selection.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-CHAT-004</span>
+                <strong>Minimize model-to-tool data transfer</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Tool inputs shall request only structured fields required for the selected market-data or governance job.</p>
+                <ul class="criteria">
+                  <li>No tool accepts full conversation history, raw transcripts, arbitrary context blobs, credentials, precise location, or unrelated personal data.</li>
+                  <li>Instrument, purpose, metric, evidence mode, and requested governed-product section use bounded enums or narrowly validated values.</li>
+                  <li>A brief task-specific intent string is accepted only where it materially improves a governed explanation and is covered by the privacy policy.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-CHAT-005</span>
+                <strong>Return concise and composable structured results</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Each tool shall pair a brief model-readable <code>content</code> summary with stable <code>structuredContent</code> that another conversational step or app can reuse and component-only <code>_meta</code> only where necessary.</p>
+                <ul class="criteria">
+                  <li>Structured results use stable field names, instrument IDs, RFC 3339 UTC intervals, rule IDs, evidence mode, and ODPS pointers where relevant.</li>
+                  <li>Important facts are not available only as prose or only inside component-only metadata.</li>
+                  <li>Tool-visible and component-hydration responses omit secrets, credentials, signing keys, raw telemetry, and diagnostic traces; component-only challenge material is short-lived, signed, and not authorization by itself.</li>
+                  <li>Schema evolution is backward compatible within a published plugin version.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-CHAT-006</span>
+                <strong>Return control to the conversation</strong>
+                <span class="priority should">Should</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Each capability shall complete one bounded job and hand control back to ChatGPT rather than forcing a tunnel-like proprietary workflow.</p>
+                <ul class="criteria">
+                  <li>The user can complete at least one meaningful end-to-end market-data task without leaving ChatGPT.</li>
+                  <li>Outputs remain usable when another compatible app or later ODP Market Steward capability is called next.</li>
+                  <li>The component does not reproduce ChatGPT navigation, history, confirmation, or composer functions.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-EVAL-001</span>
+                <strong>Measure incremental app value</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The release evaluation shall compare app-assisted answers with base ChatGPT answers for the same versioned prompt set.</p>
+                <ul class="criteria">
+                  <li>The set covers direct, vague or indirect, negative, and edge-case prompts for live data, product discovery, quality evidence, and prohibited financial behavior.</li>
+                  <li>A documented rubric scores factual grounding, current-data access, correct tool routing, structured completeness, state honesty, first-turn usefulness, and policy compliance.</li>
+                  <li>The report records per-case results and an app-versus-base win rate without hiding ties or failures.</li>
+                  <li>The acceptance threshold and adjudication procedure are approved before release evaluation begins.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="req-group">
+          <h3>8.9 Plugin connection and publication</h3>
+          <div class="requirements">
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-PLUG-001</span>
+                <strong>Deliver the app as ODP Market Steward</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The final distributable product shall be a ChatGPT plugin named <strong>ODP Market Steward</strong> that contains the MCP-backed app/connector, its Apps SDK component, and a stable Cloudflare-hosted service endpoint.</p>
+                <ul class="criteria">
+                  <li>The developer-mode app connects to the deployed public HTTPS <code>/mcp</code> endpoint and lists the approved tools.</li>
+                  <li>The app name is <strong>ODP Market Steward</strong>; the competition title is <strong>ODP Market Steward — Governed Live Market Data in ChatGPT</strong>.</li>
+                  <li>The app description accurately states when to use it, its completed-bar and governance scope, and the <strong>MARKET DATA DEMO</strong> limitation.</li>
+                  <li>At least one complete user job is verified in ChatGPT developer mode before plugin submission.</li>
+                  <li>Every gated market-data tool links the disclosure-capable versioned component resource.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-PLUG-002</span>
+                <strong>Version plugin-facing metadata as a contract</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Tool metadata, schemas, annotations, server instructions, and UI resource references shall be treated as a versioned public compatibility contract.</p>
+                <ul class="criteria">
+                  <li>The component obtains all market evidence and acknowledgement behavior through MCP tools; it never calls FXLive or the OpenAI API directly.</li>
+                  <li>The versioned <code>ui://</code> resource, required MCP App HTML media type, CSP, and unique app domain agree with the deployed component.</li>
+                  <li>Developer-mode metadata is refreshed and re-tested after a tool or description change.</li>
+                  <li>Published metadata changes follow the required scan, submission, review, and publication flow.</li>
+                  <li>Published tools, fields, and resource contracts are not removed or incompatibly changed while users may depend on them.</li>
+                  <li>Server-only fixes preserve the published contract or are rolled back if they break it.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="req-group">
+          <h3>8.10 Consent, evidence requests, and Cloudflare delivery</h3>
+          <div class="requirements">
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-ACK-001</span>
+                <strong>Gate market-data retrieval on acknowledgement</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The MCP service shall not call the FXLive market-data service until the user has acknowledged the exact current publication-policy disclaimer in the active MCP session.</p>
+                <ul class="criteria">
+                  <li>Initial tool output may provide policy text, a signed acknowledgement challenge, and the component, but contains no retrieved market values.</li>
+                  <li>The component invokes a component-only acknowledgement tool to mutate session policy state, then reissues the previously validated pending market request after an <code>ACKNOWLEDGED</code> result for user continuity.</li>
+                  <li>The challenge binds the active session, exact policy version, exact disclaimer digest, nonce, and expiry. The pending request is not authorization; the server validates the post-acknowledgement call normally and does not rely on the component preserving it unchanged.</li>
+                  <li>The service rejects missing, expired, replayed, modified, or cross-session acknowledgements with a typed non-retrieval result.</li>
+                  <li>Acknowledgement records a safety disclosure; it is not identity verification, authorization, suitability assessment, or financial consent.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-ACK-002</span>
+                <strong>Maintain bounded session acknowledgement state</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The service shall maintain acknowledgement and replay-protection state in a strongly consistent per-session runtime object with automatic expiry.</p>
+                <ul class="criteria">
+                  <li>Stored fields are limited to policy version, disclaimer digest, challenge nonce or hash, issue and expiry times, acknowledgement time, and replay state.</li>
+                  <li>No prompt text, market-data response, user profile, or ChatGPT transcript is stored in acknowledgement state.</li>
+                  <li>An expired session requires a new challenge and acknowledgement before another upstream retrieval.</li>
+                  <li>Signing secrets remain server-side and never appear in tool content, component metadata, logs, or public artifacts.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-EVID-001</span>
+                <strong>Use an explicit evidence request and result matrix</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Every market-data operation shall separate the requested evidence policy from the evidence actually returned.</p>
+                <ul class="criteria">
+                  <li>Public request policy is <code>LIVE_ONLY</code> or <code>ALLOW_RECORDED_FALLBACK</code>; synthetic fixtures are test-only and cannot be requested through the public tool surface.</li>
+                  <li>Public result mode is <code>LIVE</code>, <code>RECORDED</code>, or <code>NONE</code>; <code>LAST_AVAILABLE</code> is reserved and prohibited until a separately governed meaning is approved.</li>
+                  <li><code>NONE</code> includes a typed reason such as acknowledgement required, upstream unavailable, invalid response, rights not approved, or verified recording unavailable.</li>
+                  <li>A recorded result can be selected only when the caller permits it and the policy, rights, integrity, and availability gates all pass.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-DEP-001</span>
+                <strong>Operate a dedicated Cloudflare MCP service</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The app backend shall run as a separate Cloudflare Worker that exposes a stable public HTTPS Streamable HTTP <code>/mcp</code> endpoint and a non-sensitive health endpoint.</p>
+                <ul class="criteria">
+                  <li>The new service uses the fixed public FXLive origin through its OpenAPI contract and does not read the source service's KV namespace directly.</li>
+                  <li>The existing FXLive Worker remains the market-data service and is not changed merely to expose an OpenAPI description.</li>
+                  <li>The MCP service allows only declared upstream hosts, routes, methods, parameters, and instrument values.</li>
+                  <li>Development, staging, and production configurations use separate names, secrets, state, and deployment evidence.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-DEP-002</span>
+                <strong>Serve the versioned Apps SDK component through MCP</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">The MCP service shall register the disclosure-capable market component as a versioned MCP UI resource and return it from every gated market-data tool.</p>
+                <ul class="criteria">
+                  <li>The component resource uses a versioned <code>ui://</code> URI and the required MCP App HTML media type.</li>
+                  <li>Its declared content-security policy permits only the minimum required origins; the component does not fetch FXLive or OpenAI directly.</li>
+                  <li>Model-visible structured content is sufficient for a correct text answer even when component rendering is unavailable.</li>
+                  <li>A production publication candidate declares a unique component domain and passes ChatGPT developer-mode rendering tests.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-DEP-003</span>
+                <strong>Use strong session coordination without retaining user content</strong>
+                <span class="priority must">Must</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">A Cloudflare Durable Object shall coordinate each active MCP session when session-bound acknowledgement or replay protection is required.</p>
+                <ul class="criteria">
+                  <li>One session maps deterministically to one session object and receives serialized state transitions.</li>
+                  <li>Alarm- or TTL-based cleanup removes expired acknowledgement state.</li>
+                  <li>Cloudflare KV is not used for replay-sensitive acknowledgement state because this requirement needs strong per-session consistency.</li>
+                  <li>The service remains read-only with respect to financial systems and performs no trade, order, account, or portfolio action.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="requirement">
+              <div class="requirement-head">
+                <span class="req-id">FR-DEP-004</span>
+                <strong>Keep recorded-evidence storage conditional</strong>
+                <span class="priority should">Should</span>
+                <span class="status proposed">Proposed</span>
+              </div>
+              <div class="requirement-body">
+                <p class="shall">Immutable recorded market evidence may be stored in Cloudflare R2 only after written rights and an approved retention and publication policy exist.</p>
+                <ul class="criteria">
+                  <li>The first implementation shall not persist live no-store responses in caches, KV, Durable Objects, logs, or analytics.</li>
+                  <li>When enabled, each recorded object has a manifest with capture UTC, content hash, product, bundle, policy, and artifact versions, validation result, retention class, create-only write protection, and an immutable manifest digest.</li>
+                  <li>Recorded objects use create-only conditional writes; overwrite and mutation of an existing evidence key are prohibited.</li>
+                  <li>Missing authorization or integrity evidence disables recorded fallback and returns result mode <code>NONE</code>.</li>
+                  <li>D1, Queues, Vectorize, and Workers AI are not required for the MVP unless a separately approved requirement justifies them.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="tools">
+        <h2>9. Proposed MCP tool surface</h2>
+        <p>
+          The surface contains five model-visible domain capabilities and one component-only policy
+          action rather than a miniature product navigation. Every gated market-data tool links the
+          same versioned disclosure-capable component; focused jobs then return control to ChatGPT.
+        </p>
+        <div class="table-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th>Tool</th>
+                <th>Purpose</th>
+                <th>Minimum input</th>
+                <th>Primary output</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>get_fx_market_board</code></td>
+                <td>Retrieve the coherent standard-set completed-minute snapshot and render the primary market board.</td>
+                <td>Evidence mode: live only or allow recorded fallback.</td>
+                <td>Bars, coverage, timestamps, service state, source mode, quality summary, component.</td>
+              </tr>
+              <tr>
+                <td><code>get_fx_instrument</code></td>
+                <td>Return one selected completed bar, hard checks, and descriptive metrics.</td>
+                <td>One exact FX-35 instrument and evidence mode.</td>
+                <td>Normalized bar, metrics, rule states, evidence.</td>
+              </tr>
+              <tr>
+                <td><code>summarize_fx_movements</code></td>
+                <td>Compare transparent descriptive changes without recommendation language.</td>
+                <td>Selected instruments or standard set, metric, and evidence mode.</td>
+                <td>Signed values, absolute values, timestamps, limitations.</td>
+              </tr>
+              <tr>
+                <td><code>assess_fx_data_service</code></td>
+                <td>Evaluate deterministic quality and purpose-specific fitness and optionally produce the GPT-5.6 Steward Brief.</td>
+                <td>Bounded purpose enum, instrument selection, evidence mode, and audience; optional Steward Brief flag.</td>
+                <td>Rules, verdict, evidence, unknowns, explanation.</td>
+              </tr>
+              <tr>
+                <td><code>get_fx_product_profile</code></td>
+                <td>Answer governed catalog and product-discovery questions from the responsibility-owning artifacts in the verified bundle.</td>
+                <td>Requested sections.</td>
+                <td>Declarations with artifact IDs, stable pointers, versions, digests, and validation status.</td>
+              </tr>
+              <tr>
+                <td><code>acknowledge_market_data_demo</code> <em>(component-only)</em></td>
+                <td>Verify the signed policy challenge and record bounded acknowledgement and replay state for the active MCP session.</td>
+                <td>Affirmation, policy version, disclaimer digest, and opaque challenge token.</td>
+                <td><code>ACKNOWLEDGED</code> with server UTC time and instruction to reissue the validated pending request.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Shared MCP behavior</h3>
+        <ul>
+          <li>Every tool shall declare exact, standalone JSON Schema input and output contracts and a description that states when the operation is relevant.</li>
+          <li>The five model-visible domain tools shall be read-only and non-destructive. The component-only acknowledgement tool may mutate only bounded session policy state and shall advertise that behavior truthfully.</li>
+          <li>Tools shall request only the minimum task-specific structured inputs and shall never request a full transcript or general context blob.</li>
+          <li>Tools that retrieve the external FXLive service shall accurately declare external-system interaction annotations.</li>
+          <li>Model-relevant facts shall be returned in stable <code>structuredContent</code>; concise narration may use <code>content</code>; component-only hydration, signed challenges, and a bounded validated pending request used solely for post-acknowledgement continuity may use protected <code>_meta</code>.</li>
+          <li>Errors shall be sanitized, actionable, and free of prohibited public source identity.</li>
+          <li>The component shall obtain market data through MCP tools and shall not call the market-data API directly.</li>
+          <li>A custom component shall be attached only where replacing it with plain text would materially reduce comprehension or utility.</li>
+          <li>No authentication is required for the public first release unless the scope is explicitly changed.</li>
+        </ul>
+      </section>
+
+      <section id="states">
+        <h2>10. State and verdict model</h2>
+        <p>
+          The application shall avoid one opaque “trust score.” Artifact validity, service state,
+          fitness, and plausibility are separate dimensions.
+        </p>
+
+        <div class="table-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th>Dimension</th>
+                <th>Allowed states</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Artifact validation layer</td>
+                <td><code>PASS</code>, <code>FAIL</code>, <code>WARNING</code>, <code>NOT_APPLICABLE</code>, <code>NOT_TESTED</code></td>
+                <td>Reports every applicable layer independently; controlling-schema validity and SDK compatibility are never collapsed.</td>
+              </tr>
+              <tr>
+                <td>Availability</td>
+                <td><code>AVAILABLE</code>, <code>PARTIAL</code>, <code>UNAVAILABLE</code>, <code>INCOHERENT</code></td>
+                <td>Describes retrieval completeness and snapshot coherence.</td>
+              </tr>
+              <tr>
+                <td>Service state</td>
+                <td><code>OPEN</code>, <code>MARKET_CLOSED</code>, <code>DEGRADED</code>, <code>UNAVAILABLE</code>, <code>UNKNOWN</code></td>
+                <td>Combines calendar and mandatory runtime evidence according to the declared policy.</td>
+              </tr>
+              <tr>
+                <td>Fitness verdict</td>
+                <td><code>FIT</code>, <code>FIT_WITH_CONDITIONS</code>, <code>NOT_FIT</code>, <code>INDETERMINATE</code></td>
+                <td>Answers whether the observed product is usable for the stated purpose.</td>
+              </tr>
+              <tr>
+                <td>Plausibility</td>
+                <td><code>NORMAL</code>, <code>UNUSUAL</code>, <code>NOT_EVALUATED</code></td>
+                <td>Provides non-fatal contextual review evidence.</td>
+              </tr>
+              <tr>
+                <td>Evidence mode</td>
+                <td><code>LIVE</code>, <code>RECORDED</code>, <code>NONE</code></td>
+                <td>States what evidence was actually returned. <code>LAST_AVAILABLE</code> is reserved and prohibited; synthetic fixtures are test-only.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Deterministic request and evidence workflow</h3>
+        <ol>
+          <li>Validate the request and current session acknowledgement. Failure returns evidence mode <code>NONE</code> and performs no upstream retrieval.</li>
+          <li>Verify the governed bundle and retain its status as a separate dimension; an invalid bundle prevents a governed fitness verdict but does not rewrite observed market values.</li>
+          <li>Attempt current retrieval. On failure, select <code>RECORDED</code> only when the request permits it and the rights, policy, integrity, and availability gates pass; otherwise return <code>NONE</code>.</li>
+          <li>Normalize the selected evidence and derive availability: missing or unparseable evidence is <code>UNAVAILABLE</code>; incomplete coverage is <code>PARTIAL</code>; mixed bar intervals are <code>INCOHERENT</code>.</li>
+        </ol>
+
+        <h3>Total service-state classification order</h3>
+        <ol>
+          <li>An unreachable or unparseable API result produces <code>UNAVAILABLE</code>.</li>
+          <li>A parseable response with no usable market evidence produces <code>UNAVAILABLE</code>.</li>
+          <li>An unavailable authoritative UTC calendar produces <code>UNKNOWN</code>.</li>
+          <li>An authoritative closed calendar produces <code>MARKET_CLOSED</code> and freshness <code>NOT_APPLICABLE</code>.</li>
+          <li>An open calendar plus a mandatory rule <code>FAIL</code> produces <code>DEGRADED</code>.</li>
+          <li>An open calendar plus any mandatory <code>UNKNOWN</code> or <code>NOT_EVALUATED</code> result produces <code>UNKNOWN</code>.</li>
+          <li>An open calendar plus all mandatory rules passing produces <code>OPEN</code>.</li>
+          <li>Any other parseable state produces the safe default <code>UNKNOWN</code>.</li>
+        </ol>
+        <p>Purpose-specific fitness is evaluated after service state and remains an independent dimension.</p>
+      </section>
+
+      <section id="mvp">
+        <h2>11. MVP definition of done</h2>
+        <p class="lead">
+          The first release is functionally complete only when every checked item below is
+          backed by the exact deployed artifact and observed test evidence.
+        </p>
+        <ul class="checklist">
+          <li>A developer-mode app named <strong>ODP Market Steward</strong> connects to a public HTTPS <code>/mcp</code> endpoint that lists and executes the approved tool contracts.</li>
+          <li>The plugin architecture and metadata use the accepted project name and exact competition title.</li>
+          <li>ChatGPT can render the market board from a real tool result and complete one meaningful job without leaving the conversation.</li>
+          <li>The standard-set request retrieves and coherently represents all 35 instruments.</li>
+          <li>The exact current disclaimer is acknowledged through a signed, expiring, session-bound challenge before the first upstream market-data request.</li>
+          <li>A dedicated Cloudflare Worker exposes the Streamable HTTP <code>/mcp</code> endpoint while the existing FXLive Worker remains an independent data service.</li>
+          <li>Strong per-session acknowledgement and replay state is coordinated by a Durable Object and contains no prompts, profiles, transcripts, or market responses.</li>
+          <li>One selected instrument displays its exact completed bar and deterministic metrics.</li>
+          <li>Required-field, exact-coverage, mathematical-validity, and session-aware freshness rules are executable.</li>
+          <li>Market-closed behavior does not fail freshness or pretend an old bar is newly live.</li>
+          <li>Unavailable and mixed-minute behavior cannot produce a complete or fit verdict.</li>
+          <li>If recorded fallback is enabled after rights approval, its snapshot is immutable, reproducible, integrity-verified, and unmistakably labelled; otherwise the service returns no fallback evidence.</li>
+          <li>GPT-5.6 generates a grounded Steward Brief without owning numerical or hard-rule results.</li>
+          <li>Product discovery answers cite the responsibility-owning artifact, stable pointer, version, and digest and preserve missing facts as unknown.</li>
+          <li>The exact complete disclaimer is visible and acknowledged before the first interactive retrieval.</li>
+          <li>No public artifact or response contains prohibited upstream identity.</li>
+          <li>No prompt produces trading advice, forecasting, recommendation, or execution behavior.</li>
+          <li>MCP Inspector and ChatGPT developer-mode golden prompts pass without schema or component errors.</li>
+          <li>Cold-start, specific, vague, indirect, negative, and edge-case prompts satisfy the approved conversational acceptance rubric.</li>
+          <li>A versioned evaluation reports app-assisted versus base-ChatGPT results, including win rate, ties, and failures.</li>
+          <li>Tool definitions are verb-led, specific, minimally parameterized, correctly annotated, and demonstrated to route predictably.</li>
+          <li>Desktop, mobile, keyboard, contrast, and non-color state tests pass.</li>
+          <li>Data-use authorization and third-party license evidence are approved before public release.</li>
+          <li>The product is complete and reliable despite the required <strong>MARKET DATA DEMO</strong> safety label; it is not submitted as an incomplete trial.</li>
+        </ul>
+      </section>
+
+      <section id="nonfunctional">
+        <h2>12. Non-functional requirements</h2>
+        <div class="table-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Requirement</th>
+                <th>Acceptance direction</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>NFR-REL-001</code></td>
+                <td>Predictable degradation</td>
+                <td>Every upstream timeout, partial response, malformed response, model failure, and rollover fixture produces a typed state without fabricating or relabelling evidence.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-PERF-001</code></td>
+                <td>Responsive interaction</td>
+                <td>Latency targets shall be agreed after a measured vertical slice; no unmeasured target is asserted in this draft.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-DEP-001</code></td>
+                <td>Environment-isolated Cloudflare delivery</td>
+                <td>Development, staging, and production use distinct Worker configuration, Durable Object state, secrets, URLs, release evidence, and rollback targets; the source FXLive Worker is not coupled to MCP deployment.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-SEC-001</code></td>
+                <td>Bounded external access</td>
+                <td>Only fixed origins, routes, methods, schemas, and exact instrument values are accepted; arbitrary URLs are rejected, signed challenges are verified server-side, and the component CSP is least-privilege.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-SEC-002</code></td>
+                <td>Secret-free public artifacts</td>
+                <td>Repository, logs, responses, component bundle, screenshots, and video pass a secrets and prohibited-identity scan.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-PRIV-001</code></td>
+                <td>Data minimization</td>
+                <td>No full conversation history, prompt text, precise location, credentials, user profile, market response, or unnecessary personal data is requested or retained in session state or operational logs.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-PUB-001</code></td>
+                <td>Public plugin readiness</td>
+                <td>If the app is submitted for public plugin distribution, publish a privacy policy and support contact and complete the required developer verification before release.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-ACC-001</code></td>
+                <td>Accessible component</td>
+                <td>WCAG AA contrast, keyboard operation, semantic labels, focus visibility, text-plus-icon states, and reduced-motion support are tested.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-OBS-001</code></td>
+                <td>Operational evidence</td>
+                <td>Cloudflare logs and traces expose health, dependency latency, tool status counts, Durable Object failures, and sanitized errors without logging prompts, secrets, market payloads, or restricted identity.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-TEST-001</code></td>
+                <td>Reproducible validation</td>
+                <td>Unit, contract, OpenAPI, bundle, acknowledgement/replay, Durable Object, integration, failure-fixture, MCP Inspector, ChatGPT developer-mode, golden-prompt, and app-versus-base evidence is retained per release.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-UX-001</code></td>
+                <td>Chat-native usefulness</td>
+                <td>At least one primary job depends on live governed data and conversational routing, completes in ChatGPT, and would materially degrade without the app.</td>
+              </tr>
+              <tr>
+                <td><code>NFR-META-001</code></td>
+                <td>Accurate discovery metadata</td>
+                <td>The app name, description, screenshots, tool definitions, and annotations accurately represent current functionality and contain no comparative, manipulative, or unsupported claims.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="competition">
+        <h2>13. Build Week submission constraints</h2>
+        <p>
+          These are delivery constraints, not product features. The project is intended for
+          <strong>Work and Productivity</strong>. Current official sources:
+          <a href="https://openai.devpost.com/rules">Devpost Official Rules</a>,
+          <a href="https://openai.devpost.com/details/faqs">FAQ</a>, and
+          <a href="https://openai.com/build-week/">OpenAI Build Week</a>.
+        </p>
+        <div class="table-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Constraint</th>
+                <th>Current draft status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>CR-BW-001</code></td>
+                <td>Working and consistently runnable ChatGPT plugin containing the ODP Market Steward MCP-backed app/connector.</td>
+                <td>Not implemented.</td>
+              </tr>
+              <tr>
+                <td><code>CR-BW-002</code></td>
+                <td>Meaningful Codex use evidenced in the primary core-build task.</td>
+                <td>Planning exists; core build not started.</td>
+              </tr>
+              <tr>
+                <td><code>CR-BW-003</code></td>
+                <td>Meaningful GPT-5.6 integration evidenced in code, README, and video.</td>
+                <td>Specified in <code>FR-AI-001</code>; not implemented.</td>
+              </tr>
+              <tr>
+                <td><code>CR-BW-004</code></td>
+                <td>Document pre-existing FXLive work separately from eligible new work.</td>
+                <td>Required submission task.</td>
+              </tr>
+              <tr>
+                <td><code>CR-BW-005</code></td>
+                <td>Judge-accessible repository and free deployed testing path.</td>
+                <td>Local repository created; public remote and judge-accessible review path remain pending.</td>
+              </tr>
+              <tr>
+                <td><code>CR-BW-006</code></td>
+                <td>README with setup, testing, Codex collaboration, human decisions, and GPT-5.6 role.</td>
+                <td>Missing.</td>
+              </tr>
+              <tr>
+                <td><code>CR-BW-007</code></td>
+                <td>Codex <code>/feedback</code> Session ID from the task containing most core implementation.</td>
+                <td>Not yet available.</td>
+              </tr>
+              <tr>
+                <td><code>CR-BW-008</code></td>
+                <td>Public narrated YouTube demonstration under three minutes.</td>
+                <td>Missing.</td>
+              </tr>
+              <tr>
+                <td><code>CR-BW-009</code></td>
+                <td>Authorized use of every API, dataset, SDK, library, font, icon, and other asset.</td>
+                <td>Market-data authorization is unresolved and is a release blocker.</td>
+              </tr>
+              <tr>
+                <td><code>CR-BW-010</code></td>
+                <td>English description, video, README, and testing instructions.</td>
+                <td>Pending.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="decisions">
+        <h2>14. Review decisions and unresolved items</h2>
+        <p>
+          Resolved architecture choices do not claim implementation. Remaining items do not silently select
+          a calendar provider, threshold, rights position, SDK version, or evaluation target.
+        </p>
+
+        <details open>
+          <summary>OD-001 · RESOLVED · Product boundary and first release</summary>
+          <p>
+            Live completed one-minute market data is the primary service; ODPS governance,
+            quality, fitness, and GPT-5.6 explanation are augmented value.
+          </p>
+        </details>
+
+        <details open>
+          <summary>OD-001A · RESOLVED · Product and competition name</summary>
+          <p>
+            The product and plugin name is <strong>ODP Market Steward</strong>. The competition title is
+            <strong>ODP Market Steward — Governed Live Market Data in ChatGPT</strong>.
+          </p>
+        </details>
+
+        <details>
+          <summary>OD-002 · Authoritative UTC market calendar</summary>
+          <p>
+            Select and document a calendar implementation that covers holidays, daylight-saving
+            transitions, and maintenance windows. Until selected, session-dependent results remain UNKNOWN.
+          </p>
+        </details>
+
+        <details>
+          <summary>OD-003 · Market-data rights and attribution</summary>
+          <p>
+            Confirm written rights for public display, judge access, screenshots, video, recorded storage,
+            and omission of public attribution. This is a go-or-no-go release decision.
+          </p>
+        </details>
+
+        <details>
+          <summary>OD-004 · ODP SDK compatibility approach</summary>
+          <p>
+            Select the pinned SDK version and decide whether a compatibility adapter or explicit compatibility
+            warning is required. Do not claim an SDK pass until the exact runtime path passes.
+          </p>
+        </details>
+
+        <details open>
+          <summary>OD-005 · PARTLY RESOLVED · GPT-5.6 runtime contract</summary>
+          <p>
+            The MCP service will make the optional Steward Brief call through the server-side OpenAI Responses API
+            using the current <code>gpt-5.6</code> alias after deterministic assessment. The exact output schema,
+            prompting policy, latency budget, retry policy, and test evidence remain to be approved during implementation.
+          </p>
+        </details>
+
+        <details open>
+          <summary>OD-006 · RESOLVED · Manual refresh for the MVP</summary>
+          <p>
+            The MVP uses user-initiated refresh only. The component compares completed <code>BarEnd</code> values and
+            labels the result <code>INITIAL</code>, <code>SAME_BAR</code>, <code>NEW_BAR</code>, or <code>NOT_EVALUATED</code>
+            when no comparable bar exists; background polling is deferred.
+          </p>
+        </details>
+
+        <details open>
+          <summary>OD-007 · RESOLVED · Cloudflare delivery architecture with conditional R2</summary>
+          <p>
+            A separate Cloudflare Worker will host Streamable HTTP <code>/mcp</code>, the versioned MCP App resource,
+            server-side OpenAI access, and Cloudflare observability. A Durable Object will hold bounded per-session
+            acknowledgement state. R2 is permitted only for rights-approved immutable recorded evidence; no general
+            application database, queue, vector store, or Workers AI dependency is required for the MVP.
+          </p>
+        </details>
+
+        <details>
+          <summary>OD-008 · Decimal display and rounding</summary>
+          <p>
+            Approve decimal parsing, calculation precision, rounding mode, and display precision for raw
+            prices, quote-currency changes, basis points, and ratios.
+          </p>
+        </details>
+
+        <details>
+          <summary>OD-009 · Plausibility baseline</summary>
+          <p>
+            Approve lookback window, minimum sample size, and warning threshold. Until then,
+            plausibility remains NOT_EVALUATED.
+          </p>
+        </details>
+
+        <details>
+          <summary>OD-010 · Performance and availability targets</summary>
+          <p>
+            Measure the vertical slice before assigning latency, cache, or availability targets.
+            The current ODPS SLA is a market-open demo objective, not a commercial guarantee.
+          </p>
+        </details>
+
+        <details>
+          <summary>OD-011 · CreatedAt provenance</summary>
+          <p>
+            Define which response supplies <code>CreatedAt</code>, its exact schema and UTC semantics,
+            and how it differs from evidence retrieval time and completed <code>BarEnd</code>.
+          </p>
+        </details>
+
+        <details>
+          <summary>OD-012 · Conversational evaluation rubric</summary>
+          <p>
+            Approve the versioned direct, vague, indirect, negative, and edge-case prompt set;
+            scoring rubric; app-versus-base acceptance threshold; and adjudication procedure.
+          </p>
+        </details>
+
+        <details>
+          <summary>OD-013 · Plugin listing description and screenshots</summary>
+          <p>
+            Approve accurate final listing metadata and representative screenshots after the deployed
+            behavior exists. The description must state when to use the app and preserve the
+            <strong>MARKET DATA DEMO</strong> boundary without presenting the product as an incomplete trial.
+          </p>
+        </details>
+      </section>
+
+      <section id="changelog">
+        <h2>15. Change log</h2>
+        <div class="table-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th>Version</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0.3</td>
+                <td>2026-07-20</td>
+                <td>Proposed</td>
+                <td>Reframed ODPS as the product contract within a responsibility-separated governed bundle; added manifest-first validation, artifact-specific discovery evidence, explicit request/result modes, signed session acknowledgement, a dedicated Cloudflare MCP Worker, Durable Object session coordination, versioned MCP App delivery, conditional R2 evidence storage, manual refresh, and a linked technical baseline.</td>
+              </tr>
+              <tr>
+                <td>0.2</td>
+                <td>2026-07-20</td>
+                <td>Proposed</td>
+                <td>Locked the ODP Market Steward name and competition title; made the ChatGPT plugin the top-level deliverable; added focused Know/Do/Show positioning, conversational discovery, first-turn value, model-friendly tools, privacy-minimal inputs, composable outputs, ecosystem handoff, app-versus-base evaluation, and plugin metadata lifecycle requirements based on current OpenAI guidance.</td>
+              </tr>
+              <tr>
+                <td>0.1</td>
+                <td>2026-07-20</td>
+                <td>Proposed</td>
+                <td>Initial requirements baseline assembled from the approved ODPS artifact and the live-data-first ChatGPT MCP App design discussion.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Required public disclaimer</h3>
+        <div class="callout warning">
+          <strong>MARKET DATA DEMO</strong>
+          MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed,
+          incomplete, unavailable, or contain errors. Nothing presented is investment advice,
+          a recommendation, or an offer to buy or sell any financial instrument. The product
+          must not be used for live trading or order execution.
+        </div>
+
+        <p class="footer-note">
+          Draft 0.3 requirements only · No implementation or deployment is claimed by this document.
+        </p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

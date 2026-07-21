@@ -6,7 +6,7 @@ ODP Market Steward is a planned ChatGPT App and MCP service for governed discove
 
 ## Repository status
 
-This initial commit is a structural scaffold only. It establishes the architecture and review boundaries accepted in the detailed-level design. It does not yet contain executable application code, dependency manifests, Cloudflare deployment configuration, copied credentials, or a live deployment.
+The repository contains the authoritative project documentation and a structural implementation scaffold. It does not yet contain executable application code, dependency manifests, Cloudflare deployment configuration, copied credentials, or a live deployment.
 
 The implementation is planned in TypeScript, with:
 
@@ -20,17 +20,17 @@ The implementation is planned in TypeScript, with:
 
 - `apps/worker/` — Cloudflare Worker composition, MCP transport, and operational endpoints.
 - `apps/component/` — ChatGPT component UI, bridge, state, views, and accessibility.
-- `contracts/bundle/` — governed, versioned ODPI-family and supporting contracts once the vendoring decision is complete.
+- `Documentation/` — authoritative specifications, requirements, design, project plan, decisions, and maintained documentation.
+- `contracts/bundle/` — reproducible runtime materialization of approved contracts once the vendoring/generation decision is complete; never the maintained source.
 - `packages/` — domain, application, adapter, contract-runtime, MCP-contract, and test-support modules.
 - `generated/` — reproducible artifacts derived from governed contracts; never a contract source.
 - `tests/` — package through end-to-end verification layers.
-- `docs/` — architecture, decisions, development, and operations documentation.
 - `evidence/` — machine-readable validation reports and release manifests.
 - `scripts/` — checked automation for generation, validation, and evidence production.
 
 ## Development and review
 
-WebStorm is the primary development and code-review IDE. Do not add dependencies or toolchain versions until their project decisions are accepted. Follow [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
+WebStorm is the primary development and code-review IDE. Begin with the [documentation index](Documentation/README.md) and [living project plan](Documentation/ProjectPlan.html). Do not add dependencies or toolchain versions until their project decisions are accepted. Follow [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Current OpenAI references:
 

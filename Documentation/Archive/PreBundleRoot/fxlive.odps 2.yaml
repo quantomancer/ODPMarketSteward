@@ -1,0 +1,430 @@
+# MARKET DATA DEMO - ODPS 4.1 data product specification
+---
+schema: https://opendataproducts.org/v4.1/schema/odps.yaml
+version: 4.1
+
+product:
+  details:
+    en:
+      name: "FXLive Market Data Demo - Standard FX-35"
+      productID: "fxlive-market-data-demo-fx35"
+      valueProposition: >-
+        Provides analysts, governance teams, developers, and AI applications with
+        a governed, machine-readable demonstration of one-minute foreign-exchange
+        OHLC market data, deterministic quality evidence, and natural-language
+        discovery without requiring manual inspection of YAML.
+      description: >-
+        MARKET DATA DEMO. FXLive exposes the latest completed one-minute OHLC bar
+        and product metadata for a fixed standard set of 35 currency instruments.
+        Product timestamps, bar boundaries, session evaluation, and freshness
+        calculations use UTC. The product supports technical evaluation of data
+        discovery, governance, validation, integrity, movement, and contextual
+        plausibility; it does not provide trading signals or execution services.
+      visibility: public
+      status: testing
+      type: derived data
+      productVersion: "1.0.0"
+      portfolioPriority: high
+      governanceProfile: structured
+      standards:
+        - "Open Data Product Specification (ODPS) 4.1"
+        - "RFC 3339 UTC timestamps"
+        - "ISO 4217 alphabetic currency codes"
+      tags:
+        - market data demo
+        - foreign exchange
+        - OHLC
+        - data quality
+        - data governance
+        - agentic discovery
+      useCases:
+        - useCase:
+            useCaseTitle: "Governed market-data discovery"
+            useCaseDescription: >-
+              Ask natural-language questions about the product, its standard
+              instrument set, access method, service objectives, and quality rules.
+        - useCase:
+            useCaseTitle: "Deterministic OHLC integrity assessment"
+            useCaseDescription: >-
+              Evaluate required fields, exact instrument coverage, UTC timestamps,
+              bar duration, finite positive prices, and OHLC ordering.
+        - useCase:
+            useCaseTitle: "Descriptive movement and plausibility review"
+            useCaseDescription: >-
+              Calculate transparent close-minus-open, basis-point, range, wick,
+              body-to-range, and cross-bar-gap metrics and flag unusual observations
+              for review without producing a trading recommendation.
+
+  productStrategy:
+    status: Active
+    objectives:
+      - en: >-
+          Demonstrate how ODPS metadata and deterministic live evidence can answer
+          whether a market-data product is usable for a stated professional purpose.
+      - en: >-
+          Separate declared product expectations, observed runtime evidence, and
+          natural-language explanation in an auditable AI data-steward workflow.
+    contributesToKPI:
+      id: "governed-answer-traceability"
+      name: "Governed answer traceability"
+      description: >-
+        Share of governed catalog answers that identify the declaration, runtime
+        evidence, rule, and evaluation state used to produce the answer.
+      unit: percentage
+      target: 100
+      direction: at_least
+      frequency: "Per governed discovery or fitness answer"
+      calculation: >-
+        100 * count(answers containing declaration, evidence, rule, and state
+        references) / count(governed answers evaluated).
+    productKPIs:
+      - id: "standard-set-coverage"
+        name: "Standard instrument set coverage"
+        description: >-
+          Share of the declared 35-instrument set represented exactly once in the
+          current metadata response.
+        unit: percentage
+        target: 100
+        direction: at_least
+        frequency: "Per completed bar during an OPEN market-session state"
+        calculation: >-
+          100 * count(unique available instruments that belong to the declared set)
+          / 35, with failure if any declared instrument is missing or any unexpected
+          instrument is present.
+      - id: "valid-bar-rate"
+        name: "Mathematically valid completed-bar rate"
+        description: >-
+          Share of returned completed bars passing required-field, duration,
+          finite-positive-value, and OHLC-ordering rules.
+        unit: percentage
+        target: 100
+        direction: at_least
+        frequency: "Per completed bar during an OPEN market-session state"
+        calculation: >-
+          100 * count(returned bars passing all hard validity rules) /
+          count(returned bars evaluated).
+      - id: "utc-conformance"
+        name: "UTC timestamp conformance"
+        description: >-
+          Share of evaluated public timestamps represented as RFC 3339 UTC values
+          with a trailing Z designator.
+        unit: percentage
+        target: 100
+        direction: equals
+        frequency: "Per metadata and bar response"
+        calculation: >-
+          100 * count(evaluated timestamps parsed as RFC 3339 UTC with trailing Z) /
+          count(evaluated timestamps).
+
+  SLA:
+    declarative:
+      default:
+        name:
+          en: "Market-open demo service objective"
+        description:
+          en: >-
+            The expected completed-bar update frequency for technical evaluation.
+            It applies only when an authoritative runtime market calendar reports
+            the product state as OPEN; it is not a commercial service guarantee.
+        dimensions:
+          - dimension: updateFrequency
+            objective: 1
+            weight: 100
+            unit: minutes
+        x-applies-when:
+          marketSessionState: OPEN
+          timezone: UTC
+        x-non-applicable-when:
+          marketSessionState: MARKET_CLOSED
+
+  dataQuality:
+    declarative:
+      default:
+        displaytitle:
+          en: "FXLive governed quality profile"
+        description: >-
+          Product-level quality objectives for the standard 35-instrument,
+          one-minute OHLC market-data demo.
+        dimensions:
+          - dimension: validity
+            objective: 100
+            weight: 25
+            unit: percentage
+          - dimension: completeness
+            objective: 100
+            weight: 20
+            unit: percentage
+          - dimension: coverage
+            objective: 100
+            weight: 20
+            unit: percentage
+          - dimension: timeliness
+            objective: 100
+            weight: 20
+            unit: percentage
+          - dimension: consistency
+            objective: 100
+            weight: 15
+            unit: percentage
+    executable:
+      - dimension: completeness
+        type: Custom
+        version: "1.0.0"
+        spec:
+          ruleID: "bar-required-fields"
+          severity: error
+          description: >-
+            Every completed-bar response must contain all required fields.
+          requiredFields:
+            - Currency
+            - Epoch
+            - BarStart
+            - BarEnd
+            - Granularity
+            - Open
+            - High
+            - Low
+            - Close
+          passCondition: "Every required field exists and has a non-null value."
+      - dimension: coverage
+        type: Custom
+        version: "1.0.0"
+        spec:
+          ruleID: "exact-standard-instrument-set"
+          severity: error
+          description: >-
+            The metadata response must identify exactly the versioned standard
+            35-instrument set declared by this product.
+          passCondition: >-
+            InstrumentCount equals 35; available contains 35 unique values; and the
+            available set equals x-standard-instrument-set.instruments with neither
+            missing nor unexpected values.
+      - dimension: validity
+        type: Custom
+        version: "1.0.0"
+        spec:
+          ruleID: "completed-bar-mathematical-integrity"
+          severity: error
+          description: >-
+            Completed bars must use the declared instrument notation, one-minute UTC
+            boundaries, finite positive prices, and valid OHLC ordering.
+          passConditions:
+            - "Currency matches ^[A-Z]{6}$ and belongs to the declared instrument set."
+            - "Granularity equals 1m."
+            - "BarStart and BarEnd parse as RFC 3339 UTC timestamps ending in Z."
+            - "BarEnd minus BarStart equals exactly one minute."
+            - "Open, High, Low, and Close are finite numbers greater than zero."
+            - "Low is less than or equal to Open and Close."
+            - "High is greater than or equal to Open and Close."
+      - dimension: timeliness
+        type: Custom
+        version: "1.0.0"
+        spec:
+          ruleID: "market-open-freshness"
+          severity: error
+          description: >-
+            Freshness is evaluated only when an authoritative runtime market calendar
+            reports OPEN. Closed-market age is not treated as a freshness failure.
+          openStatePassCondition: >-
+            The current UTC time minus CreatedAt is no greater than two minutes and
+            the most recent completed BarEnd is no greater than two minutes old.
+          closedStateResult: NOT_APPLICABLE
+          missingCalendarResult: UNKNOWN
+      - dimension: consistency
+        type: Custom
+        version: "1.0.0"
+        spec:
+          ruleID: "contextual-ohlc-plausibility"
+          severity: warning
+          description: >-
+            Evaluate movement, range, wick, body, and gap metrics against a configured
+            rolling baseline. Statistical unusualness prompts review and does not by
+            itself make a mathematically valid bar invalid.
+          method: rolling_median_and_median_absolute_deviation
+          configurationPolicy: >-
+            The consuming application must declare its UTC lookback window, minimum
+            sample size, and alert threshold before producing a plausibility result.
+          resultStates:
+            - NORMAL
+            - UNUSUAL
+            - NOT_EVALUATED
+          hardValidityEffect: none
+
+  dataAccess:
+    default:
+      name:
+        en: "FXLive public JSON API"
+      description:
+        en: >-
+          Read-only access to service health, current product metadata, and the latest
+          completed one-minute OHLC bar for an instrument in the standard set.
+      outputPorttype: API
+      format: JSON
+      authenticationMethod: none
+      accessURL: https://fxlive.qmvp.workers.dev
+      x-routes:
+        - name: health
+          method: GET
+          path: /health
+          purpose: "Report service reachability and identity."
+        - name: metadata
+          method: GET
+          path: /meta
+          purpose: >-
+            Report UTC bar timing, one-minute granularity, instrument count, and the
+            available instrument identifiers for the current completed-bar snapshot.
+        - name: latestCompletedBar
+          method: GET
+          path: "/latest?bar={instrument}"
+          purpose: >-
+            Return the latest completed one-minute OHLC bar for one declared instrument.
+          parameters:
+            - name: instrument
+              location: query
+              required: true
+              type: string
+              constraint: >-
+                Must be one value from x-standard-instrument-set.instruments.
+
+  x-planned-data-access:
+    mcp:
+      status: planned
+      name: "ODP Market Steward governed MCP access"
+      outputPorttype: AI
+      format: MCP
+      specification: MCP
+      consumerApplication:
+        id: "odp-market-steward"
+        name: "ODP Market Steward"
+        applicationType: "ChatGPT plugin"
+        competitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
+        delivery:
+          connector: "MCP-backed app/connector"
+          serverEndpoint: "Public HTTPS /mcp endpoint"
+          userInterface: "Apps SDK component"
+      purpose: >-
+        Provide ODP Market Steward with read-only access to validate this ODPS artifact,
+        retrieve deterministic runtime evidence, answer governed natural-language
+        discovery questions, and render a market-data and assurance component for
+        professional users inside ChatGPT.
+      publicationRequirement: >-
+        Do not present this access method or the ODP Market Steward plugin as available
+        until its MCP server, tools, Apps SDK component, and public endpoint have been
+        deployed, connected in ChatGPT developer mode, and tested end to end.
+
+  x-standard-instrument-set:
+    id: "fxlive-standard-fx35"
+    version: "1.0.0"
+    count: 35
+    ordering: alphabetical
+    notation: >-
+      Six uppercase letters formed by concatenating ISO 4217 alphabetic base-currency
+      and quote-currency codes.
+    instruments:
+      - AUDCAD
+      - AUDCHF
+      - AUDJPY
+      - AUDNZD
+      - AUDUSD
+      - CADCHF
+      - CADJPY
+      - CHFHUF
+      - CHFJPY
+      - EURAUD
+      - EURCAD
+      - EURCHF
+      - EURGBP
+      - EURHUF
+      - EURJPY
+      - EURNZD
+      - EURPLN
+      - EURUSD
+      - GBPAUD
+      - GBPCAD
+      - GBPCHF
+      - GBPJPY
+      - GBPNZD
+      - GBPUSD
+      - NZDCAD
+      - NZDCHF
+      - NZDJPY
+      - NZDUSD
+      - USDCAD
+      - USDCHF
+      - USDHUF
+      - USDJPY
+      - USDMXN
+      - USDPLN
+      - USDZAR
+
+  x-market-session:
+    timezone: UTC
+    timestampStandard: RFC 3339
+    timestampSuffix: Z
+    calendarPolicy:
+      mode: runtime-configured
+      requirement: >-
+        The consuming application must use an authoritative foreign-exchange market
+        calendar expressed in UTC and must account for holidays and maintenance
+        windows. This product specification does not hard-code weekday opening hours.
+    states:
+      OPEN: >-
+        The configured market calendar reports open and the latest completed bar
+        satisfies the market-open freshness rule.
+      MARKET_CLOSED: >-
+        The configured market calendar reports closed; freshness objectives are not
+        applicable and the most recent completed bar may remain unchanged.
+      DEGRADED: >-
+        The configured market calendar reports open and runtime evidence is available,
+        but one or more mandatory coverage, completeness, validity, or timeliness rules fail.
+      UNAVAILABLE: >-
+        The API cannot be reached or does not return a parseable response.
+      UNKNOWN: >-
+        The calendar state or evidence needed for classification is unavailable.
+
+  x-runtime-analysis:
+    scope: descriptive_and_quality_assurance_only
+    priceBasis: "Use Open as the denominator for basis-point calculations."
+    zeroRangePolicy: "Return 0 for body-to-range ratio when High equals Low."
+    metrics:
+      closeMinusOpen: "Close - Open"
+      basisPointMovement: "10000 * (Close - Open) / Open"
+      absoluteRange: "High - Low"
+      rangeBasisPoints: "10000 * (High - Low) / Open"
+      upperWick: "High - max(Open, Close)"
+      lowerWick: "min(Open, Close) - Low"
+      bodyToRangeRatio: "abs(Close - Open) / (High - Low), or 0 when High equals Low"
+      crossBarGap: "Current Open - previous completed-bar Close"
+    presentationRules:
+      - "Label calculated values as descriptive observations, not predictions."
+      - "Show the input bar timestamps and instrument with every calculation."
+      - "Distinguish hard validity failures from contextual plausibility warnings."
+      - "Do not generate trading signals, forecasts, recommendations, or orders."
+
+  x-demo-disclaimer:
+    label: "MARKET DATA DEMO"
+    statement: >-
+      MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be
+      delayed, incomplete, unavailable, or contain errors. Nothing presented is
+      investment advice, a recommendation, or an offer to buy or sell any financial
+      instrument. The product must not be used for live trading or order execution.
+    requiredSurfaces:
+      - public specification
+      - governed catalog entry
+      - MCP tool result
+      - ODP Market Steward Apps SDK component
+      - screenshot
+      - demo video
+      - README
+    acknowledgementRequiredBeforeInteractiveUse: true
+
+  x-publication-policy:
+    publicProductIdentity: "FXLive by QMVP"
+    publicConsumerApplicationIdentity: "ODP Market Steward"
+    publicCompetitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
+    timestampPolicy: "Use UTC on every public surface."
+    sourceIdentityPolicy: >-
+      Public artifacts identify ODP Market Steward, the FXLive product, and QMVP only
+      and do not identify upstream data sources.
+    disclaimerPolicy: >-
+      Display the MARKET DATA DEMO label and the complete demo disclaimer prominently.

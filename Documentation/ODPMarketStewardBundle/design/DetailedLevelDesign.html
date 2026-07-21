@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Proposed implementation-planning detailed level design for ODP Market Steward, a governed FXLive Market Data Demo delivered as a ChatGPT MCP App on Cloudflare.">
+  <title>ODP Market Steward — Detailed Level Design</title>
+  <style>
+    :root{
+      --ink:#152235;--muted:#5b697b;--navy:#102a43;--navy-2:#173f5f;--teal:#087f75;
+      --teal-soft:#e7f6f3;--blue:#1864ab;--blue-soft:#eaf3ff;--amber:#a45d00;
+      --amber-soft:#fff4dc;--red:#a73737;--red-soft:#fff0f0;--green:#16704a;
+      --green-soft:#eaf7f0;--paper:#fff;--canvas:#f3f6f9;--line:#d9e1ea;
+      --code:#0e2435;--shadow:0 12px 34px rgba(18,44,68,.08)
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--canvas);color:var(--ink);font:15.5px/1.58 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    a{color:#086d75;text-decoration-thickness:1px;text-underline-offset:3px}
+    code{padding:2px 5px;border-radius:5px;background:#eef2f6;color:#183a5a;font:12.5px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace}
+    pre{margin:14px 0 0;padding:18px;overflow:auto;border-radius:11px;background:var(--code);color:#d8e7ef;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .shell{display:grid;grid-template-columns:280px minmax(0,1fr);max-width:1540px;margin:0 auto}
+    .side{position:sticky;top:0;height:100vh;padding:27px 20px;background:var(--navy);color:#dceaf2;overflow:auto}
+    .side .brand{font-size:20px;font-weight:850;color:#fff;letter-spacing:-.02em}
+    .side .sub{margin-top:4px;color:#aac1d0;font-size:12px}
+    .side .doc-state{display:inline-block;margin-top:14px;padding:5px 9px;border:1px solid rgba(255,255,255,.24);border-radius:999px;color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em}
+    .side nav{margin-top:24px}.side nav strong{display:block;margin:16px 8px 5px;color:#7fcac2;font-size:10px;text-transform:uppercase;letter-spacing:.12em}
+    .side nav a{display:block;padding:6px 8px;border-radius:7px;color:#cde0e9;text-decoration:none;font-size:13px}
+    .side nav a:hover,.side nav a:focus{background:rgba(255,255,255,.08);color:#fff;outline:none}
+    .content{min-width:0;padding:34px 38px 72px}
+    .hero{padding:41px;color:#fff;background:linear-gradient(125deg,var(--navy),#174c67 66%,var(--teal));border-radius:20px;box-shadow:var(--shadow)}
+    .eyebrow{margin:0 0 9px;text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:800;opacity:.84}
+    .hero h1{max-width:1000px;margin:0;font-size:clamp(34px,5vw,57px);line-height:1.04;letter-spacing:-.045em}
+    .hero .lead{max-width:970px;margin:17px 0 0;color:#e7f3f6;font-size:18px}
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.badge{padding:5px 9px;border:1px solid rgba(255,255,255,.34);border-radius:999px;background:rgba(255,255,255,.11);font-size:11px;font-weight:800;letter-spacing:.04em}
+    .hero-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:25px}.hero-stat{padding:13px 14px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(7,30,47,.22)}.hero-stat strong{display:block;font-size:22px}.hero-stat span{color:#d6e8ee;font-size:12px}
+    section{margin-top:25px;padding:30px;background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(20,43,74,.045)}
+    h2{margin:0 0 13px;color:var(--navy);font-size:25px;letter-spacing:-.02em}h3{margin:25px 0 8px;color:#1c405a;font-size:18px}h4{margin:18px 0 7px;color:#244d66;font-size:15px}
+    p{margin:8px 0}.lead{color:var(--muted);font-size:17px}.small{color:var(--muted);font-size:12px}.kicker{margin:0 0 8px;color:var(--teal);font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.11em}
+    ul,ol{padding-left:22px}li+li{margin-top:5px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .card{padding:17px;border:1px solid var(--line);border-radius:12px;background:#fbfcfe}.card h3,.card h4{margin-top:0}.card p:last-child{margin-bottom:0}
+    .callout{margin:15px 0;padding:15px 17px;border-left:5px solid var(--teal);border-radius:9px;background:var(--teal-soft)}
+    .callout.info{border-left-color:var(--blue);background:var(--blue-soft)}.callout.warn{border-left-color:var(--amber);background:var(--amber-soft)}.callout.block{border-left-color:var(--red);background:var(--red-soft)}.callout.good{border-left-color:var(--green);background:var(--green-soft)}
+    .table-wrap{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:11px}table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f4f7fa;color:#556678;font-size:11px;text-transform:uppercase;letter-spacing:.06em}tr:last-child td{border-bottom:0}td ul{margin:0;padding-left:18px}
+    .pill{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:850;letter-spacing:.04em;white-space:nowrap}.pill.req{background:#e9f3ff;color:#185d9d}.pill.proposed{background:var(--amber-soft);color:#8a5200}.pill.blocked{background:var(--red-soft);color:#963535}.pill.safe{background:var(--green-soft);color:#176b48}.pill.scope{background:#eef0f4;color:#4c5a68}
+    .architecture{display:grid;grid-template-columns:1.1fr auto 1.2fr auto 1.35fr;gap:12px;align-items:stretch;margin-top:18px}.node{padding:17px;border:1px solid var(--line);border-radius:12px;background:#f8fafc}.node.core{border-top:4px solid var(--teal);background:#f4fbfa}.node.boundary{border-top:4px solid var(--blue)}.node.external{border-top:4px solid var(--amber)}.node h3{margin:0 0 5px;font-size:16px}.node p{color:var(--muted);font-size:13px}.arrow{align-self:center;color:var(--teal);font-size:28px;font-weight:900}.subflow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:14px}.subflow div{padding:12px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:12px;text-align:center}.subflow strong{display:block;color:var(--navy)}
+    .sequence{margin-top:14px;border:1px solid var(--line);border-radius:11px;overflow:hidden}.sequence .row{display:grid;grid-template-columns:52px 1fr 1fr 1fr;min-width:750px}.sequence .row>div{padding:9px 11px;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}.sequence .row>div:last-child{border-right:0}.sequence .row:last-child>div{border-bottom:0}.sequence .head>div{background:#f4f7fa;color:#556678;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.sequence .n{color:var(--teal);font-weight:900;text-align:center}.sequence .action{background:#fbfcfe}
+    .state-line{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.state{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#f8fafc;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}.state:after{content:" →";color:var(--teal);margin-left:8px}.state:last-child:after{content:""}
+    .wireframe{display:grid;grid-template-columns:1.5fr .8fr;gap:12px;margin-top:15px}.screen{padding:13px;border:2px solid #b9c6d2;border-radius:14px;background:#f8fafc}.screen-block{margin-top:9px;padding:12px;border:1px dashed #9aabb9;border-radius:8px;background:#fff;color:#486071;font-size:12px}.screen-block.primary{border-style:solid;border-color:#77b8b0;background:#eff9f7;color:#164c49}.screen-actions{display:flex;gap:8px;margin-top:10px}.screen-actions span{padding:7px 10px;border-radius:7px;background:var(--navy);color:#fff;font-size:11px}.screen-actions span+span{background:#eef2f6;color:#334a5e}
+    .footer{margin-top:25px;padding:20px;text-align:center;color:var(--muted);font-size:12px}.page-break{break-before:page}
+    @media(max-width:1080px){.shell{display:block}.side{position:relative;height:auto}.side nav{display:none}.content{padding:22px}.hero-grid,.grid-4{grid-template-columns:1fr 1fr}.architecture{grid-template-columns:1fr}.arrow{justify-self:center;transform:rotate(90deg)}.subflow{grid-template-columns:1fr 1fr}.wireframe{grid-template-columns:1fr}}
+    @media(max-width:700px){.content{padding:12px}.hero,section{padding:21px}.hero-grid,.grid-2,.grid-3,.grid-4,.subflow{grid-template-columns:1fr}.hero-stat strong{font-size:19px}}
+    @media print{body{background:#fff}.shell{display:block}.side{display:none}.content{padding:0}.hero{border-radius:0;box-shadow:none}section{box-shadow:none;break-inside:auto}.table-wrap{overflow:visible}a{color:inherit}.page-break{break-before:page}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="side" aria-label="Document navigation">
+      <div class="brand">ODP Market Steward</div>
+      <div class="sub">Detailed Level Design · OMS-DLD-001</div>
+      <span class="doc-state">DRAFT 0.1 · PROPOSED</span>
+      <nav>
+        <strong>Foundation</strong>
+        <a href="#executive">1. Executive design</a>
+        <a href="#control">2. Document control</a>
+        <a href="#authority">3. Authority model</a>
+        <a href="#architecture">4. Architecture</a>
+        <a href="#deployment">5. Cloud topology</a>
+        <strong>Implementation</strong>
+        <a href="#modules">6. Modules and source tree</a>
+        <a href="#contracts">7. Internal contracts</a>
+        <a href="#session">8. Session and disclosure</a>
+        <a href="#retrieval">9. Retrieval design</a>
+        <a href="#evaluation">10. Deterministic evaluation</a>
+        <a href="#mcp">11. MCP design</a>
+        <a href="#component">12. ChatGPT component</a>
+        <a href="#brief">13. Steward Brief</a>
+        <strong>Assurance</strong>
+        <a href="#security">14. Security and privacy</a>
+        <a href="#observability">15. Observability</a>
+        <a href="#failure">16. Failure handling</a>
+        <a href="#testing">17. Verification design</a>
+        <a href="#delivery">18. Delivery work packages</a>
+        <a href="#traceability">19. Traceability</a>
+        <a href="#decisions">20. Decisions and blockers</a>
+        <a href="#references">21. References</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <header class="hero">
+        <p class="eyebrow">ODP Market Steward — Governed Live Market Data in ChatGPT</p>
+        <h1>Detailed Level Design</h1>
+        <p class="lead">A proposed implementation-planning baseline for the Cloudflare-hosted MCP service and ChatGPT component, derived from the governed ODP Market Steward bundle without moving product, API, rule, monitoring, AI, or presentation responsibilities into the wrong artifact. Coding readiness begins only after the Definition of Ready and WP00 contract decisions pass.</p>
+        <div class="badges">
+          <span class="badge">Document OMS-DLD-001</span>
+          <span class="badge">Draft 0.1</span>
+          <span class="badge">Status: Proposed</span>
+          <span class="badge">Baseline: Bundle 1.1.0</span>
+          <span class="badge">UTC only</span>
+        </div>
+        <div class="hero-grid">
+          <div class="hero-stat"><strong>6</strong><span>MCP tools: five domain tools and one component-only acknowledgement</span></div>
+          <div class="hero-stat"><strong>35</strong><span>exact governed FX instruments</span></div>
+          <div class="hero-stat"><strong>8</strong><span>runtime inputs: manifest plus seven responsibility-owning artifacts</span></div>
+          <div class="hero-stat"><strong>0</strong><span>cloud resources or runtime components implemented by this document</span></div>
+        </div>
+      </header>
+
+      <section id="executive">
+        <p class="kicker">1 · Executive design</p>
+        <h2>Implementation outcome</h2>
+        <p class="lead">The design resolves the requirements into one independently deployable Cloudflare service: an edge router exposes <code>/mcp</code> and <code>/healthz</code>, routes a service-issued opaque MCP session to one stateful Agent backed by a Durable Object, and executes a deterministic governed-data pipeline before any optional model explanation.</p>
+        <div class="grid-4">
+          <article class="card"><h3>Input</h3><p>Validated bundle artifacts, a bounded MCP tool request, explicit session acknowledgement for market retrieval, and point-in-time evidence from the fixed public FXLive API.</p></article>
+          <article class="card"><h3>Output</h3><p>Typed market board, instrument, movement, assessment, and product-discovery results with UTC evidence, source mode, quality findings, artifact pointers, limitations, and an optional grounded Steward Brief.</p></article>
+          <article class="card"><h3>Benefit</h3><p>Professional users receive useful market evidence first, then inspect why the result is available, coherent, valid, plausible, and fit—or why it cannot be claimed.</p></article>
+          <article class="card"><h3>Users</h3><p>Analysts, governance teams, and developers using ChatGPT as the conversational surface for the Market Data Demo.</p></article>
+        </div>
+        <div class="callout good"><strong>Primary vertical slice.</strong> The first end-to-end implementation milestone is: connect the developer-mode app, request the market, render the exact disclosure without an upstream call, acknowledge through the component, retrieve a coherent FX-35 completed-minute board, show deterministic quality evidence, and refresh manually without mislabelling the same bar as new.</div>
+        <h3>Non-goals for release 1</h3>
+        <ul>
+          <li>No trading advice, forecasting, opportunity ranking, order creation, execution, portfolio analysis, or user-specific entitlement.</li>
+          <li>No background polling, streaming ticks, hidden automatic refresh, persistent market-response cache, or <code>LAST_AVAILABLE</code> mode.</li>
+          <li>No direct component call to FXLive or OpenAI; no source KV binding; no D1, Queues, Vectorize, or Workers AI dependency.</li>
+          <li>No ODPG, ODPC, ODPV, or ODPR implementation claim. ODPS 4.1 remains the only claimed ODP-family artifact.</li>
+        </ul>
+        <div class="callout warn"><strong>Evidence boundary.</strong> This document is a proposed implementation design. It does not prove that a Worker, Durable Object, MCP endpoint, component, OpenAI call, calendar adapter, recorded-evidence store, or production deployment exists or works.</div>
+      </section>
+
+      <section id="control">
+        <p class="kicker">2 · Document control</p>
+        <h2>Status, scope, and change control</h2>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><th>Document ID</th><td><code>OMS-DLD-001</code></td><th>Version</th><td>Draft 0.1</td></tr>
+              <tr><th>Status</th><td><span class="pill proposed">PROPOSED</span></td><th>Prepared</th><td>2026-07-21 UTC design baseline</td></tr>
+              <tr><th>Product</th><td>FXLive Market Data Demo - Standard FX-35</td><th>Application</th><td>ODP Market Steward</td></tr>
+              <tr><th>Source baseline</th><td>Governed bundle 1.1.0</td><th>Runtime state</th><td><span class="pill blocked">NOT IMPLEMENTED</span></td></tr>
+              <tr><th>Normative effect</th><td colspan="3">Non-normative. Functional Requirements Draft 0.3, Technical Requirements Draft 0.1, the bundle manifest, and responsibility-owning artifacts control acceptance and runtime facts.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Design rules</h3>
+        <ol>
+          <li>If this design conflicts with a responsibility-owning artifact, the artifact wins for that responsibility.</li>
+          <li>If implementation needs a new public field, tool, state, calculation, or disclosure behavior, change the owning contract first and regenerate traceability before writing runtime code.</li>
+          <li>Generated TypeScript types, compiled validators, UI projections, and test fixtures are derived caches; they are never an alternative source of truth.</li>
+          <li>Every implementation pull request must identify affected requirement IDs, artifacts, tests, and release gates.</li>
+          <li>Performance targets, rights, calendar facts, and unresolved numerical presentation rules must not be invented in code.</li>
+        </ol>
+      </section>
+
+      <section id="authority">
+        <p class="kicker">3 · Authority model</p>
+        <h2>One responsibility per controlling artifact</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Artifact</th><th>Controls</th><th>Must not control</th><th>Runtime treatment</th></tr></thead>
+            <tbody>
+              <tr><td><code>product/fxlive.odps.yaml</code></td><td>Product identity, purpose, use cases, lifecycle, product-level SLA and quality declarations, access profile</td><td>Routes, execution, state logic, AI, or UI behavior</td><td>Parsed as ODPS 4.1 and projected into product discovery</td></tr>
+              <tr><td><code>interface/fxlive.openapi.yaml</code></td><td>HTTP routes, parameters, methods, responses, transport headers, errors</td><td>Product value, instrument membership, or verdicts</td><td>Generates adapter-only DTO validators and a fixed operation allowlist</td></tr>
+              <tr><td><code>value-sets/fx35-instrument-set.yaml</code></td><td>Exact 35-member product universe and identifier invariants</td><td>Shared vocabulary or external-standard claims</td><td>Creates the sole <code>InstrumentId</code> allowlist</td></tr>
+              <tr><td><code>rules/ohlc-rules.yaml</code></td><td>Coherence rule, formulas, hard/contextual rules, plausibility method, fitness tables</td><td>Calendar facts, routes, public presentation</td><td>Compiles into deterministic rule and calculation configuration</td></tr>
+              <tr><td><code>operations/monitoring.yaml</code></td><td>UTC, calendar and freshness semantics, availability, service state, evidence modes, cache policy, telemetry allowlist</td><td>Product metadata or formulas</td><td>Configures classifiers, evidence routing, time behavior, and sanitized telemetry</td></tr>
+              <tr><td><code>policies/publication-policy.yaml</code></td><td>Public identities, exact disclaimer, surfaces, acknowledgement requirement, accessibility, safety boundaries</td><td>Session signing implementation or tool schemas</td><td>Feeds the disclosure gate and all public text assertions</td></tr>
+              <tr><td><code>application/mcp-application.yaml</code></td><td>Six tools, public schemas, result envelope, app resource, model/component/server boundaries, acknowledgement protocol</td><td>Cloud resource topology or product facts</td><td>Materializes standalone MCP descriptors and result validators</td></tr>
+              <tr><td><code>requirements/*.html</code></td><td>Functional, non-functional, technical acceptance baseline</td><td>Runtime values or hidden configuration</td><td>Build and release traceability only; not loaded by the Worker</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout info"><strong>Two-phase resolution.</strong> Phase 1 parses every runtime artifact independently with duplicate-key rejection and its controlling structural/schema checks. Phase 2 resolves only bundle-relative paths and JSON Pointers, verifies versions and SHA-256 digests, then enforces cross-artifact invariants. A specialized artifact wins only inside its assigned responsibility.</div>
+        <h3>Immutable runtime registry</h3>
+        <pre aria-label="Contract registry structure">ContractRegistry
+├── manifest                 # artifact IDs, versions, paths, digests, dependencies
+├── productProfile            # ODPS-owned declarations with JSON Pointers
+├── apiOperations             # fixed OpenAPI routes and response validators
+├── instrumentSet             # exact InstrumentId membership
+├── ruleSet                   # formulas, rule IDs, decision tables
+├── monitoringProfile         # UTC, evidence, state, no-store, telemetry policy
+├── publicationPolicy         # exact disclaimer and presentation constraints
+├── mcpApplication            # tool schemas, component and result contracts
+└── validationEvidence        # one result per artifact and validation layer</pre>
+        <p>Every projection retains <code>artifactId</code>, artifact version, bundle-relative path, SHA-256, and a stable JSON Pointer. Contract facts are never copied into environment variables.</p>
+      </section>
+
+      <section id="architecture" class="page-break">
+        <p class="kicker">4 · Runtime architecture</p>
+        <h2>Stateful MCP coordination with deterministic evaluation</h2>
+        <figure>
+          <div class="architecture">
+            <article class="node boundary"><h3>ChatGPT</h3><p>Model selects a narrow tool. The sandboxed component receives tool input/result notifications and calls approved app-visible tools over the MCP Apps bridge.</p></article>
+            <div class="arrow" aria-hidden="true">→</div>
+            <article class="node core"><h3>Edge Worker router</h3><p>Terminates HTTPS, exposes <code>/mcp</code> and <code>/healthz</code>, validates or issues the opaque signed session identifier, and routes to one Agent.</p></article>
+            <div class="arrow" aria-hidden="true">→</div>
+            <article class="node core"><h3>OdpMarketStewardAgent</h3><p>One Agent/Durable Object per session. Owns persistent <code>WorkerTransport</code>, bounded acknowledgement state, tool registration, and request orchestration.</p></article>
+          </div>
+          <div class="subflow" aria-label="Deterministic server pipeline">
+            <div><strong>Contract registry</strong>integrity and responsibility</div>
+            <div><strong>Source adapter</strong>fixed OpenAPI operations</div>
+            <div><strong>Domain core</strong>decimal, UTC, coherence</div>
+            <div><strong>Governance</strong>rules, states, evidence</div>
+            <div><strong>Result assembler</strong>schema-safe MCP envelope</div>
+          </div>
+          <div class="architecture">
+            <article class="node external"><h3>FXLive public API</h3><p>Independent, unchanged source service reached only by allowlisted HTTPS GET operations. No internal data-store binding crosses the boundary.</p></article>
+            <div class="arrow" aria-hidden="true">←</div>
+            <article class="node boundary"><h3>Optional OpenAI path</h3><p>Responses API receives only the bounded deterministic assessment when <code>includeStewardBrief=true</code>. It cannot change facts or verdicts.</p></article>
+            <div class="arrow" aria-hidden="true">→</div>
+            <article class="node boundary"><h3>Versioned app resource</h3><p><code>ui://odp-market-steward/market-board-v1.html</code> renders server-provided structured content with no direct external data call.</p></article>
+          </div>
+          <figcaption class="small">Figure 1. Logical architecture. Arrows show request/data flow, not artifact authority.</figcaption>
+        </figure>
+        <h3>Trust boundaries</h3>
+        <div class="grid-3">
+          <article class="card"><h4>Boundary A — ChatGPT to MCP</h4><p>All model and component input is untrusted. Validate standalone schemas, session headers, protocol version, content type, size, and tool visibility server-side.</p></article>
+          <article class="card"><h4>Boundary B — MCP to source API</h4><p>Only the configured origin, declared GET paths, known query values, bounded redirects, response sizes, and timeouts are allowed.</p></article>
+          <article class="card"><h4>Boundary C — deterministic to model</h4><p>Only minimized assessed facts cross into the optional model path. Output is schema-checked and fact-locked before inclusion.</p></article>
+        </div>
+        <h3>Composition rule</h3>
+        <p>The edge Worker is the only infrastructure composition root. Domain packages do not import Cloudflare, MCP, HTTP, OpenAI, or UI libraries. Tool handlers are thin adapters around application use cases. No <code>McpServer</code> or transport instance is shared globally across client sessions.</p>
+      </section>
+
+      <section id="deployment">
+        <p class="kicker">5 · Cloud topology</p>
+        <h2>Resource and environment design</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Resource</th><th>Proposed name/binding</th><th>Purpose</th><th>Constraint</th></tr></thead>
+            <tbody>
+              <tr><td>Cloudflare Worker</td><td><code>odp-market-steward-{env}</code></td><td>HTTPS router, health/readiness, MCP routing, embedded resource delivery</td><td>Separate project and rollback lifecycle from FXLive</td></tr>
+              <tr><td>SQLite-backed Durable Object Agent</td><td>Class <code>OdpMarketStewardAgent</code><br>binding <code>MCP_SESSION_AGENT</code></td><td>Persistent WorkerTransport plus serialized acknowledgement state</td><td>One object per service-issued session; never one global object</td></tr>
+              <tr><td>Secrets</td><td><code>MCP_SESSION_ID_SIGNING_KEY</code><br><code>ACK_CHALLENGE_SIGNING_KEY</code><br><code>OPENAI_API_KEY</code></td><td>Session authenticity, challenge HMAC, optional Responses API</td><td>Distinct per environment; never in source, result, component, screenshot, or log</td></tr>
+              <tr><td>Text modules / compiled assets</td><td><code>contracts/runtime/*</code><br><code>ui/market-board-v1.html</code></td><td>Exact runtime artifacts and versioned app HTML included with the build</td><td>Build copies exact bytes; runtime recomputes manifest digests</td></tr>
+              <tr><td>Workers Logs and Traces</td><td>environment-specific observability</td><td>Sanitized operational evidence and dependency timings</td><td>Only the monitoring allowlist; sampling and retention configured per environment</td></tr>
+              <tr><td>R2</td><td><code>RECORDED_EVIDENCE</code></td><td>Optional immutable recorded evidence</td><td>Binding absent until written rights and retention controls pass the release gate</td></tr>
+              <tr><td>Not bound</td><td>Source data store, D1, KV, Queues, Vectorize, Workers AI</td><td>None in MVP</td><td>Adding any requires a requirements and threat-model change</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Environment isolation</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Concern</th><th>Local</th><th>Staging</th><th>Production</th></tr></thead>
+            <tbody>
+              <tr><td>MCP endpoint</td><td>Local Worker runtime or secure tunnel</td><td>Stable HTTPS preview/staging URL</td><td>Stable verified HTTPS endpoint</td></tr>
+              <tr><td>Session state</td><td>Local Durable Object storage</td><td>Dedicated namespace</td><td>Dedicated production namespace</td></tr>
+              <tr><td>Secrets</td><td>Local secret injection</td><td>Staging secrets</td><td>Production secrets with rotation record</td></tr>
+              <tr><td>Source adapter</td><td>Fixtures by default; bounded live opt-in</td><td>Fixtures plus bounded live contract smoke</td><td>Fixed public API only</td></tr>
+              <tr><td>Recorded evidence</td><td>Test fixture adapter only</td><td>Absent unless rights-approved test bucket exists</td><td>Absent until full rights gate passes</td></tr>
+              <tr><td>Observability</td><td>Developer console with sanitizer</td><td>Full diagnostic sampling without payloads</td><td>Approved sampling, retention, access, and alerts</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Ingress routes</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Route</th><th>Methods</th><th>Handler</th><th>Response policy</th></tr></thead>
+            <tbody>
+              <tr><td><code>/mcp</code> and SDK-required nested paths</td><td>Methods required by the pinned Streamable HTTP SDK, plus bounded <code>OPTIONS</code></td><td>Session router → Agent → <code>createMcpHandler</code> with persistent <code>WorkerTransport</code></td><td>No HTML error page; stable protocol-safe status and headers</td></tr>
+              <tr><td><code>/healthz</code></td><td><code>GET</code>, <code>HEAD</code></td><td>Local readiness only</td><td><code>200</code> when runtime bundle is ready; <code>503</code> otherwise; never calls FXLive or OpenAI</td></tr>
+              <tr><td>Other routes</td><td>Any</td><td>Reject</td><td><code>404</code>; no route inventory or internal detail</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre aria-label="Health response schema">{
+  "service": "odp-market-steward",
+  "status": "READY | NOT_READY",
+  "buildVersion": "&lt;immutable build id&gt;",
+  "bundleVersion": "1.1.0",
+  "checkedAtUtc": "&lt;RFC3339 UTC Z&gt;"
+}</pre>
+
+        <h3>Cloudflare plan feasibility gate</h3>
+        <div class="callout block"><strong>Paid-plan decision required before the full-board implementation is called feasible.</strong> A first coherent FX-35 pass needs at least 37 external calls: metadata before, 35 bars, and metadata after. One complete rollover reread can take the total beyond 50 external subrequests, while the current Workers Free limit is 50 subrequests per invocation. The runtime also needs more startup/CPU headroom than should be assumed from a free-plan proof of concept. Staging must measure the selected plan and the exact pinned runtime before targets are approved.</div>
+        <p>The fan-out concurrency ceiling is <strong>six</strong>, matching the current simultaneous outgoing-connection limit. A lower configured value is allowed; a higher value is rejected at startup. The full-board rollover strategy is enabled only where the environment subrequest budget can cover its worst case. Otherwise, the request must return <code>INCOHERENT</code> rather than silently omit the required reread.</p>
+      </section>
+
+      <section id="modules" class="page-break">
+        <p class="kicker">6 · Modules and source tree</p>
+        <h2>Ports-and-adapters implementation layout</h2>
+        <p>The implementation repository is established as a TypeScript monorepo with one Worker application, one component application, pure domain packages, generated contracts, and an evidence-led test hierarchy.</p>
+        <pre aria-label="Proposed source tree">odp-market-steward/
+├── contracts/
+│   └── bundle/                         # immutable exact bundle input
+├── apps/
+│   ├── worker/src/
+│   │   ├── edge/                       # router, health, session ID codec
+│   │   ├── transport/                  # Agent, WorkerTransport store, MCP factory
+│   │   ├── mcp/                        # tools, resources, envelopes, safe errors
+│   │   └── operations/                 # deadlines, clock, telemetry, configuration
+│   └── component/src/
+│       ├── bridge/                     # MCP Apps JSON-RPC bridge
+│       ├── state/                      # UI state machine
+│       ├── views/                      # disclosure, board, detail, evidence
+│       └── accessibility/              # focus, labels, reduced motion
+├── packages/
+│   ├── contract-runtime/               # loader, registry, validators, pointers
+│   ├── domain/                         # market, decimal, rules, states, governance
+│   ├── application/                    # ports and use cases
+│   ├── adapter-source-api/             # OpenAPI-confined source client
+│   ├── adapter-calendar/               # unresolved authoritative UTC adapter
+│   ├── adapter-openai/                 # optional Steward Brief
+│   ├── adapter-recorded-evidence/      # rights-gated; disabled in MVP build
+│   ├── mcp-contracts/                  # materialized public schemas and types
+│   └── test-support/                   # clocks, fetchers, fixtures, evidence ledger
+├── generated/
+│   ├── embedded-runtime-bundle.ts
+│   ├── standalone-tool-schemas.ts
+│   ├── contract-validation-report.json
+│   └── market-board-v1.html
+├── tests/
+│   ├── package/ contract/ unit/ adapter/ session/ mcp/ component/ e2e/
+└── scripts/
+    ├── validate-contracts
+    ├── materialize-mcp-schemas
+    ├── build-component-resource
+    ├── generate-evidence-ledger
+    └── public-release-scan</pre>
+
+        <h3>Dependency rules</h3>
+        <ul>
+          <li><code>domain</code> imports no Cloudflare, MCP, network, OpenAI, component, or persistence package.</li>
+          <li><code>application</code> depends on domain types and ports; concrete adapters point inward.</li>
+          <li>OpenAPI-generated DTOs remain inside <code>adapter-source-api</code>. Untrusted DTOs never appear in MCP results.</li>
+          <li>The component imports only generated public result types and bridge helpers. It cannot import server adapters or secrets.</li>
+          <li>The Worker bootstrap is the only place that binds environment configuration, the Durable Object namespace, secrets, and optional R2.</li>
+          <li>Generated files never write back into <code>contracts/bundle</code>; contract changes originate in the bundle and are reviewed first.</li>
+        </ul>
+
+        <h3>Module catalogue</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Module</th><th>Responsibility</th><th>Key dependencies</th></tr></thead>
+            <tbody>
+              <tr><td>M01</td><td><code>EdgeRouter</code></td><td>Exact route and method dispatch; safe 404/405; delegates MCP sessions</td><td>SessionIdCodec, Agent namespace, HealthService</td></tr>
+              <tr><td>M02</td><td><code>SessionIdCodec</code></td><td>Issue and validate opaque integrity-protected session IDs with no business meaning</td><td>Web Crypto, session signing secret, Clock</td></tr>
+              <tr><td>M03</td><td><code>OdpMarketStewardAgent</code></td><td>One session coordination atom; owns MCP server, persistent transport, acknowledgement store</td><td>Agent SDK, Durable Object storage</td></tr>
+              <tr><td>M04</td><td><code>McpServerFactory</code></td><td>Registers server instructions, six tools, one versioned resource, materialized schemas</td><td>ContractRegistry, ToolRegistry, ComponentResource</td></tr>
+              <tr><td>M05</td><td><code>BundleLoader</code></td><td>Parse exact embedded bytes, reject duplicate keys, verify relative paths and digests</td><td>ContractFileProvider, SHA-256, YAML parser</td></tr>
+              <tr><td>M06</td><td><code>ContractRegistry</code></td><td>Expose immutable responsibility-owned projections and validation evidence</td><td>BundleLoader, compiled validators</td></tr>
+              <tr><td>M07</td><td><code>AcknowledgementService</code></td><td>Issue stateless signed challenges and commit one-time component-mediated acknowledgement</td><td>ChallengeCodec, AckStore, PublicationPolicy, Clock</td></tr>
+              <tr><td>M08</td><td><code>MarketSourceClient</code></td><td>Call only fixed OpenAPI operations with deadlines, size/content checks, and lossless parsing</td><td>Fetcher, OpenAPI validators, Deadline</td></tr>
+              <tr><td>M09</td><td><code>SnapshotAssembler</code></td><td>Metadata-before/fan-out/metadata-after coherence and bounded rollover reread</td><td>MarketSourceClient, concurrency limiter</td></tr>
+              <tr><td>M10</td><td><code>BarNormalizer</code></td><td>Convert untrusted lexemes into typed UTC, epoch-string, and arbitrary-precision decimal values</td><td>Lossless JSON, DecimalPort, UtcParser</td></tr>
+              <tr><td>M11</td><td><code>EvaluationEngine</code></td><td>Calculations, hard/contextual rules, quality summary, plausibility, fitness</td><td>RuleSet, DecimalPort, CalendarPort</td></tr>
+              <tr><td>M12</td><td><code>StateClassifier</code></td><td>Total service and availability classification, refresh result, evidence separation</td><td>MonitoringProfile, Clock</td></tr>
+              <tr><td>M13</td><td><code>EvidenceSelector</code></td><td>Choose LIVE, rights-approved RECORDED, or NONE without stale relabelling</td><td>SnapshotAssembler, optional RecordedEvidencePort</td></tr>
+              <tr><td>M14</td><td><code>ProductDiscoveryService</code></td><td>Resolve ODPS and companion declarations with stable artifact pointers</td><td>ContractRegistry</td></tr>
+              <tr><td>M15</td><td><code>StewardBriefService</code></td><td>Bounded post-deterministic model call, structured result check, fact-change rejection</td><td>OpenAI adapter, ContractRegistry</td></tr>
+              <tr><td>M16</td><td><code>ResultEnvelopeBuilder</code></td><td>Validate output, create concise content, complete structuredContent, protected _meta</td><td>Standalone output schemas, Disclaimer</td></tr>
+              <tr><td>M17</td><td><code>TelemetrySanitizer</code></td><td>Construct only allowlisted structured log/trace fields</td><td>MonitoringProfile, CorrelationIdFactory</td></tr>
+              <tr><td>M18</td><td><code>MarketBoardComponent</code></td><td>Bridge-driven disclosure, result rendering, selection, manual refresh, progressive evidence</td><td>MCP Apps bridge only</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="contracts">
+        <p class="kicker">7 · Internal contracts</p>
+        <h2>Typed boundaries and data ownership</h2>
+        <p>Internal contracts use discriminated unions and explicit ports. Public prices and metrics are canonical decimal strings; nanosecond epoch values remain decimal strings. Ordinary JavaScript numbers must never become the authoritative representation of source OHLC or epoch values.</p>
+
+        <h3>Principal service ports</h3>
+        <pre aria-label="Principal TypeScript interfaces">interface ContractRegistry {
+  readiness(operation: OperationKind): Promise&lt;ContractReadiness&gt;;
+  artifact(id: ArtifactId): VerifiedArtifact;
+  resolve(id: ArtifactId, pointer: JsonPointer): unknown;
+  disclaimer(): Disclaimer;
+  governanceContext(consumes: ArtifactId[]): GovernanceContext;
+  toolDescriptor(name: ToolName): MaterializedToolDescriptor;
+}
+
+interface SessionCoordinator {
+  acknowledgement(policy: PolicyIdentity, now: Instant): Promise&lt;AckStatus&gt;;
+  issueChallenge(policy: PolicyIdentity, now: Instant): Promise&lt;Challenge&gt;;
+  acknowledge(input: AcknowledgementInput, now: Instant): Promise&lt;AckResult&gt;;
+  clearExpired(now: Instant): Promise&lt;void&gt;;
+}
+
+interface MarketSourcePort {
+  getHealth(ctx: DependencyContext): Promise&lt;RawHealthDto&gt;;
+  getMetadata(ctx: DependencyContext): Promise&lt;RawMetadataDto&gt;;
+  getLatestBar(instrument: InstrumentId, ctx: DependencyContext): Promise&lt;RawBarDto&gt;;
+}
+
+interface SnapshotAssembler {
+  retrieve(instruments: readonly InstrumentId[], ctx: MarketRequestContext):
+    Promise&lt;SnapshotAttempt&gt;;
+}
+
+interface EvaluationEngine {
+  evaluate(evidence: EvidenceContext, purpose: Purpose, now: Instant):
+    Promise&lt;DeterministicAssessment&gt;;
+}
+
+interface StewardBriefPort {
+  generate(input: BoundedStewardBriefInput, ctx: DependencyContext):
+    Promise&lt;StewardBriefResult&gt;;
+}
+
+type ContractReadiness =
+  | {state: "READY"; snapshot: ContractSnapshot; validation: GovernanceValidation}
+  | {state: "DEGRADED"; snapshot: ContractSnapshot; validation: GovernanceValidation;
+      disabledCapabilities: Capability[]}
+  | {state: "BLOCKED"; validation: GovernanceValidation; reasons: ContractFailure[]};</pre>
+
+        <h3>Layered data model</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Layer</th><th>Representative types</th><th>Invariant</th></tr></thead>
+            <tbody>
+              <tr><td>Untrusted source DTO</td><td><code>RawHealthDto</code>, <code>RawMetadataDto</code>, <code>RawBarDto</code>, <code>RawErrorDto</code></td><td>Generated/validated from OpenAPI; confined to source adapter; preserves numeric lexemes</td></tr>
+              <tr><td>Normalized market</td><td><code>InstrumentId</code>, <code>UtcTimestamp</code>, <code>EpochLexeme</code>, <code>DecimalValue</code>, <code>CompletedBar</code></td><td>Exact FX-35 membership, UTC-Z timestamps, lossless decimal and epoch representation</td></tr>
+              <tr><td>Snapshot</td><td><code>SnapshotEvidence</code>, <code>CoherentSnapshot</code>, <code>SnapshotAttempt</code></td><td>No coherent snapshot exists until metadata and accepted bars share one completed <code>BarEnd</code></td></tr>
+              <tr><td>Evaluation</td><td><code>RuleResult</code>, <code>QualitySummary</code>, <code>PlausibilityResult</code>, <code>FitnessAssessment</code>, <code>RefreshResult</code></td><td>Every result carries rule/artifact pointers; plausibility never changes hard validity</td></tr>
+              <tr><td>Evidence</td><td><code>LiveEvidenceContext | RecordedEvidenceContext | NoEvidenceContext</code></td><td>Request mode and returned mode are separate; NONE contains no market values</td></tr>
+              <tr><td>Governance</td><td><code>ArtifactPointer</code>, <code>ValidationLayerResult</code>, <code>GovernanceContext</code></td><td>One explicit result per artifact and validation layer; <code>NOT_TESTED</code> remains visible</td></tr>
+              <tr><td>MCP public</td><td><code>DisclosureRequiredOutput | ToolSpecificSuccessOutput</code></td><td>Matches standalone output schema; model-relevant facts never hide in <code>_meta</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Injected test seams</h3>
+        <p>The composition root supplies <code>Clock</code>, <code>RandomSource</code>, <code>Fetcher</code>, <code>CalendarPort</code>, <code>RecordedEvidencePort</code>, <code>StewardBriefPort</code>, <code>TelemetrySink</code>, and <code>ContractFileProvider</code>. Deterministic tests never use wall-clock time, the public network, live secrets, or mutable global state.</p>
+
+        <h3>Runtime bundle compilation</h3>
+        <ol>
+          <li>The build validates all package files and materializes all 12 standalone MCP input/output schemas.</li>
+          <li>Only <code>bundle.yaml</code> and the seven <code>requiredAtRuntime=true</code> responsibility-owning artifacts are copied byte-for-byte into the Worker build.</li>
+          <li>Wrangler text modules or an equivalent generated read-only byte map expose those exact bytes; the Worker does not assume a runtime filesystem.</li>
+          <li>At Worker activation, <code>BundleLoader</code> recomputes SHA-256, parses with duplicate-key rejection, resolves paths and pointers, and builds an immutable registry promise scoped to that isolate.</li>
+          <li>A build-time validation report supplies controlling-schema and SDK evidence that cannot be cheaply regenerated on every request; runtime integrity results are merged without converting an unexecuted layer into PASS.</li>
+        </ol>
+        <div class="callout warn"><strong>Startup budget.</strong> Expensive schema generation belongs at build time. Runtime performs exact-byte integrity, parse, link, and invariant checks once per isolate, then reuses the immutable promise. Readiness is operation-specific and never reduced to one boolean.</div>
+
+        <h3>Contract criticality and degraded operation</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Contract condition</th><th>Readiness</th><th>Permitted behavior</th><th>Prohibited behavior</th></tr></thead>
+            <tbody>
+              <tr><td>Manifest, application contract, or publication policy cannot be verified</td><td><code>BLOCKED</code> for every tool</td><td>After the typed-error contract is versioned, return <code>CONTRACT_UNAVAILABLE</code> with correlation ID</td><td>No market retrieval; no improvised disclaimer or result schema</td></tr>
+              <tr><td>OpenAPI or FX-35 value set cannot be verified</td><td><code>BLOCKED</code> for market tools</td><td>Product discovery may continue only from its separately verified inputs</td><td>No source request, arbitrary route, or unverified instrument</td></tr>
+              <tr><td>ODPS cannot be verified</td><td><code>BLOCKED</code> for product profile and governed market success</td><td>Expose the failing artifact/layer only through the approved typed error</td><td>No product identity, declaration, or fitness claim</td></tr>
+              <tr><td>Rules or monitoring has a failed required integrity/semantic layer</td><td><code>BLOCKED</code> for assessment and calculations; <code>DEGRADED</code> for raw board/instrument only after schema-parity tests prove the path</td><td>Verified raw bars may remain viewable with validation failure, limitations, safe UNKNOWN/INDETERMINATE states, and no derived metric</td><td>No governed fitness, plausibility PASS, freshness PASS, or calculation from the failing artifact</td></tr>
+              <tr><td>Required SDK/build evidence is <code>NOT_TESTED</code> but runtime bytes and mandatory semantic layers pass</td><td><code>DEGRADED</code></td><td>Return the explicit validation status and limitation only in a schema-valid result</td><td>Do not promote SDK compatibility or certification to PASS</td></tr>
+              <tr><td>All operation-required artifacts and layers pass</td><td><code>READY</code></td><td>Execute the requested use case</td><td>No inference beyond the verified contracts</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The manifest permission that market values <em>may</em> remain viewable after an integrity failure is not a mandate to continue. The v1 default is <code>BLOCKED</code>. A <code>DEGRADED</code> raw-value path is enabled only when the advertised output schema can represent every unavailable dimension, the criticality table has a contract test for that exact operation, and no failed artifact controls routing, membership, disclosure, product identity, or serialization. Otherwise the handler returns the future typed contract error and performs no retrieval.</p>
+      </section>
+
+      <section id="session" class="page-break">
+        <p class="kicker">8 · Session and disclosure</p>
+        <h2>Opaque session routing and component-mediated acknowledgement</h2>
+        <h3>Session identifier</h3>
+        <p>The first MCP initialization without a valid <code>mcp-session-id</code> receives a cryptographically random, service-issued identifier. It contains no user, account, instrument, conversation, or business value. The identifier is integrity-protected so an arbitrary client string cannot select an Agent object.</p>
+        <pre aria-label="Session ID logical format">oms1.&lt;base64url random 128+ bits&gt;.&lt;base64url issued-at and expiry&gt;.&lt;base64url HMAC&gt;</pre>
+        <ul>
+          <li>The router validates version, syntax, signature, issued time, expiry, and maximum length before calling <code>getAgentByName</code>.</li>
+          <li>The validated identifier deterministically names one Agent; <code>WorkerTransport.sessionIdGenerator</code> returns that same Agent name.</li>
+          <li>An invalid, expired, missing-on-a-non-initial request, or rotated identifier cannot be mapped to another existing object. The client must reinitialize and acknowledge again.</li>
+          <li>Exact session lifetime and clock-skew allowance require approval before coding; reconnect never extends expiry.</li>
+        </ul>
+
+        <h3>First gated call sequence</h3>
+        <div class="sequence table-wrap" role="table" aria-label="Acknowledgement sequence">
+          <div class="row head" role="row"><div>#</div><div>ChatGPT / component</div><div>Agent / MCP server</div><div>Dependencies / state</div></div>
+          <div class="row" role="row"><div class="n">1</div><div>Calls one of four market tools.</div><div class="action">Validates the standalone input schema and FX-35 values.</div><div>No source or model call.</div></div>
+          <div class="row" role="row"><div class="n">2</div><div>Waits for result.</div><div class="action">Reads current policy acknowledgement state.</div><div>Durable Object state only.</div></div>
+          <div class="row" role="row"><div class="n">3</div><div>Receives disclosure result.</div><div class="action">Inside the session Agent's serialized execution, reads acknowledgement state and creates a stateless signed short-lived challenge plus validated pending request.</div><div>No durable challenge mutation; no source/model call.</div></div>
+          <div class="row" role="row"><div class="n">4</div><div>Component renders the exact disclaimer and explicit control.</div><div class="action">Returns <code>DISCLOSURE_REQUIRED</code>, evidence <code>NONE</code>; challenge and pending request only in protected <code>_meta</code>.</div><div>No market values.</div></div>
+          <div class="row" role="row"><div class="n">5</div><div>User activates “Acknowledge and continue”.</div><div class="action">Receives component-only <code>acknowledge_market_data_demo</code>.</div><div>No source/model call.</div></div>
+          <div class="row" role="row"><div class="n">6</div><div>Waits for commit.</div><div class="action">Verifies HMAC, session digest, policy, disclaimer digest, affirmation, time, nonce, and replay state.</div><div>Transaction serializes concurrent submissions.</div></div>
+          <div class="row" role="row"><div class="n">7</div><div>Receives <code>ACKNOWLEDGED</code>.</div><div class="action">Commits bounded fields, then returns success.</div><div>Exactly one valid concurrent submission succeeds.</div></div>
+          <div class="row" role="row"><div class="n">8</div><div>Reissues the validated pending market request.</div><div class="action">Validates the new call normally and checks committed acknowledgement.</div><div>Pending request is continuity, never authorization.</div></div>
+          <div class="row" role="row"><div class="n">9</div><div>Receives the governed result.</div><div class="action">Only now begins permitted retrieval and evaluation.</div><div>FXLive; optional OpenAI only when requested.</div></div>
+        </div>
+
+        <h3>Challenge claims</h3>
+        <pre aria-label="Challenge payload">{
+  "v": 1,
+  "kid": "&lt;rotation key id&gt;",
+  "sessionDigest": "&lt;sha256 of validated opaque session id&gt;",
+  "policyVersion": "1.1.0",
+  "disclaimerDigest": "&lt;sha256&gt;",
+  "nonce": "&lt;128+ random bits&gt;",
+  "issuedAtUtc": "&lt;RFC3339 UTC Z&gt;",
+  "expiresAtUtc": "&lt;RFC3339 UTC Z; no more than 600 seconds later&gt;"
+}</pre>
+        <p>Use Web Crypto HMAC-SHA-256 verification. The token is opaque application material, not a credential, and contains no secret. Secret rotation may accept a narrowly defined current/previous key set, but a rotated session or changed policy/disclaimer forces acknowledgement again.</p>
+
+        <h3>Three independent lifetimes</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Lifetime</th><th>Starts</th><th>Ends</th><th>Cleanup/validation rule</th></tr></thead>
+            <tbody>
+              <tr><td>Challenge token</td><td>Signed issuance</td><td>No later than 600 seconds after issuance</td><td>Validated only when the acknowledgement call begins. An expired unaccepted challenge is stateless and needs no Durable Object cleanup.</td></tr>
+              <tr><td>Accepted acknowledgement</td><td>Successful serialized commit</td><td>End of the same MCP session, or earlier policy-version/disclaimer-digest invalidation</td><td>The stored <code>expiresAtUtc</code> records the winning challenge expiry; it does not retroactively expire an already committed acknowledgement. Any stricter acknowledgement TTL requires a versioned contract field and DLD-004 approval.</td></tr>
+              <tr><td>MCP session/transport</td><td>Server-issued session initialization</td><td>Signed session-ID expiry, rotation, or explicit protocol termination under the pinned transport contract</td><td>Reconnect before expiry restores protocol and acknowledgement state. Session expiry removes both namespaces and requires initialization plus acknowledgement.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>All challenge issuance runs through the same session Agent and is ordered with acknowledgement transitions, satisfying serialized session coordination without turning a read-only domain tool into a durable mutation. Multiple unexpired stateless challenges may exist; the first valid challenge committed while the session is unacknowledged wins. After that transition, any other challenge is rejected as an already-completed/replay attempt and cannot change the record. If the acknowledgement commit wins before a queued issuance check, the latter observes <code>ACKNOWLEDGED</code> and issues no new challenge.</p>
+
+        <h3>Durable application state</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Field</th><th>Source</th><th>Use</th><th>Retention</th></tr></thead>
+            <tbody>
+              <tr><td><code>policyVersion</code></td><td>Publication policy</td><td>Invalidate acknowledgement on policy change</td><td>Until MCP session cleanup</td></tr>
+              <tr><td><code>disclaimerDigest</code></td><td>Exact policy statement</td><td>Byte-level statement binding</td><td>Until MCP session cleanup</td></tr>
+              <tr><td><code>challengeNonceOrHash</code></td><td>Winning accepted challenge</td><td>Single-use replay evidence</td><td>Hash preferred; until MCP session cleanup</td></tr>
+              <tr><td><code>issuedAtUtc</code>, <code>expiresAtUtc</code></td><td>Winning signed challenge</td><td>Prove that transition input was timely; not the accepted-acknowledgement TTL</td><td>Until MCP session cleanup</td></tr>
+              <tr><td><code>acknowledgedAtUtc</code></td><td>Server clock after commit</td><td>Proof of accepted transition</td><td>Until MCP session cleanup</td></tr>
+              <tr><td><code>replayState</code></td><td>Ack transition</td><td><code>ACKNOWLEDGED</code>, <code>EXPIRED</code>, or rejected replay handling</td><td>Until MCP session cleanup</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Prompts, transcript, user profile, account ID, component selections, pending requests, market responses, and raw challenge tokens are not stored. Challenge issuance is stateless; only the component-only acknowledgement tool commits application state.</p>
+
+        <h3>Reconnect and cleanup</h3>
+        <ol>
+          <li>Same valid session ID routes to the same Agent and restores protocol initialization plus acknowledgement state.</li>
+          <li>An interrupted market tool is retried as a new idempotent call; its result is not persisted for replay.</li>
+          <li>Do not configure a persistent MCP event store in v1 because replay storage could retain live market results contrary to the no-store policy.</li>
+          <li>The Agent alarm targets the approved MCP-session expiry, not the short-lived challenge expiry. At session expiry it marks application state expired, deletes bounded acknowledgement and transport namespaces, and removes the alarm. Alarm delivery is treated as at-least-once and cleanup is idempotent.</li>
+        </ol>
+        <div class="callout block"><strong>Invariant ACK-0.</strong> Every missing, expired, modified, replayed, fabricated, cross-session, or model-only acknowledgement produces exactly zero FXLive and OpenAI calls for that operation.</div>
+      </section>
+
+      <section id="retrieval">
+        <p class="kicker">9 · Retrieval design</p>
+        <h2>Fixed-origin, lossless, coherent evidence acquisition</h2>
+        <h3>Source request policy</h3>
+        <div class="grid-3">
+          <article class="card"><h4>Allowlist</h4><p>HTTPS origin fixed by configuration and checked against the bundle; GET only; <code>/health</code>, <code>/meta</code>, <code>/latest</code>; only declared selectors; no arbitrary URL or debug mode.</p></article>
+          <article class="card"><h4>Bounds</h4><p>Per-call abort deadline, maximum bytes while streaming, expected JSON content type, redirect rejection, total tool deadline, and at most one transient retry within budget.</p></article>
+          <article class="card"><h4>No-store</h4><p>No Cache API, KV, Durable Object, R2, analytics payload, or cross-call memory cache. Request-scoped reuse and in-flight coalescing only.</p></article>
+        </div>
+        <h3>Health operation semantics</h3>
+        <p><code>getHealth</code> is a bounded diagnostic operation, not part of the normal successful snapshot path and never part of the service's own <code>/healthz</code>. The assessment use case may call it once, after metadata or bar acquisition yields no usable market evidence, to distinguish a parseable reachable source service from an unreachable or unparseable dependency. A health response cannot establish market <code>OPEN</code>, freshness, bar coherence, availability of all instruments, or fitness. The call consumes the same dependency deadline and subrequest budget and its body is validated through <code>RawHealthDto</code>.</p>
+        <h3>Coherent snapshot algorithm</h3>
+        <ol>
+          <li>Read <code>getSnapshotMetadata</code> and validate its response; record target completed <code>BarEnd</code>.</li>
+          <li>Retrieve each requested member through <code>getLatestObservation</code> in stable symbol order with a configurable concurrency of 1–6.</li>
+          <li>Read metadata again after fan-out.</li>
+          <li>Accept a coherent attempt only when metadata-before, metadata-after, and every accepted bar identify the same completed <code>BarEnd</code>.</li>
+          <li>If the completed minute rolled during the request and the environment has enough subrequest budget, perform one complete bounded reread against the new target.</li>
+          <li>If mismatch continues—or a required reread cannot safely run—return availability <code>INCOHERENT</code>. Never merge minutes or call the board complete.</li>
+        </ol>
+        <pre aria-label="Snapshot pseudocode">async function assemble(instruments, ctx) {
+  const before = await source.getMetadata(ctx);
+  const bars = await mapConcurrent(instruments, ctx.concurrencyMax6,
+    instrument =&gt; source.getLatestBar(instrument, ctx));
+  const after = await source.getMetadata(ctx);
+
+  if (sameCompletedBar(before, after, bars)) return coherent(before, bars);
+  if (isRollover(before, after) &amp;&amp; ctx.subrequestBudget.allowsFullRetry())
+    return assembleOnceAgainstTarget(instruments, after.BarEnd, ctx);
+  return incoherentAttempt(before, after, bars);
+}</pre>
+
+        <h3>Per-tool acquisition plan</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tool</th><th>Evidence acquisition</th><th>Special rule</th></tr></thead>
+            <tbody>
+              <tr><td><code>get_fx_market_board</code></td><td>Exact full FX-35 coherent snapshot</td><td>Exactly 35 unique members for AVAILABLE; report missing, duplicate, unexpected, and failed members</td></tr>
+              <tr><td><code>get_fx_instrument</code></td><td>Metadata-before, one bar, metadata-after</td><td>Bar must match the coherent metadata target; instrument from exact enum</td></tr>
+              <tr><td><code>summarize_fx_movements</code></td><td>Coherent selected subset or full FX-35</td><td>Calculate only the declared metric; no opportunity ranking; cross-bar gap remains NOT_EVALUATED without a genuine prior bar</td></tr>
+              <tr><td><code>assess_fx_data_service</code></td><td>Coherent selected subset or full FX-35; one bounded health diagnostic only after no usable market evidence</td><td>Deterministic fitness precedes optional model brief; health never upgrades state, freshness, or fitness</td></tr>
+              <tr><td><code>get_fx_product_profile</code></td><td>No market source call</td><td>Reads only the verified contract registry; no acknowledgement required</td></tr>
+              <tr><td><code>acknowledge_market_data_demo</code></td><td>No market source or model call</td><td>Mutates only bounded session policy state</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Lossless response parsing</h3>
+        <p>Read the response body as bounded UTF-8 text. Do not call ordinary <code>Response.json()</code> for authoritative price or epoch processing, because standard JSON parsing converts number tokens to binary floating point. A pinned lossless JSON parser must preserve each numeric lexical representation, after which the normalizer:</p>
+        <ul>
+          <li>converts OHLC lexemes to an arbitrary-precision decimal type;</li>
+          <li>renders <code>Epoch</code> as a non-negative decimal string without number coercion;</li>
+          <li>parses <code>BarStart</code> and <code>BarEnd</code> only as RFC 3339 UTC values ending in <code>Z</code>;</li>
+          <li>retains the sanitized raw-versus-normalized distinction in test evidence, never in production logs.</li>
+        </ul>
+      </section>
+
+      <section id="evaluation" class="page-break">
+        <p class="kicker">10 · Deterministic evaluation</p>
+        <h2>Calculations, rules, state, and fitness</h2>
+        <h3>Evaluation order</h3>
+        <div class="state-line" aria-label="Evaluation order">
+          <span class="state">Normalize</span><span class="state">Coherence</span><span class="state">Required fields</span><span class="state">OHLC integrity</span><span class="state">Calculations</span><span class="state">Calendar/freshness</span><span class="state">Plausibility</span><span class="state">Fitness</span><span class="state">Output validation</span>
+        </div>
+        <ol>
+          <li>Reject or mark invalid fields before any dependent calculation.</li>
+          <li>Run the coherent-snapshot rule independently from availability; rule <code>FAIL</code> maps to availability <code>INCOHERENT</code>.</li>
+          <li>Use arbitrary-precision decimal arithmetic at working precision 34. Do not round authoritative calculations before the approved presentation boundary.</li>
+          <li>Evaluate calendar and freshness only with their required evidence. Staleness cannot infer market closure.</li>
+          <li>Evaluate statistical plausibility separately. With unconfigured parameters the only valid state is <code>NOT_EVALUATED</code>.</li>
+          <li>Apply the purpose-specific fitness decision table. A model can explain but never alter the result.</li>
+        </ol>
+
+        <h3>Calculation catalogue</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Metric</th><th>Formula</th><th>Special behavior</th></tr></thead>
+            <tbody>
+              <tr><td><code>closeMinusOpen</code></td><td><code>Close - Open</code></td><td>Descriptive signed decimal</td></tr>
+              <tr><td><code>basisPointMovement</code></td><td><code>10000 × (Close - Open) / Open</code></td><td>Suppressed when Open is invalid; valid Open is greater than zero</td></tr>
+              <tr><td><code>absoluteRange</code></td><td><code>High - Low</code></td><td>Requires hard OHLC integrity</td></tr>
+              <tr><td><code>rangeBasisPoints</code></td><td><code>10000 × (High - Low) / Open</code></td><td>Same denominator policy</td></tr>
+              <tr><td><code>upperWick</code></td><td><code>High - max(Open, Close)</code></td><td>Non-negative after valid integrity</td></tr>
+              <tr><td><code>lowerWick</code></td><td><code>min(Open, Close) - Low</code></td><td>Non-negative after valid integrity</td></tr>
+              <tr><td><code>bodyToRangeRatio</code></td><td><code>abs(Close - Open) / (High - Low)</code></td><td>Result 0 when High equals Low</td></tr>
+              <tr><td><code>crossBarGap</code></td><td><code>Current.Open - Previous.Close</code></td><td><code>NOT_EVALUATED</code> unless Previous.BarEnd equals Current.BarStart and provenance is authorized</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout block"><strong>Decimal release blocker.</strong> Rounding mode, display scale, trailing-zero policy, and negative-zero normalization are not approved. The decimal adapter and golden outputs cannot be finalized until OD-008 is resolved. Internal exact decimal strings may be implemented; public formatting cannot be called verified.</div>
+
+        <h3>Orthogonal state vocabularies</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Dimension</th><th>Values</th><th>Owner</th><th>Key invariant</th></tr></thead>
+            <tbody>
+              <tr><td>Request evidence</td><td><code>LIVE_ONLY</code>, <code>ALLOW_RECORDED_FALLBACK</code></td><td>Monitoring/app</td><td>Never reused as returned provenance</td></tr>
+              <tr><td>Returned evidence</td><td><code>LIVE</code>, <code>RECORDED</code>, <code>NONE</code></td><td>Monitoring/app</td><td>LIVE means current-call retrieval only</td></tr>
+              <tr><td>Availability</td><td><code>AVAILABLE</code>, <code>PARTIAL</code>, <code>UNAVAILABLE</code>, <code>INCOHERENT</code></td><td>Monitoring</td><td>Coverage/coherence, not market session</td></tr>
+              <tr><td>Service state</td><td><code>OPEN</code>, <code>MARKET_CLOSED</code>, <code>DEGRADED</code>, <code>UNAVAILABLE</code>, <code>UNKNOWN</code></td><td>Monitoring</td><td>Eight-branch total mapping</td></tr>
+              <tr><td>Rule state</td><td><code>PASS</code>, <code>FAIL</code>, <code>WARNING</code>, <code>NOT_APPLICABLE</code>, <code>UNKNOWN</code>, <code>NOT_EVALUATED</code></td><td>Rules</td><td>Hard/contextual allowed subsets enforced</td></tr>
+              <tr><td>Fitness</td><td><code>FIT</code>, <code>FIT_WITH_CONDITIONS</code>, <code>NOT_FIT</code>, <code>INDETERMINATE</code></td><td>Rules</td><td>Purpose-specific, point in time</td></tr>
+              <tr><td>Plausibility</td><td><code>NORMAL</code>, <code>UNUSUAL</code>, <code>NOT_EVALUATED</code></td><td>Rules</td><td>Never changes hard validity or creates a signal</td></tr>
+              <tr><td>Refresh</td><td><code>INITIAL</code>, <code>SAME_BAR</code>, <code>NEW_BAR</code>, <code>NOT_EVALUATED</code></td><td>Monitoring/app</td><td>Dependency errors are not refresh outcomes</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Total service-state classifier</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Priority</th><th>Condition</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>API unreachable or unparseable</td><td><code>UNAVAILABLE</code></td></tr>
+              <tr><td>2</td><td>Parseable response but no usable market evidence</td><td><code>UNAVAILABLE</code></td></tr>
+              <tr><td>3</td><td>Authoritative calendar unavailable</td><td><code>UNKNOWN</code></td></tr>
+              <tr><td>4</td><td>Authoritative calendar closed</td><td><code>MARKET_CLOSED</code></td></tr>
+              <tr><td>5</td><td>Calendar open and any mandatory rule fails</td><td><code>DEGRADED</code></td></tr>
+              <tr><td>6</td><td>Calendar open and mandatory rule is UNKNOWN or NOT_EVALUATED</td><td><code>UNKNOWN</code></td></tr>
+              <tr><td>7</td><td>Calendar open and all mandatory rules pass</td><td><code>OPEN</code></td></tr>
+              <tr><td>8</td><td>Any other parseable state</td><td><code>UNKNOWN</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A “LIVE” badge is allowed only when returned evidence is <code>LIVE</code>, service state is <code>OPEN</code>, and market-open freshness is <code>PASS</code>. Until an authoritative UTC calendar is configured and <code>CreatedAt</code> semantics are confirmed, the safe output remains <code>UNKNOWN</code> where those facts are required.</p>
+      </section>
+
+      <section id="mcp">
+        <p class="kicker">11 · MCP design</p>
+        <h2>Streamable HTTP server, six tools, one resource</h2>
+        <p>The Agent will own one <code>McpServer</code> and one persistent <code>WorkerTransport</code>. After DLD-002 pins and compatibility-tests the exact packages, the handler shall implement the proposed Cloudflare stateful pattern: <code>Agent</code> + <code>createMcpHandler</code> + a transport storage adapter backed by the same Durable Object. Transport state preserves session ID, protocol negotiation, and initialization across reconnects; it does not persist market results.</p>
+
+        <h3>Tool registry</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tool</th><th>Visibility</th><th>Mutation</th><th>Acknowledgement</th><th>Component</th><th>Use case</th></tr></thead>
+            <tbody>
+              <tr><td><code>get_fx_market_board</code></td><td>model + app</td><td>Read-only, idempotent</td><td>Required before retrieval</td><td>Market board v1</td><td>Full coherent FX-35 view</td></tr>
+              <tr><td><code>get_fx_instrument</code></td><td>model + app</td><td>Read-only, idempotent</td><td>Required before retrieval</td><td>Market board v1</td><td>One completed bar and metrics</td></tr>
+              <tr><td><code>summarize_fx_movements</code></td><td>model + app</td><td>Read-only, idempotent</td><td>Required before retrieval</td><td>Market board v1</td><td>Declared descriptive metric</td></tr>
+              <tr><td><code>assess_fx_data_service</code></td><td>model + app</td><td>Read-only, idempotent</td><td>Required before retrieval</td><td>Market board v1</td><td>Fitness and optional Steward Brief</td></tr>
+              <tr><td><code>get_fx_product_profile</code></td><td>model</td><td>Read-only, idempotent</td><td>Not required</td><td>None</td><td>Governed product discovery</td></tr>
+              <tr><td><code>acknowledge_market_data_demo</code></td><td>app only</td><td>Bounded non-idempotent session mutation</td><td>Performs acknowledgement</td><td>Called by component</td><td>Commit challenge transition</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Descriptor materialization</h3>
+        <ol>
+          <li>Resolve each source <code>inputSchema</code> and <code>outputSchema</code> from the application contract.</li>
+          <li>Collect reachable definitions, reject cycles and missing references, move them under standalone <code>$defs</code>, and rewrite references.</li>
+          <li>Validate each of the 12 generated schemas independently, then generate TypeScript request/result types.</li>
+          <li>Contract-test parity between schema, generated type, handler input, handler output, and published descriptor.</li>
+          <li>Publish <code>securitySchemes: [{"type":"noauth"}]</code> plus the compatibility mirror; use standard <code>_meta.ui.resourceUri</code> and <code>_meta.ui.visibility</code>. Add the ChatGPT output-template alias only if required by the pinned integration and contract-tested.</li>
+        </ol>
+        <p>Keep server instructions concise: scope the service to Market Data Demo retrieval, deterministic quality, descriptive calculations, and governed product discovery; require acknowledgement; prohibit advice and execution; preserve UNKNOWN and INDETERMINATE when evidence is missing.</p>
+
+        <h3>Result channels</h3>
+        <div class="grid-3">
+          <article class="card"><h4><code>structuredContent</code></h4><p>Complete, concise, schema-valid model facts: market values, state dimensions, UTC evidence, rules, artifact pointers, limitations, and disclaimer.</p></article>
+          <article class="card"><h4><code>content</code></h4><p>One short natural-language summary that introduces no fact absent from <code>structuredContent</code>. It remains useful when the component cannot render.</p></article>
+          <article class="card"><h4><code>_meta</code></h4><p>Component-only hydration, signed challenge, and bounded validated pending request. No required model fact, secret, credential, raw payload, or internal identifier.</p></article>
+        </div>
+
+        <h3>Common gated handler</h3>
+        <pre aria-label="Gated tool handler pseudocode">async function runGatedTool(tool, rawInput, session, deps) {
+  const input = tool.inputSchema.parse(rawInput);
+  const ack = await session.acknowledgement(deps.policy.identity, deps.clock.now());
+  if (!ack.valid) return deps.results.disclosureRequired(tool, input, session);
+
+  const readiness = await deps.registry.readiness(tool.operation);
+  if (readiness.state === "BLOCKED")
+    return deps.results.contractUnavailable(readiness); // available after DLD-001
+
+  const deterministic = await tool.useCase(input, readiness.snapshot, deps, {
+    disabledCapabilities: readiness.state === "DEGRADED"
+      ? readiness.disabledCapabilities : []
+  });
+  const result = deps.results.success(deterministic, tool.outputSchema);
+  deps.telemetry.emit(deps.sanitizer.from(result));
+  return result;
+}</pre>
+
+        <h3>Error-contract blocker</h3>
+        <div class="callout block"><strong>Contract revision required before tool coding.</strong> Technical requirement TR-MCP-005 requires stable error codes, safe guidance, and a correlation identifier, but the current six output schemas contain only disclosure and success branches. Dependency, bundle, and internal failures therefore have no canonical schema-valid typed error representation. Before implementation, the application contract must either add a common <code>ToolErrorOutput</code> branch to the affected outputs or define an equally testable MCP protocol-error contract. Implementation must not invent an unadvertised error envelope.</div>
+        <p>The revision should distinguish at least <code>INVALID_INPUT</code>, <code>INVALID_SESSION</code>, <code>CONTRACT_UNAVAILABLE</code>, <code>SOURCE_UNAVAILABLE</code>, <code>SOURCE_INVALID</code>, <code>OUTPUT_INVALID</code>, <code>MODEL_UNAVAILABLE</code>, and <code>INTERNAL_ERROR</code>. The final vocabulary and HTTP/MCP mapping remain an application-contract decision.</p>
+
+        <h3>Deliberate component coupling</h3>
+        <p>Current OpenAI guidance supports separating data tools from render tools for some apps. This design does <strong>not</strong> add a seventh render tool: the accepted baseline explicitly associates one coherent market component with each gated market-data intent. Adding a render tool would change the six-tool contract, evaluation surface, and traceability. Reconsider only through a versioned requirements and application-contract change.</p>
+      </section>
+
+      <section id="component" class="page-break">
+        <p class="kicker">12 · ChatGPT component</p>
+        <h2>Values first, governance on demand</h2>
+        <p>The component is one compiled, versioned <code>text/html;profile=mcp-app</code> resource at <code>ui://odp-market-steward/market-board-v1.html</code>. It uses the standard MCP Apps JSON-RPC bridge for tool input, tool result, and <code>tools/call</code>. ChatGPT-specific <code>window.openai</code> features are optional and feature-detected; none is required for the baseline.</p>
+
+        <h3>Information architecture</h3>
+        <div class="wireframe" aria-label="Market component wireframe">
+          <div class="screen">
+            <div class="screen-block primary"><strong>Header</strong><br>ODP Market Steward · MARKET DATA DEMO · evidence / service / availability / freshness / fitness labels · retrieval or attempt time · completed UTC interval</div>
+            <div class="screen-block"><strong>Market values</strong><br>Responsive 35-row board or selected subset · instrument · O/H/L/C · selected descriptive metric · text-labelled quality state</div>
+            <div class="screen-block"><strong>Selection detail</strong><br>One completed bar · calculated observations · explicit UTC timestamps · limitations</div>
+            <div class="screen-block"><strong>Progressive evidence</strong><br>Quality rules · plausibility · validation layers · artifact and JSON Pointer references</div>
+            <div class="screen-actions"><span>Refresh evidence</span><span>Explain selected result</span></div>
+          </div>
+          <div class="screen">
+            <div class="screen-block primary"><strong>Disclosure state</strong><br>Exact full disclaimer, policy version, no market values</div>
+            <div class="screen-block"><strong>Explicit action</strong><br>Acknowledge and continue</div>
+            <div class="screen-block"><strong>Non-color state</strong><br>Text + icon + accessible name</div>
+            <div class="screen-block"><strong>Mobile behavior</strong><br>Stacked cards, preserved values-first order, keyboard focus</div>
+          </div>
+        </div>
+
+        <h3>Result branch to visible-field projection</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Result branch</th><th>Always visible</th><th>Progressive detail</th><th>Forbidden presentation</th></tr></thead>
+            <tbody>
+              <tr><td><code>DISCLOSURE_REQUIRED</code></td><td>MARKET DATA DEMO, exact full disclaimer, policy version, explicit acknowledgement control, evidence NONE</td><td>Safe reason and next action</td><td>Market values, implied retrieval, or locally fabricated acknowledgement</td></tr>
+              <tr><td><code>LIVE</code> success</td><td>LIVE text label, <code>fetchedAtUtc</code>, completed bar interval, availability, service state, freshness rule state, fitness dimension, market values when present, quality summary, disclaimer</td><td>Calendar evaluation time, cache age, live-badge permission, plausibility, rule and governance evidence, limitations</td><td>LIVE badge unless the contract condition passes; health-as-open; collapsed trust score</td></tr>
+              <tr><td><code>RECORDED</code> success</td><td>Exact recorded-snapshot banner, <code>fetchedAtUtc</code>, <code>manifest.capturedAtUtc</code>, original interval, availability, service state, freshness not current, fitness dimension, values, quality, disclaimer</td><td>Immutable manifest/digests, calendar evaluation, cache age, provenance, rules, limitations</td><td>LIVE badge, “current” wording, or mixing with live evidence</td></tr>
+              <tr><td><code>NONE</code> success</td><td>No-evidence label, <code>attemptedAtUtc</code>, reason, availability, service state, freshness UNKNOWN/NOT_APPLICABLE as returned, fitness dimension, no values, disclaimer</td><td>Calendar evaluation, failed dependency category, governance results, limitations</td><td>Blank stale values, cached fallback, or implied successful retrieval</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The freshness view is a direct projection of the returned <code>market-open-freshness</code> rule result; it is not recomputed in the component. For <code>assess_fx_data_service</code>, fitness is the returned governed fitness. The current board, instrument, and movement output schemas contain no fitness field even though FR-UI-001 requires the component to present the fitness dimension. Until DLD-019 is resolved in the owning requirements/application contract, those views must say “Fitness not assessed by this result” as a non-governed availability statement and must not invent a fitness enum value.</p>
+
+        <h3>Component state machine</h3>
+        <div class="state-line">
+          <span class="state">MOUNTING</span><span class="state">DISCLOSURE_REQUIRED</span><span class="state">ACKNOWLEDGING</span><span class="state">RETRYING_PENDING</span><span class="state">LOADING</span><span class="state">RESULT</span>
+        </div>
+        <p>From <code>RESULT</code>, an explicit action may enter <code>REFRESHING</code> or <code>EXPLAINING</code>, then return to <code>RESULT</code>. A typed failure enters <code>ERROR</code> with a safe retry or “continue in chat” action. Missing initial input is a normal host lifecycle state, not an error.</p>
+
+        <h3>Bridge responsibilities</h3>
+        <pre aria-label="Component bridge contract">interface HostBridge {
+  initialize(): Promise&lt;UiInitialization&gt;;
+  onToolInput(handler: (input: unknown) =&gt; void): Unsubscribe;
+  onToolResult(handler: (result: McpToolResult) =&gt; void): Unsubscribe;
+  callTool&lt;I, O&gt;(name: AppVisibleTool, args: I): Promise&lt;O&gt;;
+}
+
+interface ComponentState {
+  phase: UiPhase;
+  latestResult?: StructuredResult;
+  pendingRequest?: PendingRequest;       // memory only, never authorization
+  previousBarEndUtc?: UtcTimestamp;
+  selectedInstrument?: InstrumentId;
+}</pre>
+        <ul>
+          <li>Render all untrusted result strings using safe text nodes; never inject result data through <code>innerHTML</code>.</li>
+          <li>Sorting, filtering the already-returned rows, row expansion, and selected-instrument state remain local and make no external call.</li>
+          <li>Post-acknowledgement retry reissues the exact schema-valid normalized original input held in component memory; the server validates it again.</li>
+          <li>Refresh and Explain use the exact per-action argument projections below. Required fields are never dropped, and unsupported fields are never added.</li>
+          <li>No timer, hidden polling, duplicate chat composer, nested iframe, clipboard dependency, trading-terminal theme, or direct network fetch.</li>
+        </ul>
+
+        <h3>Component action argument projections</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Current result</th><th>Refresh evidence call</th><th>Explain selected result call</th></tr></thead>
+            <tbody>
+              <tr><td>Market board</td><td><code>get_fx_market_board({evidenceMode: original.evidenceMode, previousBarEndUtc: latest.snapshot?.barEndUtc ?? null})</code></td><td rowspan="4"><code>assess_fx_data_service({purpose: explicitChoice, instruments: selectedOrOriginal, evidenceMode: original.evidenceMode, audience: explicitChoice, includeStewardBrief: true})</code>. The component asks for bounded purpose and audience choices; it does not infer them from transcript text.</td></tr>
+              <tr><td>Instrument</td><td><code>get_fx_instrument({instrument: original.instrument, evidenceMode: original.evidenceMode})</code>; no unsupported <code>previousBarEndUtc</code></td></tr>
+              <tr><td>Movement summary</td><td><code>summarize_fx_movements({instruments: original.instruments, metric: original.metric, evidenceMode: original.evidenceMode})</code></td></tr>
+              <tr><td>Assessment</td><td><code>assess_fx_data_service({purpose: original.purpose, instruments: original.instruments, evidenceMode: original.evidenceMode, audience: original.audience, includeStewardBrief: original.includeStewardBrief ?? true})</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Only market-board refresh has a contract-defined <code>previousBarEndUtc</code> and canonical <code>INITIAL | SAME_BAR | NEW_BAR | NOT_EVALUATED</code> result. Other refreshes are new idempotent calls and must not display a fabricated same/new-bar classification. The component retains only these bounded normalized inputs for its mounted lifetime and never persists them as acknowledgement or authorization state.</p>
+
+        <h3>Accessibility acceptance</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Concern</th><th>Implementation rule</th><th>Evidence</th></tr></thead>
+            <tbody>
+              <tr><td>State meaning</td><td>Text and/or icon in addition to color; visible legend for evidence, service, availability, rule, and fitness states</td><td>Automated semantics plus non-color screenshot review</td></tr>
+              <tr><td>Keyboard</td><td>Logical tab order, keyboard row/detail selection, no trap, visible focus, focus restored after refresh</td><td>Keyboard-only walkthrough</td></tr>
+              <tr><td>Screen reader</td><td>Landmarks, headings, table/card semantics, descriptive control names, live region only for bounded status changes</td><td>Accessibility tree and manual screen-reader smoke</td></tr>
+              <tr><td>Motion</td><td>Respect <code>prefers-reduced-motion</code>; no required animation</td><td>Reduced-motion render test</td></tr>
+              <tr><td>Contrast</td><td>WCAG AA target; status not encoded by color alone</td><td>Automated contrast scan and visual inspection</td></tr>
+              <tr><td>Responsive</td><td>ChatGPT desktop and narrow mobile; values remain before evidence</td><td>Desktop/mobile screenshots and interaction tests</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Resource metadata and CSP</h3>
+        <ul>
+          <li>Use <code>_meta.ui.prefersBorder=true</code>, the current human-readable widget description, and a unique <code>_meta.ui.domain</code> approved before plugin submission.</li>
+          <li>Bundle HTML, CSS, and JavaScript into the resource. If the final component is self-contained, keep <code>connectDomains</code> and <code>resourceDomains</code> empty.</li>
+          <li>Omit <code>frameDomains</code>. Do not add external scripts, fonts, images, analytics, or redirects without a threat-model and publication-policy change.</li>
+          <li>Every breaking component change receives a new <code>ui://</code> URI; never replace v1 bytes under the same cache key.</li>
+        </ul>
+      </section>
+
+      <section id="brief">
+        <p class="kicker">13 · Steward Brief</p>
+        <h2>Optional model explanation after deterministic assessment</h2>
+        <p>Only <code>assess_fx_data_service</code> may invoke the server-side model path, and only when <code>includeStewardBrief=true</code>. The requested API model is the configured <code>gpt-5.6</code> alias; the result records the actual model identifier returned by the API instead of assuming it.</p>
+
+        <h3>Bounded input</h3>
+        <div class="grid-2">
+          <article class="card"><h4>Allowed</h4><ul><li>Approved purpose and audience</li><li>Deterministic fitness and service/evidence states</li><li>Decisive rule results and artifact pointers</li><li>Calculated metrics required for the answer</li><li>UTC evidence times, declared limitations, and safe next steps</li></ul></article>
+          <article class="card"><h4>Prohibited</h4><ul><li>Full conversation transcript</li><li>Credentials, challenge or session values</li><li>Raw unrestricted source payload</li><li>Facts absent from deterministic evidence</li><li>Any instruction to forecast, recommend, rank, order, or execute</li></ul></article>
+        </div>
+
+        <h3>Generation and verification pipeline</h3>
+        <ol>
+          <li><code>StewardBriefInputBuilder</code> emits a small immutable JSON object with stable evidence IDs.</li>
+          <li>A versioned lean prompt defines the role, fact boundary, prohibited behavior, required uncertainty, audience, and exact structured response.</li>
+          <li>The Responses API call uses a server-side key, independent timeout, explicit model alias, bounded output size, and a measured attempt budget. No fallback model is silently selected.</li>
+          <li>The response is schema-validated as <code>StewardBriefResult</code>.</li>
+          <li><code>BriefFactValidator</code> verifies every decisive pointer exists, every enumerated state matches deterministic evidence, and every number/date in the narrative belongs to an allowlisted fact set. Unknown factual tokens reject the brief.</li>
+          <li>A valid result is <code>GENERATED</code>. Timeout or dependency failure is <code>UNAVAILABLE</code>; schema/fact/policy failure is <code>REJECTED</code>. Deterministic output remains unchanged in both cases.</li>
+        </ol>
+        <div class="callout info"><strong>Evaluation before optimization.</strong> Start with one attempt and a conservative timeout in staging, then measure usefulness, fact consistency, latency, and token cost. Any retry or reasoning-setting change is approved from representative evaluation evidence, not assumed.</div>
+        <h3>Prompt versioning</h3>
+        <p>Record <code>promptContractVersion</code>, requested model alias, actual model identifier, response-schema version, brief status, and evaluation-set version in sanitized evidence. Do not log the prompt, assessment payload, or generated answer. The optional model path can be disabled independently through configuration while all deterministic tools remain available.</p>
+      </section>
+
+      <section id="security" class="page-break">
+        <p class="kicker">14 · Security and privacy</p>
+        <h2>Threat model and least-privilege controls</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Threat</th><th>Control</th><th>Verification</th></tr></thead>
+            <tbody>
+              <tr><td>SSRF / arbitrary egress</td><td>Fixed origin and path enums; GET only; no user URL; redirect error; exact query builder; OpenAI host only inside optional adapter</td><td>Host, scheme, port, path, redirect, and encoded-input tests</td></tr>
+              <tr><td>Session fixation / object selection</td><td>Service-issued signed opaque ID; format, HMAC, time, and length validation before Agent lookup</td><td>Fabricated, mutated, expired, cross-environment IDs</td></tr>
+              <tr><td>Challenge replay / cross-session use</td><td>HMAC session digest, policy and disclaimer binding, nonce hash, expiry, serialized one-time commit</td><td>Replay, concurrent, policy rotation, cross-session tests</td></tr>
+              <tr><td>Cross-client MCP leakage</td><td>One Agent/McpServer/WorkerTransport per validated session; no global shared server or transport instance</td><td>Parallel session isolation tests</td></tr>
+              <tr><td>Contract tampering</td><td>Exact build bytes, manifest digest, path containment, duplicate-key rejection, compiled-schema provenance</td><td>Mutation, path traversal, stale digest, missing pointer tests</td></tr>
+              <tr><td>Numeric corruption</td><td>Bounded response text, lossless parser, decimal type, epoch string, output schema validation</td><td>Unsafe integer, exponent, long decimal, malformed token fixtures</td></tr>
+              <tr><td>Prompt injection / source strings</td><td>Model receives typed deterministic fields only; no raw payload or source text; fixed system contract; fact validator</td><td>Adversarial strings and fact-change attempts</td></tr>
+              <tr><td>Component XSS</td><td>Compiled trusted HTML, safe text nodes, strict CSP, no direct fetch, no untrusted HTML</td><td>DOM injection suite and CSP scan</td></tr>
+              <tr><td>Resource exhaustion</td><td>MCP/body size limit, bounded arrays, max 35 members, concurrency ≤6, dependency and total deadlines, rate/abuse controls after measurement</td><td>Oversize, slow body, fan-out, repeated invalid-call tests</td></tr>
+              <tr><td>Secret or identity leakage</td><td>Environment secrets, sanitized exceptions, public scan, no raw headers, payloads, tokens, source implementation identifiers</td><td>Secret/public-identity scan of source, build, logs, screenshots, video</td></tr>
+              <tr><td>Supply-chain compromise</td><td>Exact dependency pins and lockfile, integrity/provenance review, minimal dependencies, automated advisory scan</td><td>Reproducible build and dependency report</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Data handling and retention</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Processed where</th><th>Persistent?</th><th>Rule</th></tr></thead>
+            <tbody>
+              <tr><td>MCP input</td><td>Agent request scope</td><td>No</td><td>Validate, use, discard; no prompt/transcript capture</td></tr>
+              <tr><td>Live source response</td><td>Agent local variables</td><td>No</td><td>No class field, cache, storage, telemetry, or event-store replay</td></tr>
+              <tr><td>Acknowledgement fields</td><td>Session Durable Object</td><td>Yes, bounded</td><td>Only seven contract fields; delete at expiry</td></tr>
+              <tr><td>Transport state</td><td>Session Durable Object</td><td>Yes, bounded</td><td>Protocol state only; no tool result events</td></tr>
+              <tr><td>Steward Brief input/output</td><td>Request scope and OpenAI API</td><td>Not by this application</td><td>Minimized; application logs neither payload nor answer; API retention terms reviewed before release</td></tr>
+              <tr><td>Operational event</td><td>Workers observability</td><td>Environment retention</td><td>Exact allowlist only after sanitizer and platform metadata review</td></tr>
+              <tr><td>Recorded evidence</td><td>Optional private R2</td><td>Only after rights gate</td><td>Create-only, immutable manifest, approved retention and deletion policy</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Secret lifecycle</h3>
+        <ul>
+          <li>Different values per local, staging, and production; minimum required access; no environment inherits production secrets.</li>
+          <li>Session-ID signing and acknowledgement signing use separate keys and rotation IDs. Rotation is rehearsed without source changes.</li>
+          <li>OpenAI credential is available only to the server-side brief adapter and only when the feature is enabled.</li>
+          <li>A compromised signing key triggers revocation, session invalidation, acknowledgement reset, incident evidence, and redeployment.</li>
+        </ul>
+      </section>
+
+      <section id="observability">
+        <p class="kicker">15 · Observability</p>
+        <h2>Sanitized operational evidence</h2>
+        <p>Every invocation creates one random non-reversible <code>correlationId</code>. A market request may create a random opaque <code>snapshotId</code>; it is never derived from instrument, price, bar time, source ID, or payload. Application logging uses one structured event after sanitization.</p>
+        <pre aria-label="Sanitized operational event">{
+  "correlationId": "&lt;random request id&gt;",
+  "toolName": "get_fx_market_board",
+  "resultCode": "&lt;approved typed code&gt;",
+  "evaluatedAtUtc": "&lt;UTC Z&gt;",
+  "calendarEvaluatedAtUtc": null,
+  "evidenceMode": "LIVE | RECORDED | NONE",
+  "cacheAgeSeconds": null,
+  "snapshotId": "&lt;random opaque id or null&gt;",
+  "serviceState": "UNKNOWN",
+  "availabilityState": "AVAILABLE",
+  "statusCounts": {"passed": 0, "failed": 0, "unknown": 0},
+  "dependencyDurationsMilliseconds": {"sourceApi": 0, "stewardBrief": 0},
+  "durationMilliseconds": 0,
+  "modelBriefState": "NOT_REQUESTED",
+  "buildVersion": "&lt;immutable id&gt;"
+}</pre>
+        <p>Do not add instrument symbols, prices, bars, raw source timestamps, session IDs, challenge values, prompts, model text, user agent, location, account data, or source response bodies.</p>
+
+        <h3>Tracing privacy blocker</h3>
+        <div class="callout block"><strong>Platform metadata must be resolved before production traces are enabled.</strong> Current Cloudflare automatic fetch tracing includes <code>url.full</code> and <code>url.query</code>. FXLive selects an instrument in the query string, while the monitoring contract explicitly forbids instrument identifiers in telemetry. The implementation must not enable a configuration that stores those attributes. Before coding the production observability path, choose and approve one solution: a platform-supported attribute-redaction configuration proven on the exact plan/runtime; a separately designed sanitized egress boundary with automatic source-fetch tracing disabled; or a requirements change that explicitly permits the identifiers. Custom application logs alone do not prove that automatic platform spans are safe.</div>
+
+        <h3>Metrics and alerts</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Signal</th><th>Aggregation</th><th>Alert class</th><th>No public claim until</th></tr></thead>
+            <tbody>
+              <tr><td>MCP request count, result codes, protocol failures</td><td>By environment/build/tool; no user dimension</td><td>MCP service failure</td><td>Staging baseline and false-positive review</td></tr>
+              <tr><td>Source dependency duration and outcome</td><td>Aggregate duration/status; no query or payload</td><td>FXLive dependency failure</td><td>Sanitized trace design passes</td></tr>
+              <tr><td>Contract readiness and drift</td><td>Artifact/layer status only</td><td>Contract drift</td><td>Build/runtime parity test passes</td></tr>
+              <tr><td>Agent/DO errors, ack rejection categories</td><td>Counts; never session/challenge values</td><td>Session coordination failure</td><td>Expected invalid-traffic baseline exists</td></tr>
+              <tr><td>Steward Brief duration/status</td><td>Status and latency; no prompt/output</td><td>Optional model dependency failure</td><td>Model evaluation baseline exists</td></tr>
+              <tr><td>CPU, wall time, subrequests, response size</td><td>Platform/app aggregate</td><td>Capacity/cost</td><td>Representative board and assessment load tests</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Sampling, retention, access roles, deletion, and alert thresholds are explicit per environment. SLOs and performance targets remain unset until the staging vertical slice supplies representative cold, warm, source, Durable Object, component, model, and end-to-end measurements.</p>
+      </section>
+
+      <section id="failure" class="page-break">
+        <p class="kicker">16 · Failure handling</p>
+        <h2>Typed degradation without fabricated evidence</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Failure</th><th>Dependency called?</th><th>Public behavior</th><th>Operational behavior</th></tr></thead>
+            <tbody>
+              <tr><td>Invalid MCP or tool input</td><td>No</td><td>Approved typed validation error and correlation ID</td><td>Count only; no rejected body</td></tr>
+              <tr><td>Missing/invalid acknowledgement</td><td>No source/model</td><td><code>DISCLOSURE_REQUIRED</code>, evidence NONE, exact disclaimer</td><td>Safe rejection category</td></tr>
+              <tr><td>Durable Object unavailable</td><td>No source/model</td><td>Fail closed with typed session-service error</td><td>Agent/DO alert</td></tr>
+              <tr><td>Critical policy, app, API, or instrument contract invalid</td><td>No market retrieval</td><td>Contract unavailable; no governed result</td><td>Artifact/layer alert</td></tr>
+              <tr><td>Operation-required governance layer invalid</td><td>Default: no retrieval; only a separately contract-tested DEGRADED raw-value path may continue</td><td>Typed contract error by default; if an approved degraded path exists, verified raw values plus explicit failure/limitations and no FIT verdict</td><td>Identify artifact/layer without payload data</td></tr>
+              <tr><td>Source timeout, 5xx, content-type, size, or parse failure</td><td>Source attempted</td><td>Evidence NONE, or verified recorded fallback only when requested and enabled</td><td>Dependency status/duration only</td></tr>
+              <tr><td>Missing members</td><td>Source attempted</td><td>PARTIAL with explicit counts and missing identifiers in result, not logs</td><td>Aggregate status counts</td></tr>
+              <tr><td>Mixed completed minutes</td><td>Source attempted</td><td>INCOHERENT; no complete-board claim</td><td>Coherence failure count</td></tr>
+              <tr><td>Calendar unavailable</td><td>Calendar attempted/config absent</td><td>Service state and freshness UNKNOWN</td><td>Calendar adapter state</td></tr>
+              <tr><td>Model timeout/rate limit/outage</td><td>Model attempted</td><td>Deterministic result + brief UNAVAILABLE</td><td>Model status/duration</td></tr>
+              <tr><td>Model schema or fact violation</td><td>Model attempted</td><td>Deterministic result + brief REJECTED</td><td>Rejection category, no text</td></tr>
+              <tr><td>Recorded adapter absent/rights blocked</td><td>No R2</td><td>LIVE_ONLY unaffected; fallback resolves to NONE</td><td>Feature-disabled category</td></tr>
+              <tr><td>Output-schema violation</td><td>Already completed</td><td>Suppress malformed payload; safe internal error</td><td>High-severity release alert and correlation ID</td></tr>
+              <tr><td>Component cannot render</td><td>Tool may have completed</td><td>Chat text + structuredContent remain sufficient</td><td>Component console/test evidence, not server payload</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Retry and deadline policy</h3>
+        <ul>
+          <li>All domain GETs are idempotent, but a retry is allowed only for approved transient network/status failures and only inside the total request deadline.</li>
+          <li>Maximum transient source retries is one. Do not retry validation, 4xx, content-type, size, schema, or coherence failures as network failures.</li>
+          <li>The acknowledgement tool is non-idempotent: a repeated accepted challenge is a replay, not a retry success.</li>
+          <li>The model path has an independent attempt budget and cannot extend or cancel the deterministic result.</li>
+          <li>A global circuit breaker is not assumed. The selected v1 breaker mode—disabled, per-isolate advisory, or separately coordinated—must be measured and documented without storing market data or creating a global Durable Object bottleneck.</li>
+        </ul>
+
+        <h3>Criticality rule for bundle failure</h3>
+        <p>Retrieval may continue after a non-critical governance validation failure only when the publication policy, disclaimer digest, MCP application contract, API allowlist, exact instrument set, and output schema remain verified enough to enforce safety. Any uncertainty in those safety-critical controls fails closed before the source call. Other artifact failures may expose values only with an explicit governance-unavailable result and no governed fitness verdict.</p>
+      </section>
+
+      <section id="testing" class="page-break">
+        <p class="kicker">17 · Verification design</p>
+        <h2>Evidence-led tests and release gates</h2>
+        <p>Artifact validation layers and implementation test layers remain separate. Artifact results keep the bundle vocabulary; implementation test records use <code>PASS</code>, <code>FAIL</code>, <code>NOT_TESTED</code>, or <code>NOT_APPLICABLE</code>. A required test layer that is FAIL or NOT_TESTED fails its release gate.</p>
+
+        <h3>Test layers</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Layer</th><th>Scope</th><th>Principal evidence</th></tr></thead>
+            <tbody>
+              <tr><td>T0 — Package integrity</td><td>Files, hashes, duplicate keys, paths, references, versions, responsibilities</td><td>Reproducible bundle verification report</td></tr>
+              <tr><td>T1 — Contract conformance</td><td>ODPS, OpenAPI, project contracts, tool input/output schemas, annotations</td><td>Schema, semantic, generated-type, and handler parity report</td></tr>
+              <tr><td>T2 — Deterministic logic</td><td>Lossless parsing, decimal calculations, OHLC, FX-35, UTC, classifiers, fitness</td><td>Table/property tests with fixed expected canonical strings and branch coverage</td></tr>
+              <tr><td>T3 — Source adapter</td><td>Recorded contract fixtures and bounded point-in-time live sample</td><td>Adapter transcript, shape report, bounded live compatibility evidence</td></tr>
+              <tr><td>T4 — Session and acknowledgement</td><td>Agent/DO state, signatures, expiry, replay, concurrency, reconnect, cleanup</td><td>Zero-dependency-call invariant and serialized transition report</td></tr>
+              <tr><td>T5 — MCP protocol</td><td>Initialize, list, resource, six calls, invalid input, transport, reconnect, safe errors</td><td>MCP Inspector and raw protocol evidence</td></tr>
+              <tr><td>T6 — Component UX</td><td>Rendering, bridge, disclosure, refresh, responsive and accessible behavior</td><td>Automated component tests plus desktop/mobile/keyboard visual evidence</td></tr>
+              <tr><td>T7 — ChatGPT and model</td><td>Discovery, routing, golden prompts, grounded brief, deterministic fallback</td><td>Versioned prompt evaluation and ChatGPT developer-mode transcripts</td></tr>
+              <tr><td>T8 — Operational quality</td><td>Timeouts, load, latency, logs, traces, exceptions, rollback, cost</td><td>Staging performance/failure report and rollback rehearsal</td></tr>
+              <tr><td>T9 — Publication</td><td>Rights, privacy/support, exact disclaimer, UTC, public identity, listing, judge path</td><td>Exact public package, screenshots, video, and release scan report</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>FR-EVAL-001 app-versus-base evaluation protocol</h3>
+        <ol>
+          <li><strong>Freeze the case pack before execution.</strong> Version and hash prompts covering direct, vague/indirect, negative, and edge cases across live data, product discovery, quality evidence, unavailable/closed states, and prohibited financial behavior. Each case records expected facts, acceptable uncertainty, required/forbidden tool behavior, and safety hard failures.</li>
+          <li><strong>Run paired conditions.</strong> Use fresh sessions, the same prompt text, locale, UTC evaluation window, and recorded ChatGPT host/model configuration. Condition A has ODP Market Steward disabled and no equivalent external tool; Condition B has the versioned app enabled. Record actual model identifiers, app build, bundle hash, tool transcript, returned evidence mode, and run IDs. Do not substitute a different prompt after seeing either answer.</li>
+          <li><strong>Score the approved rubric.</strong> Two reviewers independently score factual grounding, current-data access, correct tool routing, structured completeness, state honesty, first-turn usefulness, and policy compliance on the approved ordinal scale. A policy hard failure cannot win regardless of aggregate score.</li>
+          <li><strong>Adjudicate without hiding variance.</strong> Present answer pairs in randomized blinded order where feasible. Reviewers resolve documented disagreements; a third reviewer adjudicates unresolved cases. Preserve both original scores, rationale, tie, failure, and adjudication.</li>
+          <li><strong>Publish the complete comparison.</strong> Report per-case dimension scores, app win/base win/tie, failures, aggregate win rate with denominator, category slices, and limitations. The acceptance threshold, minimum cases per category, reviewer qualifications, scale, tie rule, and permitted rerun rule must be approved under DLD-011 before the first release-scored run.</li>
+        </ol>
+        <div class="callout warn"><strong>Current state.</strong> No threshold, scored case pack, base-control run, adjudication record, or win-rate report exists. FR-EVAL-001 remains <code>NOT_TESTED</code>; T7, G4, and G7 cannot pass on the strength of design prose.</div>
+
+        <h3>Minimum fixture catalogue</h3>
+        <div class="grid-4">
+          <article class="card"><h4>Snapshot</h4><ul><li>Valid full 35</li><li>Valid single bar</li><li>Missing / extra / duplicate</li><li>Mixed minutes</li><li>Minute rollover</li><li>Empty / malformed / oversized</li><li>Timeout / redirect</li><li>Unsafe epoch</li><li>Open / closed / unavailable calendar</li></ul></article>
+          <article class="card"><h4>OHLC</h4><ul><li>All integrity boundaries</li><li>Invalid/non-finite numbers</li><li>Zero/open denominator policy</li><li>Exact decimal lexemes</li><li>Negative-zero candidate</li><li>Genuine/missing prior bar</li><li>Plausibility configured</li><li>Plausibility unconfigured</li></ul></article>
+          <article class="card"><h4>Session</h4><ul><li>Missing / expired challenge</li><li>Fabricated / modified HMAC</li><li>Cross-session use</li><li>Policy rotation</li><li>Concurrent double submit</li><li>Replay</li><li>Reconnect</li><li>Session expiry</li><li>Alarm cleanup</li></ul></article>
+          <article class="card"><h4>Model and UI</h4><ul><li>Model timeout / refusal</li><li>Malformed / fact-changing output</li><li>Direct / vague / negative prompts</li><li>Market closed / unavailable</li><li>Desktop / mobile</li><li>Keyboard / reduced motion</li><li>Component rendering failure</li><li>No direct network call</li></ul></article>
+        </div>
+
+        <h3>Acceptance evidence ledger</h3>
+        <p>Tests write a machine-readable ledger rather than relying on prose. Each record contains:</p>
+        <div class="grid-3">
+          <article class="card"><h4>Traceability</h4><p>Requirement ID and source artifact/version/hash; owning component; interface; test case and layer; related gap and gate.</p></article>
+          <article class="card"><h4>Execution</h4><p>Environment/deployment/build; dependency-lock digest; fixture/preconditions; expected and observed result; status.</p></article>
+          <article class="card"><h4>Evidence</h4><p>Evidence URI/path and SHA-256; UTC evaluation time; runner or human evaluator; approved waiver when policy permits one.</p></article>
+        </div>
+        <div class="callout block"><strong>Current evidence-provenance gap.</strong> The manifest records focused PASS results and timestamps, but it does not yet link immutable reports that identify the validator revision, exact command, source revision, evidence location, and evidence digest. Those entries remain useful package metadata, not sufficient G0 release evidence. DLD-020 requires the implementation evidence pipeline to package and hash each report rather than relying on prose or terminal history.</div>
+
+        <h3>Release gates</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Gate</th><th>Pass condition</th><th>Current design-time state</th></tr></thead>
+            <tbody>
+              <tr><td>G0 — Specification/package</td><td>Exact package, schemas, digests, responsibilities, generated schemas, pinned SDK compatibility</td><td><span class="pill proposed">PARTIAL</span> Static package evidence exists; SDK/pins and new design blockers remain</td></tr>
+              <tr><td>G1 — Rights/governance</td><td>Written display/redistribution/judge rights, attribution, licence/data-holder facts; recording rights separately</td><td><span class="pill blocked">BLOCKED</span></td></tr>
+              <tr><td>G2 — Deterministic correctness</td><td>All T1/T2; exact 35; coherence; decimal policy; UTC; classifier; plausibility default</td><td><span class="pill blocked">NOT IMPLEMENTED</span></td></tr>
+              <tr><td>G3 — Session/security</td><td>All acknowledgement cases; rejected request source-call count zero; egress, secret, and isolation tests</td><td><span class="pill blocked">NOT IMPLEMENTED</span></td></tr>
+              <tr><td>G4 — MCP/component</td><td>Six tools, Inspector, versioned resource, accessibility, golden prompts, grounded brief/fallback</td><td><span class="pill blocked">NOT IMPLEMENTED</span></td></tr>
+              <tr><td>G5 — Operations</td><td>Health, sanitized observability, failure suite, measured plan/latency/cost, rollback, safe exceptions</td><td><span class="pill blocked">NOT IMPLEMENTED</span></td></tr>
+              <tr><td>G6 — Publication</td><td>Every required public surface, exact disclaimer, privacy/support, app domain/CSP, public scans</td><td><span class="pill blocked">BLOCKED</span></td></tr>
+              <tr><td>G7 — Competition submission</td><td>Working freely testable app, current rules, repository/readme, evidence, video, judge walkthrough</td><td><span class="pill blocked">NOT READY</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn"><strong>Claim discipline.</strong> Fixture tests, one bounded live sample, a deployed MCP smoke, ChatGPT rendering, accessibility, load behavior, and public submission readiness are different evidence scopes. A PASS in one never upgrades another automatically.</div>
+      </section>
+
+      <section id="delivery">
+        <p class="kicker">18 · Delivery work packages</p>
+        <h2>Implementation sequence and completion criteria</h2>
+        <p>Work packages are dependency-ordered, not calendar estimates. The implementation repository is a dedicated external development boundary. This document authorizes no cloud creation.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>WP</th><th>Outcome</th><th>Depends on</th><th>Definition of done</th></tr></thead>
+            <tbody>
+              <tr><td>WP00</td><td>Contract and evidence unblock</td><td>Design review</td><td>Typed errors, three lifetimes, challenge concurrency, Cloudflare plan, tracing privacy, degraded criticality, UI fitness projection, exhaustive acceptance-ledger mapping, and durable validation-evidence provenance approved in owning artifacts</td></tr>
+              <tr><td>WP01</td><td>Repository, package pins, build skeleton</td><td>WP00 decisions needed for configuration shape</td><td>Dedicated repository, exact lockfile, dependency/ADR report, reproducible local build, no secrets or nested repositories</td></tr>
+              <tr><td>WP02</td><td>Contract compiler and runtime registry</td><td>WP01</td><td>Eight runtime inputs embedded; digests/paths/pointers verified; 12 schemas materialized; product-profile use case passes T0/T1</td></tr>
+              <tr><td>WP03</td><td>Pure deterministic domain core</td><td>WP02; decimal decision for public formatting</td><td>Lossless parsing, UTC, FX-35, OHLC, formulas, state/fitness tables pass T2; unresolved features return safe states</td></tr>
+              <tr><td>WP04</td><td>Bounded source adapter and snapshot assembler</td><td>WP03; selected plan limits</td><td>OpenAPI-only egress, lossless bodies, concurrency ≤6, coherence/rollover, fixture suite and bounded live T3 sample</td></tr>
+              <tr><td>WP05</td><td>Agent, transport, session and acknowledgement</td><td>WP01, WP02, session decisions</td><td>Persistent WorkerTransport, signed session, stateless challenge, serialized acknowledgement, replay/expiry/reconnect T4</td></tr>
+              <tr><td>WP06</td><td>MCP endpoint and six tools</td><td>WP02–WP05; typed error contract</td><td><code>/mcp</code>, <code>/healthz</code>, descriptors, result schemas, common gate, Inspector T5</td></tr>
+              <tr><td>WP07</td><td>Versioned ChatGPT component</td><td>WP06; domain/CSP and DLD-019 decisions</td><td>Disclosure → acknowledgement → pending retry → result; every result branch maps all FR-UI-001 dimensions; exact action arguments; manual refresh; T6 accessibility and responsive evidence</td></tr>
+              <tr><td>WP08</td><td>Optional Steward Brief and incremental-value evaluation</td><td>WP03, WP06; DLD-011 decision</td><td>Bounded Responses API adapter, schema/fact validator, deterministic fallback, frozen paired base-control case pack, adjudicated per-case report and approved-threshold T7 result</td></tr>
+              <tr><td>WP09</td><td>Staging operations and rollback</td><td>WP06–WP08; observability decision</td><td>Isolated staging, sanitized logs/traces, measured latency/cost, failure injection, alert evidence, rollback T8</td></tr>
+              <tr><td>WP10</td><td>Public release and submission package</td><td>G0–G6</td><td>Rights, privacy/support, domain/CSP, clean judge path, listing, README, current competition rules, video and T9 evidence</td></tr>
+              <tr><td>WP11</td><td>Recorded-evidence extension</td><td>Separate written rights and policy approval</td><td>Private R2, separate capture workflow, create-only integrity, retention/deletion, unmistakable RECORDED results; never on ordinary live path</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Recommended first planning increment</h3>
+        <ol>
+          <li>Review and approve or revise this DLD, especially the typed-error, challenge-concurrency, UI-fitness, tracing-privacy, and durable-evidence blockers.</li>
+          <li>Raise a versioned bundle change for the common typed error result and the agreed session/observability rules.</li>
+          <li>Select exact TypeScript, Cloudflare Agents, MCP, Apps helper, schema, YAML, lossless JSON, decimal, test, and bundler versions.</li>
+          <li>Plan WP02 as the first code deliverable: bundle verification plus <code>get_fx_product_profile</code> is valuable, network-free, and proves the authority model.</li>
+          <li>Plan the acknowledgement vertical slice before any market tool is connected to the public source.</li>
+        </ol>
+
+        <h3>Definition of ready for implementation</h3>
+        <ul>
+          <li>DLD reviewed, unresolved decisions assigned, and contract changes versioned.</li>
+          <li>External implementation path selected; Cloudflare account/environment and plan decision documented.</li>
+          <li>Exact dependency versions, compatibility date, Durable Object class/migration, and build toolchain approved.</li>
+          <li>Test fixtures have lawful provenance and no prohibited public content.</li>
+          <li>Acceptance ledger and initial T0–T4 test IDs exist before corresponding production modules.</li>
+        </ul>
+
+        <h3>Definition of done for every work package</h3>
+        <ul>
+          <li>Code and generated artifacts match the owning contract and contain no unreviewed duplication.</li>
+          <li>All mapped tests pass in the exact target environment; evidence records include hashes and UTC timestamps.</li>
+          <li>No required test is hidden as skipped; limitations and NOT_TESTED scopes remain visible.</li>
+          <li>Public-content and secret scans cover source, built files, logs used as evidence, screenshots, and documentation.</li>
+          <li>Operational and rollback instructions are updated before promotion.</li>
+        </ul>
+      </section>
+
+      <section id="traceability" class="page-break">
+        <p class="kicker">19 · Traceability</p>
+        <h2>Requirements to components, tests, and gates</h2>
+        <p>The baseline contains 49 functional, 12 non-functional, and 47 technical requirements. This matrix groups every implementation area; the machine-readable acceptance ledger should carry individual IDs per test case.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Area</th><th>Requirement coverage</th><th>Primary modules</th><th>Tests</th><th>Gates</th></tr></thead>
+            <tbody>
+              <tr><td>Bundle, architecture and product discovery</td><td><code>FR-ODP-001..004</code>, <code>NFR-META-001</code>, <code>TR-ARCH-001..003</code>, <code>TR-TEST-002</code></td><td>M01, M05, M06, M14, M16</td><td>T0, T1, T5</td><td>G0, G4</td></tr>
+              <tr><td>Live retrieval and coherence</td><td><code>FR-LIVE-001..005</code>, <code>FR-BAR-001</code>, <code>FR-STATE-001..004</code>, <code>TR-DATA-001..005</code>, <code>TR-STATE-001..003</code>, <code>TR-REL-001</code></td><td>M08–M13</td><td>T1–T3, T5, T8</td><td>G2, G4, G5</td></tr>
+              <tr><td>OHLC, calculations and fitness</td><td><code>FR-BAR-002..004</code>, <code>FR-QUAL-001..005</code>, <code>TR-DATA-003</code>, <code>TR-TEST-001/004/007</code></td><td>M10–M12</td><td>T1–T3</td><td>G2</td></tr>
+              <tr><td>UTC, state and evidence</td><td><code>FR-TIME-001</code>, <code>FR-STATE-001..004</code>, <code>FR-EVID-001</code>, <code>TR-ARCH-004</code>, <code>TR-STATE-001..003</code></td><td>M09–M13</td><td>T1–T3, T8</td><td>G2, G5</td></tr>
+              <tr><td>MCP transport and tools</td><td><code>FR-CHAT-001..006</code>, <code>FR-PLUG-001..002</code>, <code>TR-MCP-001..006</code>, <code>TR-TEST-005</code></td><td>M01–M04, M16</td><td>T1, T5, T8</td><td>G4, G5</td></tr>
+              <tr><td>Acknowledgement and session</td><td><code>FR-ACK-001..002</code>, <code>FR-PUB-001..003</code>, <code>TR-ACK-001..003</code>, <code>TR-SEC-003</code>, <code>TR-TEST-003</code></td><td>M02, M03, M07</td><td>T1, T2, T4, T8</td><td>G3</td></tr>
+              <tr><td>Component and accessibility</td><td><code>FR-UI-001..003</code>, <code>NFR-ACC-001</code>, <code>NFR-UX-001</code>, <code>TR-MCP-003..004</code>, <code>TR-SEC-002</code>, <code>TR-TEST-006</code></td><td>M04, M18</td><td>T5–T7</td><td>G4, G6</td></tr>
+              <tr><td>Steward Brief</td><td><code>FR-AI-001..004</code>, <code>FR-EVAL-001</code>, <code>TR-AI-001..003</code>, <code>TR-TEST-006..007</code></td><td>M11, M15, M16</td><td>T2, T7, T8</td><td>G4, G7</td></tr>
+              <tr><td>Security, privacy, publication</td><td><code>FR-PUB-001..003</code>, <code>NFR-SEC-001..002</code>, <code>NFR-PRIV-001</code>, <code>NFR-PUB-001</code>, <code>TR-SEC-001..004</code>, <code>TR-PRIV-001</code>, <code>TR-PUB-001</code>, <code>TR-TEST-008</code></td><td>M01–M18 cross-cutting</td><td>T0, T1, T8, T9</td><td>G1, G3, G6, G7</td></tr>
+              <tr><td>Cloud operations</td><td><code>FR-DEP-001..004</code>, <code>NFR-REL/PERF/DEP/OBS-001</code>, <code>TR-OPS-001..004</code>, <code>TR-OBS-001</code>, <code>TR-PERF/REL/COST-001</code></td><td>M01–M04, M17</td><td>T4, T5, T8, T9</td><td>G5–G7</td></tr>
+              <tr><td>Recorded evidence</td><td><code>FR-STATE-003</code>, <code>FR-DEP-004</code>, <code>TR-R2-001</code>, <code>TR-STATE-002</code>, <code>TR-TEST-007</code></td><td>M13, optional adapter</td><td>T1, T3, T8, T9</td><td>G1, G5, G6</td></tr>
+              <tr><td>Verification and evidence discipline</td><td><code>NFR-TEST-001</code>, <code>FR-EVAL-001</code>, <code>TR-TEST-001..008</code></td><td>M01–M18 and acceptance-ledger generator</td><td>T0–T9</td><td>G0–G7</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>WP00 creates the individual acceptance ledger and a machine check that extracts all 61 FR/NFR identifiers and all 47 TR identifiers from the accepted baselines, then fails when any identifier lacks an owner, interface, test case, and gate. The grouped matrix above is a design index; it is not a substitute for that exhaustive generated ledger.</p>
+
+        <h3>Design-to-artifact dependency map</h3>
+        <pre>Functional Requirements Draft 0.3
+└── Technical Requirements Draft 0.1
+    ├── bundle.yaml + seven runtime responsibility artifacts
+    ├── application/mcp-application.yaml tool and result contract
+    └── OMS-DLD-001 Detailed Level Design (this document)
+        ├── work packages
+        ├── module and interface design
+        ├── test layers and release gates
+        └── implementation evidence ledger (future)</pre>
+        <p>This dependency map is project design traceability, not an ODPG claim.</p>
+      </section>
+
+      <section id="decisions">
+        <p class="kicker">20 · Decisions and blockers</p>
+        <h2>Pre-coding decision register</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Decision</th><th>Blocks</th><th>Safe state until approved</th></tr></thead>
+            <tbody>
+              <tr><td>DLD-001</td><td>Add and version the stable typed tool-error schema and MCP mapping</td><td>WP06</td><td>No unadvertised runtime error envelope</td></tr>
+              <tr><td>DLD-002</td><td>Pin Agents, MCP, Apps helper, validator, YAML, lossless JSON, decimal, bundler, and test versions</td><td>WP01 onward</td><td>No SDK compatibility claim</td></tr>
+              <tr><td>DLD-003</td><td>Select Cloudflare plan/subrequest/CPU budget that supports one full rollover reread</td><td>WP04, G5</td><td>Return INCOHERENT when safe budget is insufficient</td></tr>
+              <tr><td>DLD-004</td><td>Approve signed session-ID format, lifetime, clock skew, rotation, and cleanup</td><td>WP05</td><td>Session implementation not released</td></tr>
+              <tr><td>DLD-005</td><td>Select and contract-test authoritative UTC FX calendar</td><td>OPEN/MARKET_CLOSED, freshness, G2</td><td>UNKNOWN</td></tr>
+              <tr><td>DLD-006</td><td>Confirm producer semantics for <code>CreatedAt</code></td><td>Freshness PASS</td><td>UNKNOWN</td></tr>
+              <tr><td>DLD-007</td><td>Approve decimal rounding, scales, trailing zeros, and negative-zero normalization</td><td>Public calculation verification</td><td>Exact internal strings; requirement unverified</td></tr>
+              <tr><td>DLD-008</td><td>Approve plausibility window, minimum samples, and MAD threshold</td><td>Plausibility feature</td><td>NOT_EVALUATED</td></tr>
+              <tr><td>DLD-009</td><td>Confirm display/redistribution/judge rights, attribution, product licence, and data holder</td><td>G1, G6, G7</td><td>Publication and recorded fallback blocked</td></tr>
+              <tr><td>DLD-010</td><td>Approve unique component domain and exact compiled CSP</td><td>WP07 public release</td><td>No plugin submission</td></tr>
+              <tr><td>DLD-011</td><td>Approve Steward Brief prompt, schema, timeout, attempts, fact verifier, evaluation rubric, and privacy settings</td><td>WP08</td><td>Brief disabled / NOT_REQUESTED</td></tr>
+              <tr><td>DLD-012</td><td>Resolve automatic trace <code>url.query</code> conflict with the no-instrument telemetry contract</td><td>WP09, TR-OBS-001</td><td>Do not enable unsafe production fetch tracing</td></tr>
+              <tr><td>DLD-013</td><td>Measure and approve latency, availability, cost, rate, abuse, retry, and circuit-breaker budgets</td><td>G5</td><td>No performance, reliability, or cost claim</td></tr>
+              <tr><td>DLD-014</td><td>Define whether a PARTIAL live attempt is returned or may invoke recorded fallback</td><td>EvidenceSelector behavior</td><td>Return honest PARTIAL live evidence; never silently replace</td></tr>
+              <tr><td>DLD-015</td><td>Select and test the ODP SDK compatibility approach</td><td>G0</td><td>sdk-compatibility NOT_TESTED</td></tr>
+              <tr><td>DLD-016</td><td>Publish truthful privacy/support pages, public OpenAPI location, listing copy, and screenshot set</td><td>G6/G7</td><td>Publication not ready</td></tr>
+              <tr><td>DLD-017</td><td>Approve recording rights, capture workflow, R2 lifecycle, immutability and retention class</td><td>WP11</td><td>R2 binding absent; RECORDED unavailable</td></tr>
+              <tr><td>DLD-018</td><td>Ratify serialized-but-stateless challenge issuance, multiple-outstanding-challenge behavior, and winning-transition semantics in the application and technical contracts</td><td>WP05</td><td>No session implementation release</td></tr>
+              <tr><td>DLD-019</td><td>Reconcile FR-UI-001 fitness presentation with board, instrument, and movement schemas that currently return no fitness field</td><td>WP06, WP07, G4</td><td>Display “Fitness not assessed by this result”; invent no enum</td></tr>
+              <tr><td>DLD-020</td><td>Package immutable validation evidence with validator/source revisions, exact command, evidence URI, and digest for manifest PASS claims</td><td>G0, evidence ledger</td><td>Current claims remain focused static evidence, not release-gate proof</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Decision accountability and closure</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Responsible owner</th><th>Required approver</th><th>Closure evidence</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>DLD-001</td><td>MCP contract owner</td><td>Architecture lead</td><td>Versioned app contract, materialized error branches, handler/protocol mapping tests; before WP06</td><td>OPEN</td></tr>
+              <tr><td>DLD-002</td><td>Technical lead</td><td>Architecture lead</td><td>Exact lockfile, compatibility matrix, runtime spike and ADR; before WP01 completion</td><td>OPEN</td></tr>
+              <tr><td>DLD-003</td><td>Cloud operations lead</td><td>Architecture lead</td><td>Selected plan, documented limits and representative rollover benchmark; before WP04</td><td>OPEN</td></tr>
+              <tr><td>DLD-004</td><td>Session/security engineer</td><td>Security lead</td><td>Three-lifetime ADR, signed-ID format, skew/rotation/cleanup tests; before WP05</td><td>OPEN</td></tr>
+              <tr><td>DLD-005</td><td>Data governance lead</td><td>Product owner</td><td>Calendar source decision, UTC contract and open/closed/unknown fixture report; before G2</td><td>OPEN</td></tr>
+              <tr><td>DLD-006</td><td>Source-service owner</td><td>Data governance lead</td><td>Producer semantic confirmation and timestamp fixtures; before freshness PASS</td><td>OPEN</td></tr>
+              <tr><td>DLD-007</td><td>Rules owner</td><td>Product owner</td><td>Versioned decimal/display policy and golden vectors; before public metric verification</td><td>OPEN</td></tr>
+              <tr><td>DLD-008</td><td>Quality-rules owner</td><td>Product owner</td><td>Versioned parameters, minimum-sample rule and normal/unusual/not-evaluated fixtures</td><td>OPEN</td></tr>
+              <tr><td>DLD-009</td><td>Data-rights owner</td><td>Product/competition accountable</td><td>Written display, redistribution, judge, attribution, licence and data-holder record; before G1</td><td>OPEN</td></tr>
+              <tr><td>DLD-010</td><td>Component lead</td><td>Security lead</td><td>Unique domain, built-asset inventory, exact CSP and deployed enforcement test; before WP07 release</td><td>OPEN</td></tr>
+              <tr><td>DLD-011</td><td>Evaluation lead</td><td>Product owner</td><td>Versioned prompt/schema, privacy review, rubric, threshold, adjudication and run plan; before scored T7</td><td>OPEN</td></tr>
+              <tr><td>DLD-012</td><td>Observability engineer</td><td>Privacy/security lead</td><td>Exact-runtime trace capture proving prohibited query attributes are absent or redacted; before production traces</td><td>OPEN</td></tr>
+              <tr><td>DLD-013</td><td>Operations lead</td><td>Product owner</td><td>Staging latency, capacity, cost, abuse and failure-budget report; before G5</td><td>OPEN</td></tr>
+              <tr><td>DLD-014</td><td>Evidence-policy owner</td><td>Product owner</td><td>Versioned PARTIAL/fallback decision table and T3/T8 fixtures; before fallback implementation</td><td>OPEN</td></tr>
+              <tr><td>DLD-015</td><td>ODP compatibility owner</td><td>Architecture lead</td><td>Pinned SDK report against the exact artifact set and recorded incompatibilities; before G0</td><td>OPEN</td></tr>
+              <tr><td>DLD-016</td><td>Publication lead</td><td>Product owner</td><td>Live privacy/support/OpenAPI URLs, approved listing, screenshots and full public scan; before G6</td><td>OPEN</td></tr>
+              <tr><td>DLD-017</td><td>Records/data-rights owner</td><td>Privacy and product owners</td><td>Written recording rights, capture design, retention/deletion and create-only integrity test; before WP11</td><td>OPEN</td></tr>
+              <tr><td>DLD-018</td><td>Session contract owner</td><td>Security lead</td><td>Versioned application/technical wording plus issuance/ack race and replay tests; before WP05</td><td>OPEN</td></tr>
+              <tr><td>DLD-019</td><td>MCP contract and component owners</td><td>Product owner</td><td>Versioned requirement/schema reconciliation and branch-to-view component tests; before WP06/WP07</td><td>OPEN</td></tr>
+              <tr><td>DLD-020</td><td>Quality/evidence owner</td><td>Architecture lead</td><td>Packaged hashed reports with commands, validator versions, source revisions and immutable evidence URIs; before G0</td><td>OPEN</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout good"><strong>What can be planned now.</strong> WP00, dependency selection, the external repository structure, contract compiler, validation ledger, product-profile vertical slice, pure lossless parsing, and most deterministic rule tests can be planned immediately. Public market-tool implementation should not begin by hard-coding answers to the blockers above.</div>
+      </section>
+
+      <section id="references" class="page-break">
+        <p class="kicker">21 · References</p>
+        <h2>Controlling local sources</h2>
+        <ul>
+          <li><a href="../bundle.yaml"><code>bundle.yaml</code> — governed bundle manifest 1.1.0</a></li>
+          <li><a href="../product/fxlive.odps.yaml"><code>product/fxlive.odps.yaml</code> — ODPS 4.1 product contract</a></li>
+          <li><a href="../interface/fxlive.openapi.yaml"><code>interface/fxlive.openapi.yaml</code> — OpenAPI 3.1.2 contract</a></li>
+          <li><a href="../value-sets/fx35-instrument-set.yaml"><code>value-sets/fx35-instrument-set.yaml</code> — exact FX-35 value set</a></li>
+          <li><a href="../rules/ohlc-rules.yaml"><code>rules/ohlc-rules.yaml</code> — deterministic rules and calculations</a></li>
+          <li><a href="../operations/monitoring.yaml"><code>operations/monitoring.yaml</code> — UTC, state, evidence, no-store, and observability</a></li>
+          <li><a href="../policies/publication-policy.yaml"><code>policies/publication-policy.yaml</code> — exact disclosure, safety, identity, and accessibility</a></li>
+          <li><a href="../application/mcp-application.yaml"><code>application/mcp-application.yaml</code> — tools, schemas, app, session, model boundaries</a></li>
+          <li><a href="../requirements/FuncitionalRequirements.html">Functional Requirements Draft 0.3</a> and <a href="../requirements/TechnicalRequirements.html">Technical Requirements Draft 0.1</a></li>
+        </ul>
+
+        <h3>Current official implementation guidance consulted</h3>
+        <div class="grid-2">
+          <article class="card"><h4>OpenAI</h4><ul>
+            <li><a href="https://developers.openai.com/apps-sdk/concepts/mcp-server">Apps SDK MCP concepts</a></li>
+            <li><a href="https://developers.openai.com/apps-sdk/build/mcp-server">Build an MCP server and register tools/resources</a></li>
+            <li><a href="https://developers.openai.com/apps-sdk/build/chatgpt-ui">Build the ChatGPT UI with the MCP Apps bridge</a></li>
+            <li><a href="https://developers.openai.com/apps-sdk/reference">Tool and component resource metadata reference</a></li>
+            <li><a href="https://developers.openai.com/apps-sdk/guides/security-privacy">Apps security and privacy</a></li>
+            <li><a href="https://developers.openai.com/apps-sdk/deploy/testing">MCP Inspector and ChatGPT testing</a></li>
+            <li><a href="https://developers.openai.com/apps-sdk/deploy/connect-chatgpt">Connect a developer-mode app to ChatGPT</a></li>
+            <li><a href="https://developers.openai.com/api/docs/guides/model-guidance?model=gpt-5.6">GPT-5.6 model guidance</a></li>
+          </ul></article>
+          <article class="card"><h4>Cloudflare</h4><ul>
+            <li><a href="https://developers.cloudflare.com/agents/model-context-protocol/apis/handler-api/#stateful-mcp-servers">Stateful createMcpHandler and WorkerTransport pattern</a></li>
+            <li><a href="https://developers.cloudflare.com/agents/model-context-protocol/protocol/transport/">MCP transport guidance</a></li>
+            <li><a href="https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/">Durable Object coordination and deterministic routing</a></li>
+            <li><a href="https://developers.cloudflare.com/durable-objects/api/alarms/">Durable Object alarms</a></li>
+            <li><a href="https://developers.cloudflare.com/workers/platform/limits/">Workers limits</a></li>
+            <li><a href="https://developers.cloudflare.com/workers/observability/traces/">Workers tracing</a> and <a href="https://developers.cloudflare.com/workers/observability/traces/spans-and-attributes/">span attributes</a></li>
+            <li><a href="https://developers.cloudflare.com/workers/observability/logs/workers-logs/">Workers Logs</a></li>
+          </ul></article>
+        </div>
+        <p class="small">External documentation is time-sensitive. Exact package versions, compatibility dates, SDK APIs, platform limits, submission paths, and metadata requirements must be rechecked when implementation begins and again before release.</p>
+
+        <h3>Required public disclaimer</h3>
+        <div class="callout warn">MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.</div>
+      </section>
+
+      <footer class="footer">
+        ODP Market Steward · OMS-DLD-001 · Draft 0.1 · Proposed · Design only; runtime not implemented
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

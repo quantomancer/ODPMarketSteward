@@ -1,0 +1,149 @@
+apiVersion: odp-market-steward.qmvp/v1
+kind: PublicationPolicy
+
+metadata:
+  id: odp-market-steward-publication-policy
+  name: "ODP Market Steward public presentation and safety policy"
+  version: "1.1.0"
+  status: testing
+  classification: project_publication_policy
+
+identity:
+  productName: "FXLive Market Data Demo - Standard FX-35"
+  applicationName: "ODP Market Steward"
+  competitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
+  organizationName: QMVP
+  permittedPublicIdentities: [ODP Market Steward, FXLive, QMVP]
+  upstreamSourceIdentityDisclosure: prohibited_on_public_surfaces
+  attributionOmissionReleaseCondition: >-
+    Applicable display, redistribution, and attribution rights must be confirmed in
+    writing before public release. This policy does not waive a legal attribution
+    obligation.
+
+disclaimer:
+  label: MARKET DATA DEMO
+  statement: >-
+    MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be
+    delayed, incomplete, unavailable, or contain errors. Nothing presented is
+    investment advice, a recommendation, or an offer to buy or sell any financial
+    instrument. The product must not be used for live trading or order execution.
+  exactWordingRequired: true
+  requiredSurfaces:
+    - public product specification
+    - OpenAPI description
+    - bundle documentation and README
+    - MCP tool result
+    - Apps SDK component
+    - screenshot
+    - demo video
+    - submission description
+  acknowledgement:
+    required: true
+    scope: once_per_app_session_before_first_interactive_market_data_retrieval
+    acknowledgementMayBeImplied: false
+    acknowledgementRecordContains:
+      - policyVersion
+      - disclaimerDigest
+      - challengeNonceOrHash
+      - issuedAtUtc
+      - expiresAtUtc
+      - acknowledgedAtUtc
+      - replayState
+    explicitUserActionRequired: true
+    verifiableSessionBindingRequired: true
+    replayProtectionRequired: true
+    modelGeneratedAffirmationAloneIsValid: false
+    recordTimestampAuthority: mcp_server_UTC_clock
+    boundedExpiringSessionStateRequired: true
+    promptsProfilesTranscriptsOrMarketResponsesMayBeStored: false
+    implementationMechanismOwner: mcp_application_contract_and_technical_requirements
+    implementationMechanismSpecifiedByThisPolicy: false
+
+temporalPresentation:
+  timezone: UTC
+  timestampFormat: RFC3339
+  requiredSuffix: Z
+  localTimezoneLabelsPermitted: false
+  separatelyLabel:
+    - bar start
+    - bar end
+    - evidence retrieval time
+    - calendar evaluation time
+    - recorded capture time
+
+evidencePresentation:
+  evidenceModeMustBeVisible: true
+  serviceStateMustBeVisible: true
+  availabilityStateMustBeVisible: true
+  cachedValuesMayAppearAsNewlyFetched: false
+  noEvidenceMode: NONE
+  noEvidenceMayContainMarketValues: false
+  recordedEvidenceRequiredText: "Recorded demo snapshot — captured {capturedAtUtc} — not current market data."
+  syntheticEvidenceRequiredText: SYNTHETIC TEST FIXTURE
+  syntheticEvidencePublicRequestMode: false
+  syntheticMayBeDescribedAsRecordedMarketData: false
+  colorMayBeSoleStateIndicator: false
+
+contentBoundaries:
+  permitted:
+    - latest-completed-bar market-data display
+    - deterministic data-quality evaluation
+    - descriptive OHLC calculations
+    - governed product discovery
+    - point-in-time fitness assessment
+    - evidence-grounded professional explanation
+  prohibited:
+    - trading signals
+    - price forecasts
+    - investment recommendations
+    - opportunity rankings
+    - orders
+    - execution instructions
+    - claims of ODPI certification
+    - claims that point-in-time evidence proves longitudinal reliability
+
+componentRequirements:
+  marketValuesFirst: true
+  maximumProminentActions: 2
+  prominentActions: [refresh evidence, explain selected result]
+  detailsUseProgressiveDisclosure: true
+  duplicateChatComposerPermitted: false
+  tradingTerminalPresentationPermitted: false
+  componentMayCallMarketDataAPIDirectly: false
+  accessibility:
+    textOrIconInAdditionToColor: true
+    semanticLabelsRequired: true
+    keyboardNavigationRequired: true
+    visibleFocusRequired: true
+    reducedMotionSupportRequired: true
+    contrastTarget: WCAG_AA
+    responsiveTargets: [ChatGPT web, ChatGPT mobile]
+
+releaseGates:
+  - exact disclaimer presence scan passes
+  - public identity policy scan passes
+  - applicable data display and redistribution rights are confirmed
+  - no prohibited financial behavior is exposed
+  - live, recorded, and none result modes are unmistakably distinguished
+  - synthetic evidence remains restricted to automated tests
+  - last-available remains disabled under no-store unless a separate policy change is approved
+  - all public temporal fields use UTC
+  - public descriptions reflect implemented functionality rather than planned functionality
+  - privacy policy and public support contact are published
+  - plugin developer verification and listing metadata review are complete
+  - component domain and exact CSP allowlists are approved and deployed
+
+requirements:
+  - FR-LIVE-001
+  - FR-UI-001
+  - FR-UI-002
+  - FR-UI-003
+  - FR-PUB-001
+  - FR-PUB-002
+  - FR-PUB-003
+  - FR-ACK-001
+  - FR-EVID-001
+  - NFR-SEC-002
+  - NFR-PUB-001
+  - NFR-ACC-001
+  - NFR-META-001

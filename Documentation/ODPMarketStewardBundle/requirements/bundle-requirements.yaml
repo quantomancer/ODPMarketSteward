@@ -1,0 +1,297 @@
+apiVersion: odp-market-steward.qmvp/v1
+kind: RequirementsNormalization
+
+metadata:
+  id: odp-market-steward-bundle-requirements
+  version: "1.1.0"
+  status: incorporated
+  classification: project_requirements_mapping
+  sourceDocument: FuncitionalRequirements.html
+  sourceDraft: "0.3"
+  priorSourceDraft: "0.2"
+  technicalDocument: TechnicalRequirements.html
+  technicalDraft: "0.1"
+  sourceRequirementStatus: all_proposed
+
+purpose: >-
+  Record how the responsibility issues found in Draft 0.2 were incorporated into
+  Functional Requirements Draft 0.3 and map both the functional and technical
+  requirements to the responsibility-correct governed bundle. This file is a
+  migration and traceability record; it does not override the current requirements
+  or claim that any runtime behavior is implemented or verified.
+
+authority:
+  sourceDocumentStatus: normative_project_requirements_draft
+  technicalDocumentStatus: normative_project_requirements_draft
+  normalizationStatus: migration_and_traceability_record
+  precedence: >-
+    Draft 0.3 and Technical Requirements Draft 0.1 contain the current proposed
+    requirements. The normalizations below describe the completed wording migration
+    from Draft 0.2 and must not be used as a hidden runtime override.
+
+normalizations:
+  - id: NR-001
+    affectedRequirements: [FR-ODP-001, FR-ODP-002]
+    priorIssue: >-
+      Draft 0.2 treated ODPS as the configuration source for instruments, API
+      routes, formulas, session policy, and publication policy.
+    incorporatedInterpretation: >-
+      Draft 0.3 makes the versioned governed bundle the resolution source. ODPS
+      owns product declarations and commitments; artifact-specific contracts own
+      the interface, value set, calculations, monitoring, publication, application,
+      and technical delivery behavior.
+    incorporatedInDraft: "0.3"
+    sourceRevisionRequired: false
+
+  - id: NR-002
+    affectedRequirements: [FR-BAR-002]
+    priorIssue: Draft 0.2 said formulas were declared in an ODPS extension.
+    incorporatedInterpretation: >-
+      Draft 0.3 resolves formula identifiers and definitions from
+      rules/ohlc-rules.yaml while ODPS retains compact product-level quality
+      declarations and references.
+    incorporatedInDraft: "0.3"
+    sourceRevisionRequired: false
+
+  - id: NR-003
+    affectedRequirements: [FR-PUB-001, FR-ACK-001, FR-ACK-002]
+    priorIssue: Draft 0.2 placed acknowledgement behavior in an ODPS extension.
+    incorporatedInterpretation: >-
+      ODPS contains the exact product-level disclaimer statement. Publication
+      policy owns required surfaces and presentation; the MCP application contract
+      and technical requirements own the signed session acknowledgement mechanism.
+    incorporatedInDraft: "0.3"
+    sourceRevisionRequired: false
+
+  - id: NR-004
+    affectedRequirements: [FR-ODP-003]
+    priorIssue: Draft 0.2 implied that all product-discovery facts came from ODPS.
+    incorporatedInterpretation: >-
+      Draft 0.3 requires each answer to cite the responsibility-owning artifact,
+      stable pointer, version, and digest. ODPS pointers are used only for facts
+      owned by the product contract.
+    incorporatedInDraft: "0.3"
+    sourceRevisionRequired: false
+
+  - id: NR-005
+    affectedRequirements: [FR-ODP-001, FR-ODP-002]
+    priorIssue: >-
+      Draft 0.2 linked to a nonexistent requirements/fxlive.odps.yaml path and named
+      product version 1.0.0.
+    incorporatedInterpretation: >-
+      Draft 0.3 links to ../product/fxlive.odps.yaml and names product
+      fxlive-market-data-demo-fx35 version 1.1.0.
+    incorporatedInDraft: "0.3"
+    sourceRevisionRequired: false
+
+artifactResponsibility:
+  manifest:
+    path: ../bundle.yaml
+    requirementIDs: [FR-ODP-001, FR-ODP-002, FR-ODP-003, FR-ODP-004, FR-CHAT-005, FR-PLUG-002, NFR-TEST-001]
+  productContract:
+    path: ../product/fxlive.odps.yaml
+    requirementIDs: [FR-ODP-002, FR-ODP-003, FR-ODP-004]
+  apiContract:
+    path: ../interface/fxlive.openapi.yaml
+    requirementIDs: [FR-LIVE-001, FR-LIVE-003, FR-LIVE-005, FR-BAR-001, FR-DEP-001, NFR-REL-001, NFR-SEC-001]
+  instrumentSet:
+    path: ../value-sets/fx35-instrument-set.yaml
+    requirementIDs: [FR-LIVE-002, FR-BAR-001, FR-QUAL-002, FR-EVID-001, NFR-SEC-001]
+  rules:
+    path: ../rules/ohlc-rules.yaml
+    requirementIDs: [FR-LIVE-003, FR-BAR-002, FR-BAR-003, FR-BAR-004, FR-QUAL-001, FR-QUAL-002, FR-QUAL-003, FR-QUAL-004, FR-QUAL-005]
+  monitoring:
+    path: ../operations/monitoring.yaml
+    requirementIDs: [FR-LIVE-003, FR-LIVE-004, FR-LIVE-005, FR-QUAL-003, FR-TIME-001, FR-STATE-001, FR-STATE-002, FR-STATE-003, FR-STATE-004, FR-EVID-001, NFR-REL-001, NFR-PERF-001, NFR-OBS-001]
+  publicationPolicy:
+    path: ../policies/publication-policy.yaml
+    requirementIDs: [FR-LIVE-001, FR-UI-001, FR-UI-002, FR-UI-003, FR-PUB-001, FR-PUB-002, FR-PUB-003, FR-ACK-001, FR-EVID-001, NFR-SEC-002, NFR-PUB-001, NFR-ACC-001, NFR-META-001]
+  mcpApplication:
+    path: ../application/mcp-application.yaml
+    requirementIDs: [FR-ODP-001, FR-ODP-002, FR-ODP-003, FR-ODP-004, FR-LIVE-001, FR-LIVE-004, FR-AI-001, FR-AI-002, FR-AI-003, FR-AI-004, FR-CHAT-001, FR-CHAT-002, FR-CHAT-003, FR-CHAT-004, FR-CHAT-005, FR-CHAT-006, FR-EVAL-001, FR-PLUG-001, FR-PLUG-002, FR-ACK-001, FR-ACK-002, FR-EVID-001, FR-DEP-001, FR-DEP-002, FR-DEP-003, FR-DEP-004, NFR-REL-001, NFR-PERF-001, NFR-DEP-001, NFR-SEC-001, NFR-SEC-002, NFR-PRIV-001, NFR-PUB-001, NFR-ACC-001, NFR-OBS-001, NFR-TEST-001, NFR-UX-001, NFR-META-001]
+  technicalRequirements:
+    path: TechnicalRequirements.html
+    requirementIDs: [FR-ODP-001, FR-ODP-002, FR-ODP-003, FR-ODP-004, FR-ACK-001, FR-ACK-002, FR-EVID-001, FR-DEP-001, FR-DEP-002, FR-DEP-003, FR-DEP-004, FR-PLUG-001, FR-PLUG-002, NFR-REL-001, NFR-PERF-001, NFR-DEP-001, NFR-SEC-001, NFR-SEC-002, NFR-PRIV-001, NFR-PUB-001, NFR-ACC-001, NFR-OBS-001, NFR-TEST-001, NFR-UX-001, NFR-META-001]
+
+coverage:
+  interpretation: specification_responsibility_only_not_runtime_verification
+  expectedFunctionalRequirementIDs:
+    - FR-LIVE-001
+    - FR-LIVE-002
+    - FR-LIVE-003
+    - FR-LIVE-004
+    - FR-LIVE-005
+    - FR-BAR-001
+    - FR-BAR-002
+    - FR-BAR-003
+    - FR-BAR-004
+    - FR-QUAL-001
+    - FR-QUAL-002
+    - FR-QUAL-003
+    - FR-QUAL-004
+    - FR-QUAL-005
+    - FR-ODP-001
+    - FR-ODP-002
+    - FR-ODP-003
+    - FR-ODP-004
+    - FR-AI-001
+    - FR-AI-002
+    - FR-AI-003
+    - FR-AI-004
+    - FR-TIME-001
+    - FR-STATE-001
+    - FR-STATE-002
+    - FR-STATE-003
+    - FR-STATE-004
+    - FR-UI-001
+    - FR-UI-002
+    - FR-UI-003
+    - FR-PUB-001
+    - FR-PUB-002
+    - FR-PUB-003
+    - FR-CHAT-001
+    - FR-CHAT-002
+    - FR-CHAT-003
+    - FR-CHAT-004
+    - FR-CHAT-005
+    - FR-CHAT-006
+    - FR-EVAL-001
+    - FR-PLUG-001
+    - FR-PLUG-002
+    - FR-ACK-001
+    - FR-ACK-002
+    - FR-EVID-001
+    - FR-DEP-001
+    - FR-DEP-002
+    - FR-DEP-003
+    - FR-DEP-004
+  expectedNonFunctionalRequirementIDs:
+    - NFR-REL-001
+    - NFR-PERF-001
+    - NFR-DEP-001
+    - NFR-SEC-001
+    - NFR-SEC-002
+    - NFR-PRIV-001
+    - NFR-PUB-001
+    - NFR-ACC-001
+    - NFR-OBS-001
+    - NFR-TEST-001
+    - NFR-UX-001
+    - NFR-META-001
+
+technicalRequirementsCoverage:
+  sourceDocument: TechnicalRequirements.html
+  sourceDraft: "0.1"
+  interpretation: proposed_technical_requirements_not_runtime_verification
+  expectedRequirementIDs:
+    - TR-ACK-001
+    - TR-ACK-002
+    - TR-ACK-003
+    - TR-AI-001
+    - TR-AI-002
+    - TR-AI-003
+    - TR-ARCH-001
+    - TR-ARCH-002
+    - TR-ARCH-003
+    - TR-ARCH-004
+    - TR-COST-001
+    - TR-DATA-001
+    - TR-DATA-002
+    - TR-DATA-003
+    - TR-DATA-004
+    - TR-DATA-005
+    - TR-MCP-001
+    - TR-MCP-002
+    - TR-MCP-003
+    - TR-MCP-004
+    - TR-MCP-005
+    - TR-MCP-006
+    - TR-OBS-001
+    - TR-OPS-001
+    - TR-OPS-002
+    - TR-OPS-003
+    - TR-OPS-004
+    - TR-PERF-001
+    - TR-PRIV-001
+    - TR-PUB-001
+    - TR-REL-001
+    - TR-R2-001
+    - TR-SEC-001
+    - TR-SEC-002
+    - TR-SEC-003
+    - TR-SEC-004
+    - TR-STATE-001
+    - TR-STATE-002
+    - TR-STATE-003
+    - TR-TEST-001
+    - TR-TEST-002
+    - TR-TEST-003
+    - TR-TEST-004
+    - TR-TEST-005
+    - TR-TEST-006
+    - TR-TEST-007
+    - TR-TEST-008
+
+resolvedDecisions:
+  - decisionID: OD-001
+    resolution: live completed-bar service with governance as augmented value
+  - decisionID: OD-001A
+    resolution: ODP Market Steward name and competition title locked
+  - decisionID: OD-006
+    resolution: manual refresh for MVP with completed BarEnd comparison
+  - decisionID: OD-007
+    resolution: separate Cloudflare MCP Worker, Durable Object session state, versioned component, and rights-gated R2
+
+unresolvedRequirements:
+  - decisionID: OD-002
+    topic: authoritative UTC market calendar
+    affectedResults: [serviceState, freshness]
+    safeDefault: UNKNOWN
+  - decisionID: OD-003
+    topic: market-data rights and public attribution treatment
+    affectedRequirements: [FR-PUB-002, FR-STATE-003, FR-DEP-004, NFR-PUB-001]
+    safeDefault: publication_and_recorded_fallback_blocked
+  - decisionID: OD-004
+    topic: pinned ODP SDK compatibility approach
+    affectedRequirement: FR-ODP-004
+    safeDefault: NOT_TESTED
+  - decisionID: OD-005
+    topic: remaining GPT-5.6 structured output, prompting, latency, retry, and evaluation contract
+    affectedRequirements: [FR-AI-001, FR-AI-004]
+    safeDefault: steward_brief_not_implemented
+  - decisionID: OD-008
+    topic: decimal rounding and display precision
+    affectedRequirement: FR-BAR-003
+    safeDefault: requirement_remains_unverified
+  - decisionID: OD-009
+    topic: plausibility lookback, minimum sample size, and threshold
+    affectedRequirement: FR-QUAL-004
+    safeDefault: NOT_EVALUATED
+  - decisionID: OD-010
+    topic: runtime performance and availability targets
+    affectedRequirements: [NFR-PERF-001, NFR-REL-001]
+    safeDefault: no_performance_or_availability_compliance_claim
+  - decisionID: OD-011
+    topic: CreatedAt producer semantics
+    affectedRequirement: FR-QUAL-003
+    safeDefault: freshness_cannot_pass
+  - decisionID: OD-012
+    topic: conversational evaluation rubric and acceptance threshold
+    affectedRequirement: FR-EVAL-001
+    safeDefault: no_app_quality_or_win_rate_claim
+  - decisionID: OD-013
+    topic: plugin listing description and screenshot selection
+    affectedRequirements: [FR-PLUG-001, NFR-META-001]
+    safeDefault: plugin_listing_not_ready
+
+competitionConstraintCoverage:
+  sourceConstraintIDs: [CR-BW-001, CR-BW-002, CR-BW-003, CR-BW-004, CR-BW-005, CR-BW-006, CR-BW-007, CR-BW-008, CR-BW-009, CR-BW-010]
+  responsibility: implementation_release_and_submission_work_outside_this_specification_bundle
+  currentStatus: not_met
+
+odpFamilyScope:
+  ODPS: included_as_product_contract
+  ODPC: not_in_scope_single_product_no_catalog
+  ODPG: not_present_no_relationship_graph
+  ODPV: not_present_domain_value_set_is_project_defined
+  ODPR: not_present_not_required_for_runtime_rules

@@ -1,0 +1,271 @@
+apiVersion: odp-market-steward.qmvp/v1
+kind: DeterministicRuleSet
+
+metadata:
+  id: fxlive-ohlc-governance-rules
+  name: "FXLive OHLC quality, calculation, and fitness rules"
+  version: "1.0.0"
+  status: testing
+  classification: project_executable_rule_contract
+  description: >-
+    Deterministic rules for coherent snapshot assembly, completed-bar validation,
+    descriptive OHLC calculations, contextual freshness, plausibility, and
+    purpose-specific fitness. This is not an ODPR artifact or an execution engine.
+
+governance:
+  authoritativeFor:
+    - hard rule identifiers and conditions
+    - deterministic calculation formulas
+    - result-state vocabulary
+    - purpose-specific fitness decision tables
+  notAuthoritativeFor:
+    - product identity and value proposition
+    - HTTP route and response schemas
+    - market calendar facts
+    - public presentation policy
+    - investment or trading decisions
+  evaluationOwner: mcp-server
+  modelMayRecalculate: false
+  modelMayOverrideVerdict: false
+
+dependencies:
+  productContract: ../product/fxlive.odps.yaml
+  instrumentSet: ../value-sets/fx35-instrument-set.yaml
+  apiContract: ../interface/fxlive.openapi.yaml
+
+spec:
+  resultStates:
+    hardRule: [PASS, FAIL, UNKNOWN, NOT_EVALUATED]
+    contextualRule: [PASS, FAIL, WARNING, NOT_APPLICABLE, UNKNOWN, NOT_EVALUATED]
+    plausibility: [NORMAL, UNUSUAL, NOT_EVALUATED]
+    fitness: [FIT, FIT_WITH_CONDITIONS, NOT_FIT, INDETERMINATE]
+
+  snapshotAssembly:
+    ruleID: coherent-completed-minute-snapshot
+    severity: error
+    procedure:
+      - retrieve metadata before instrument fan-out
+      - retrieve every expected instrument using bounded concurrency
+      - retrieve metadata after instrument fan-out
+      - accept only bars whose BarEnd equals both metadata BarEnd values
+      - permit one bounded reread when the completed minute rolls over
+    passCondition: >-
+      Both metadata observations and every accepted bar identify the same completed
+      BarEnd value.
+    failureRuleState: FAIL
+    availabilityStateOnFailure: INCOHERENT
+
+  hardRules:
+    bar-required-fields:
+      dimension: completeness
+      severity: error
+      requiredFields:
+        - Currency
+        - Epoch
+        - BarStart
+        - BarEnd
+        - Granularity
+        - Open
+        - High
+        - Low
+        - Close
+      passCondition: Every required field exists and is non-null.
+      dependentCalculationPolicy: suppress_when_required_input_invalid
+
+    exact-standard-instrument-set:
+      dimension: coverage
+      severity: error
+      expectedMembersRef: ../value-sets/fx35-instrument-set.yaml#/spec/members
+      identifierProjection: members[*].symbol
+      passConditions:
+        - returned identifiers are unique
+        - returned count equals 35
+        - no expected identifier is missing
+        - no unexpected identifier is present
+      evidenceFields: [expected, returned, missing, duplicate, unexpected]
+
+    completed-bar-mathematical-integrity:
+      dimension: validity
+      severity: error
+      passConditions:
+        - "Currency matches ^[A-Z]{6}$ and is a member of FX-35."
+        - "Granularity equals 1m."
+        - "BarStart and BarEnd parse as RFC 3339 UTC timestamps ending in Z."
+        - "BarEnd minus BarStart equals exactly 60 seconds."
+        - "Open, High, Low, and Close are finite decimal values greater than zero."
+        - "Low is less than or equal to High."
+        - "Low is less than or equal to Open and Close."
+        - "High is greater than or equal to Open and Close."
+      evidenceFields:
+        - normalized bar
+        - failed conditions
+        - instrument
+        - UTC interval
+
+  calculations:
+    arithmeticPolicy:
+      status: PARTIALLY_DEFINED
+      numericModel: arbitrary_precision_decimal
+      inputConversion: parse_the_JSON_number_lexical_representation_as_decimal
+      workingPrecisionSignificantDigits: 34
+      roundingMode: UNRESOLVED
+      roundOnlyAtPresentationBoundary: proposed_not_approved
+      displayPolicy:
+        priceAndPriceDelta:
+          decimalPlaces: UNRESOLVED
+        basisPoints:
+          decimalPlaces: UNRESOLVED
+        ratio:
+          decimalPlaces: UNRESOLVED
+      modelReceivesServerCalculatedValues: true
+      acceptanceEffect: >-
+        FR-BAR-003 remains unverified until rounding mode and display precision are
+        approved and covered by deterministic tests.
+
+    closeMinusOpen:
+      formula: "Close - Open"
+      requiredInputs: [Open, Close]
+      classification: descriptive
+    basisPointMovement:
+      formula: "10000 * (Close - Open) / Open"
+      denominator: Open
+      requiredInputs: [Open, Close]
+      classification: descriptive
+    absoluteRange:
+      formula: "High - Low"
+      requiredInputs: [High, Low]
+      classification: descriptive
+    rangeBasisPoints:
+      formula: "10000 * (High - Low) / Open"
+      denominator: Open
+      requiredInputs: [Open, High, Low]
+      classification: descriptive
+    upperWick:
+      formula: "High - max(Open, Close)"
+      requiredInputs: [Open, High, Close]
+      classification: descriptive
+    lowerWick:
+      formula: "min(Open, Close) - Low"
+      requiredInputs: [Open, Low, Close]
+      classification: descriptive
+    bodyToRangeRatio:
+      formula: "abs(Close - Open) / (High - Low)"
+      requiredInputs: [Open, High, Low, Close]
+      zeroRangePolicy:
+        condition: "High equals Low"
+        result: 0
+      classification: descriptive
+    crossBarGap:
+      formula: "Current.Open - Previous.Close"
+      requiredInputs: [Current.Open, Previous.Close]
+      continuityCondition: "Previous.BarEnd equals Current.BarStart"
+      missingOrNonConsecutiveResult: NOT_EVALUATED
+      classification: descriptive
+
+  contextualRules:
+    market-open-freshness:
+      dimension: timeliness
+      severity: error_when_applicable
+      runtimeProfileOwner: ../operations/monitoring.yaml
+      requiredRuntimeInputs:
+        - calendarState
+        - evaluationTimeUtc
+        - createdAtUtc
+        - latestBarEndUtc
+        - createdAtMaximumAgeSeconds
+        - barEndMaximumAgeSeconds
+        - inclusiveBoundary
+      applicability: authoritative_calendar_state_is_OPEN
+      passCondition: >-
+        At evaluation time, both CreatedAt age and latest completed BarEnd age are
+        within the thresholds supplied by the operational monitoring profile.
+      marketClosedResult: NOT_APPLICABLE
+      unavailableCalendarResult: UNKNOWN
+      prohibition: staleness_must_not_infer_market_closed
+
+    contextual-ohlc-plausibility:
+      dimension: consistency
+      severity: warning
+      method: rolling_median_and_median_absolute_deviation
+      configuration:
+        status: UNCONFIGURED
+        utcLookbackWindow: null
+        minimumSampleSize: null
+        alertThresholdMAD: null
+      unconfiguredResult: NOT_EVALUATED
+      validResultStates: [NORMAL, UNUSUAL, NOT_EVALUATED]
+      hardValidityEffect: none
+      tradingSignalEffect: prohibited
+
+  fitnessProfiles:
+    one_minute_descriptive_analysis:
+      requiredRules:
+        - coherent-completed-minute-snapshot
+        - bar-required-fields
+        - exact-standard-instrument-set
+        - completed-bar-mathematical-integrity
+        - market-open-freshness
+      decisionTable:
+        mandatoryFailure: NOT_FIT
+        missingRequiredEvidence: INDETERMINATE
+        allMandatoryPass: FIT
+        warningOnly: FIT_WITH_CONDITIONS
+        authoritativeCalendarClosedAndAllOtherMandatoryRulesPass: FIT_WITH_CONDITIONS
+        recordedEvidenceAndAllApplicableMandatoryRulesPass: FIT_WITH_CONDITIONS
+        syntheticEvidenceForProfessionalAnalysis: NOT_FIT
+        freshnessNotApplicableWithoutAuthoritativeClosedCalendar: INDETERMINATE
+      conditions:
+        marketClosed:
+          - freshness is NOT_APPLICABLE only because the authoritative calendar is MARKET_CLOSED
+          - original UTC bar intervals and evidence age remain visible
+          - the result is not described as current, fresh, or live
+        recordedEvidence:
+          - the immutable recorded-evidence manifest validates
+          - the recorded banner and captured timestamp are visible
+          - current freshness is never asserted
+        syntheticEvidence:
+          - suitable only for deterministic tests and demonstrations explicitly labelled synthetic
+    governed_product_discovery:
+      requiredEvidence:
+        - valid product contract
+        - artifact digests
+        - stable declaration pointers
+      decisionTable:
+        missingRequiredEvidence: INDETERMINATE
+        validAndComplete: FIT
+    api_integration_testing:
+      requiredEvidence:
+        - valid OpenAPI contract
+        - parseable representative responses
+        - stable response schemas
+      decisionTable:
+        schemaFailure: NOT_FIT
+        missingRequiredEvidence: INDETERMINATE
+        allRequiredPass: FIT
+    data_quality_review:
+      requiredRules:
+        - bar-required-fields
+        - exact-standard-instrument-set
+        - completed-bar-mathematical-integrity
+      decisionTable:
+        mandatoryFailure: NOT_FIT
+        missingRequiredEvidence: INDETERMINATE
+        allMandatoryPass: FIT
+
+presentationConstraints:
+  - label every metric as a descriptive observation
+  - display instrument and UTC bar interval with each result
+  - distinguish hard failures from contextual warnings
+  - do not generate forecasts, recommendations, signals, orders, or execution instructions
+  - state that each assessment is point-in-time evidence, not proof of longitudinal reliability
+
+requirementIDs:
+  - FR-LIVE-003
+  - FR-BAR-002
+  - FR-BAR-003
+  - FR-BAR-004
+  - FR-QUAL-001
+  - FR-QUAL-002
+  - FR-QUAL-003
+  - FR-QUAL-004
+  - FR-QUAL-005

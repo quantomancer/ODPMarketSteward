@@ -1,0 +1,79 @@
+apiVersion: odp-market-steward.qmvp/v1
+kind: ControlledValueSet
+
+metadata:
+  id: fxlive-standard-fx35
+  name: "FXLive product-defined FX-35 instrument set"
+  version: "1.0.0"
+  status: testing
+  classification: project_domain_value_set
+  authority: fxlive-product-contract
+  description: >-
+    The exact product-governed set of currency-pair identifiers used by the FXLive
+    Market Data Demo. The name FX-35 identifies this product set and does not claim
+    recognition as an external industry-standard universe.
+
+semanticAlignment:
+  identifierForm: >-
+    Six uppercase letters formed by concatenating the ISO 4217 alphabetic
+    base-currency and quote-currency identifiers.
+  externalStandard: ISO 4217
+  odpvStatus: not_an_odpv_artifact
+  odpvRationale: >-
+    ODPV defines shared Open Data Products family terminology. This fixed domain
+    membership list is maintained as a project-controlled value set instead.
+
+spec:
+  ordering: alphabetical
+  expectedCount: 35
+  uniquenessKey: symbol
+  symbolPattern: "^[A-Z]{6}$"
+  membershipPolicy: exact
+  unknownMemberPolicy: reject
+  missingMemberPolicy: fail_coverage
+  duplicateMemberPolicy: fail_coverage
+  members:
+    - { symbol: AUDCAD, base: AUD, quote: CAD }
+    - { symbol: AUDCHF, base: AUD, quote: CHF }
+    - { symbol: AUDJPY, base: AUD, quote: JPY }
+    - { symbol: AUDNZD, base: AUD, quote: NZD }
+    - { symbol: AUDUSD, base: AUD, quote: USD }
+    - { symbol: CADCHF, base: CAD, quote: CHF }
+    - { symbol: CADJPY, base: CAD, quote: JPY }
+    - { symbol: CHFHUF, base: CHF, quote: HUF }
+    - { symbol: CHFJPY, base: CHF, quote: JPY }
+    - { symbol: EURAUD, base: EUR, quote: AUD }
+    - { symbol: EURCAD, base: EUR, quote: CAD }
+    - { symbol: EURCHF, base: EUR, quote: CHF }
+    - { symbol: EURGBP, base: EUR, quote: GBP }
+    - { symbol: EURHUF, base: EUR, quote: HUF }
+    - { symbol: EURJPY, base: EUR, quote: JPY }
+    - { symbol: EURNZD, base: EUR, quote: NZD }
+    - { symbol: EURPLN, base: EUR, quote: PLN }
+    - { symbol: EURUSD, base: EUR, quote: USD }
+    - { symbol: GBPAUD, base: GBP, quote: AUD }
+    - { symbol: GBPCAD, base: GBP, quote: CAD }
+    - { symbol: GBPCHF, base: GBP, quote: CHF }
+    - { symbol: GBPJPY, base: GBP, quote: JPY }
+    - { symbol: GBPNZD, base: GBP, quote: NZD }
+    - { symbol: GBPUSD, base: GBP, quote: USD }
+    - { symbol: NZDCAD, base: NZD, quote: CAD }
+    - { symbol: NZDCHF, base: NZD, quote: CHF }
+    - { symbol: NZDJPY, base: NZD, quote: JPY }
+    - { symbol: NZDUSD, base: NZD, quote: USD }
+    - { symbol: USDCAD, base: USD, quote: CAD }
+    - { symbol: USDCHF, base: USD, quote: CHF }
+    - { symbol: USDHUF, base: USD, quote: HUF }
+    - { symbol: USDJPY, base: USD, quote: JPY }
+    - { symbol: USDMXN, base: USD, quote: MXN }
+    - { symbol: USDPLN, base: USD, quote: PLN }
+    - { symbol: USDZAR, base: USD, quote: ZAR }
+
+references:
+  productContract: ../product/fxlive.odps.yaml
+  apiContract: ../interface/fxlive.openapi.yaml
+  requirementIDs:
+    - FR-LIVE-002
+    - FR-BAR-001
+    - FR-QUAL-002
+

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ODP Market Steward Bundle</title>
+  <style>
+    body{margin:0;background:#f3f6f9;color:#172033;font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+    main{max-width:820px;margin:48px auto;padding:34px;background:#fff;border:1px solid #dce2eb;border-radius:16px;box-shadow:0 16px 42px rgba(20,43,74,.08)}
+    h1{margin:0 0 8px;color:#142b4a;font-size:34px}h2{margin-top:26px;color:#142b4a}code{background:#edf2f6;padding:2px 5px;border-radius:5px}a{color:#087f75}.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#e7f6f3;color:#075e57;font-weight:700;font-size:12px}.warning{margin-top:22px;padding:16px;border-left:5px solid #b56c08;background:#fff4dc;border-radius:8px}
+  </style>
+</head>
+<body>
+  <main>
+    <span class="badge">BUNDLE v1.1.0 · DRAFT</span>
+    <h1>ODP Market Steward Bundle</h1>
+    <p>This directory contains the responsibility-separated specification package for the FXLive Market Data Demo and the planned ODP Market Steward ChatGPT MCP App and Cloudflare service.</p>
+    <p>The package contains one official ODP-family artifact, the ODPS 4.1 product contract; OpenAPI is a companion standard and the other YAML files are explicitly classified project contracts. Functional Requirements Draft 0.3 and Technical Requirements Draft 0.1 define the current proposed acceptance and delivery baseline. Detailed Level Design Draft 0.1 translates that baseline into non-normative modules, interfaces, sequences, tests, release gates, and implementation work packages. The MCP Worker, Durable Object, Apps SDK component, GPT-5.6 integration, and public <code>/mcp</code> endpoint are not implemented by this package.</p>
+    <h2>Start here</h2>
+    <ul>
+      <li><a href="ODPMarketStewardBundleDocumentation.html">Professional bundle documentation</a></li>
+      <li><a href="bundle.yaml">Machine-readable bundle manifest</a></li>
+      <li><a href="product/fxlive.odps.yaml">ODPS 4.1 product contract</a></li>
+      <li><a href="interface/fxlive.openapi.yaml">OpenAPI 3.1.2 interface contract</a></li>
+      <li><a href="value-sets/fx35-instrument-set.yaml">Product-defined FX-35 value set</a></li>
+      <li><a href="rules/ohlc-rules.yaml">Deterministic OHLC rule contract</a></li>
+      <li><a href="operations/monitoring.yaml">UTC monitoring profile</a></li>
+      <li><a href="policies/publication-policy.yaml">Publication and safety policy</a></li>
+      <li><a href="application/mcp-application.yaml">Planned MCP application contract</a></li>
+      <li><a href="requirements/FuncitionalRequirements.html">Functional Requirements Draft 0.3</a></li>
+      <li><a href="requirements/TechnicalRequirements.html">Technical Requirements Draft 0.1</a></li>
+      <li><a href="requirements/bundle-requirements.yaml">Draft migration and requirements traceability</a></li>
+      <li><a href="design/DetailedLevelDesign.html">Detailed Level Design Draft 0.1</a></li>
+    </ul>
+    <div class="warning"><strong>MARKET DATA DEMO.</strong> For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.</div>
+  </main>
+</body>
+</html>

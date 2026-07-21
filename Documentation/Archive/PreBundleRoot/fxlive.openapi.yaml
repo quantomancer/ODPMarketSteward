@@ -1,0 +1,467 @@
+openapi: 3.1.0
+
+info:
+  title: FXLive Market Data Demo API
+  version: 1.0.0
+  summary: Read-only access to the latest completed one-minute FX market-data snapshot.
+  description: >-
+    MARKET DATA DEMO. This API provides service health, current snapshot metadata,
+    close-only observations, and completed one-minute OHLC bars. Public timestamps
+    use UTC. Data may be delayed, incomplete, unavailable, or contain errors.
+    Nothing provided by this API is investment advice, a recommendation, or an
+    offer to buy or sell any financial instrument. It must not be used for live
+    trading or order execution.
+
+servers:
+  - url: https://fxlive.qmvp.workers.dev
+    description: Live MARKET DATA DEMO service
+
+tags:
+  - name: Service
+    description: Service and presentation endpoints.
+  - name: Market data
+    description: Read-only market-data discovery and retrieval endpoints.
+
+paths:
+  /:
+    get:
+      operationId: getMarketBoard
+      tags: [Service]
+      summary: Display the FXLive market board
+      description: >-
+        Returns an HTML page showing the latest available completed bars. If the
+        current snapshot cannot be loaded, the response is an HTML error page.
+      responses:
+        "200":
+          description: Current market board.
+          content:
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: Required service storage binding is unavailable.
+          content:
+            text/html:
+              schema:
+                type: string
+        "503":
+          description: The latest market-data snapshot is unavailable.
+          content:
+            text/html:
+              schema:
+                type: string
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+    options:
+      operationId: corsPreflightRoot
+      tags: [Service]
+      summary: Complete a CORS preflight request
+      responses:
+        "204":
+          $ref: "#/components/responses/CorsPreflightAccepted"
+
+  /health:
+    get:
+      operationId: getHealth
+      tags: [Service]
+      summary: Report service reachability and identity
+      responses:
+        "200":
+          description: Service is reachable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                ok: true
+                service: FXLive
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+    options:
+      operationId: corsPreflightHealth
+      tags: [Service]
+      summary: Complete a CORS preflight request
+      responses:
+        "204":
+          $ref: "#/components/responses/CorsPreflightAccepted"
+
+  /meta:
+    get:
+      operationId: getSnapshotMetadata
+      tags: [Market data]
+      summary: Return metadata for the current completed-bar snapshot
+      description: >-
+        Returns the latest snapshot timing, one-minute granularity, reported
+        instrument count, and the sorted identifiers currently represented in the
+        snapshot. An identifier may be listed even when its completed bar is
+        temporarily unavailable.
+      responses:
+        "200":
+          description: Current snapshot metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetadataResponse"
+        "500":
+          $ref: "#/components/responses/StorageBindingMissing"
+        "503":
+          $ref: "#/components/responses/SnapshotUnavailable"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+    options:
+      operationId: corsPreflightMeta
+      tags: [Service]
+      summary: Complete a CORS preflight request
+      responses:
+        "204":
+          $ref: "#/components/responses/CorsPreflightAccepted"
+
+  /latest:
+    get:
+      operationId: getLatestObservation
+      tags: [Market data]
+      summary: Return a close-only observation or completed OHLC bar
+      description: >-
+        Supply exactly one of ticker or bar. The ticker mode returns Currency,
+        Timestamp, and Close. The bar mode returns Currency, Epoch, BarStart,
+        BarEnd, Granularity, Open, High, Low, and Close. Input is uppercased and
+        non-letter characters are removed before validation; the normalized value
+        must contain exactly six letters. Supplying both selectors is ambiguous.
+      parameters:
+        - name: ticker
+          in: query
+          required: false
+          description: >-
+            Select the compact close-only representation. Mutually exclusive with
+            bar. The normalized value must contain exactly six letters.
+          schema:
+            type: string
+          example: EURUSD
+        - name: bar
+          in: query
+          required: false
+          description: >-
+            Select the completed one-minute OHLC representation. Mutually exclusive
+            with ticker. The normalized value must contain exactly six letters.
+          schema:
+            type: string
+          example: EURUSD
+        - name: debug
+          in: query
+          required: false
+          description: Include non-contractual request and storage timing when set to 1.
+          schema:
+            type: string
+            enum: ["1"]
+      responses:
+        "200":
+          description: >-
+            Latest observation. The response shape is selected by the ticker or bar
+            query parameter.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/LatestTickerResponse"
+                  - $ref: "#/components/schemas/LatestBarResponse"
+        "400":
+          description: Missing, ambiguous, or invalid instrument selector.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/UsageError"
+                  - $ref: "#/components/schemas/InvalidTickerError"
+        "404":
+          description: The normalized instrument is not represented in the current snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TickerNotFoundError"
+        "500":
+          $ref: "#/components/responses/StorageBindingMissing"
+        "503":
+          description: The snapshot or selected completed bar is unavailable.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/StorageError"
+                  - $ref: "#/components/schemas/BarUnavailableError"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+    options:
+      operationId: corsPreflightLatest
+      tags: [Service]
+      summary: Complete a CORS preflight request
+      responses:
+        "204":
+          $ref: "#/components/responses/CorsPreflightAccepted"
+
+components:
+  responses:
+    CorsPreflightAccepted:
+      description: CORS preflight accepted.
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+          example: "*"
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+          example: GET, OPTIONS
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+          example: content-type
+    MethodNotAllowed:
+      description: The path does not support the requested HTTP method.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleError"
+          example:
+            ok: false
+            error: method_not_allowed
+    StorageBindingMissing:
+      description: Required service storage binding is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StorageError"
+    SnapshotUnavailable:
+      description: The current market-data snapshot is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StorageError"
+
+  schemas:
+    CurrencyIdentifier:
+      type: string
+      description: >-
+        Six-letter concatenation of uppercase base- and quote-currency identifiers
+        after server-side normalization.
+      pattern: "^[A-Z]{6}$"
+      example: EURUSD
+
+    UtcTimestamp:
+      type: string
+      format: date-time
+      description: RFC 3339 timestamp expressed in UTC.
+      example: "2026-07-20T16:54:00Z"
+
+    DebugTiming:
+      type: object
+      additionalProperties: false
+      required: [Key, KVGetMs, RequestToResponseMs]
+      properties:
+        Key:
+          type: string
+        KVGetMs:
+          type: number
+          minimum: 0
+        RequestToResponseMs:
+          type: number
+          minimum: 0
+
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, service]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        service:
+          type: string
+          const: FXLive
+
+    MetadataResponse:
+      type: object
+      additionalProperties: false
+      required: [Granularity, InstrumentCount, available]
+      properties:
+        Epoch:
+          type: integer
+          format: int64
+          minimum: 0
+        CreatedAt:
+          $ref: "#/components/schemas/UtcTimestamp"
+        Granularity:
+          type: string
+          const: 1m
+        InstrumentCount:
+          type: integer
+          minimum: 0
+        BarStart:
+          $ref: "#/components/schemas/UtcTimestamp"
+        BarEnd:
+          $ref: "#/components/schemas/UtcTimestamp"
+        available:
+          type: array
+          items:
+            $ref: "#/components/schemas/CurrencyIdentifier"
+
+    LatestTickerResponse:
+      type: object
+      additionalProperties: false
+      required: [Currency, Timestamp, Close]
+      properties:
+        Currency:
+          $ref: "#/components/schemas/CurrencyIdentifier"
+        Timestamp:
+          $ref: "#/components/schemas/UtcTimestamp"
+        Close:
+          type: number
+          exclusiveMinimum: 0
+        Debug:
+          $ref: "#/components/schemas/DebugTiming"
+
+    LatestBarResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - Currency
+        - Epoch
+        - BarStart
+        - BarEnd
+        - Granularity
+        - Open
+        - High
+        - Low
+        - Close
+      properties:
+        Currency:
+          $ref: "#/components/schemas/CurrencyIdentifier"
+        Epoch:
+          type: integer
+          format: int64
+          minimum: 0
+        BarStart:
+          $ref: "#/components/schemas/UtcTimestamp"
+        BarEnd:
+          $ref: "#/components/schemas/UtcTimestamp"
+        Granularity:
+          type: string
+          const: 1m
+        Open:
+          type: number
+          exclusiveMinimum: 0
+        High:
+          type: number
+          exclusiveMinimum: 0
+        Low:
+          type: number
+          exclusiveMinimum: 0
+        Close:
+          type: number
+          exclusiveMinimum: 0
+        Debug:
+          $ref: "#/components/schemas/DebugTiming"
+
+    SimpleError:
+      type: object
+      additionalProperties: true
+      required: [ok, error]
+      properties:
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: string
+
+    Usage:
+      type: object
+      additionalProperties: false
+      required: [close, bar]
+      properties:
+        close:
+          type: string
+          const: /latest?ticker=EURUSD
+        bar:
+          type: string
+          const: /latest?bar=EURUSD
+
+    UsageError:
+      type: object
+      additionalProperties: false
+      required: [ok, error, usage]
+      properties:
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: string
+          enum: [missing_ticker, ambiguous_query]
+        usage:
+          $ref: "#/components/schemas/Usage"
+
+    InvalidTickerError:
+      type: object
+      additionalProperties: false
+      required: [ok, error, ticker, message]
+      properties:
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: string
+          const: invalid_ticker
+        ticker:
+          type: string
+        message:
+          type: string
+
+    TickerNotFoundError:
+      type: object
+      additionalProperties: false
+      required: [ok, error, ticker, key, available]
+      properties:
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: string
+          const: ticker_not_found
+        ticker:
+          $ref: "#/components/schemas/CurrencyIdentifier"
+        key:
+          type: string
+        available:
+          type: array
+          items:
+            $ref: "#/components/schemas/CurrencyIdentifier"
+
+    StorageError:
+      type: object
+      additionalProperties: false
+      required: [ok, error, key]
+      properties:
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: string
+          enum: [kv_binding_missing, blob_not_found]
+        key:
+          type: string
+
+    BarUnavailableError:
+      type: object
+      additionalProperties: false
+      required: [ok, error, ticker, status, message]
+      properties:
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: string
+          const: bar_not_available
+        ticker:
+          $ref: "#/components/schemas/CurrencyIdentifier"
+        status:
+          type: string
+        message:
+          type: string

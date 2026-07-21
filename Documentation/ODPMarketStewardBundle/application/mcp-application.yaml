@@ -1,0 +1,1485 @@
+apiVersion: odp-market-steward.qmvp/v1
+kind: MCPApplicationContract
+
+metadata:
+  id: odp-market-steward
+  name: ODP Market Steward
+  competitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
+  version: "1.1.0"
+  status: planned
+  classification: project_mcp_application_contract
+  description: >-
+    Contract for an MCP-backed ChatGPT application whose market-data and catalog
+    domain tools are read-only and whose component-only policy action records only
+    bounded session acknowledgement state. It presents latest stored FXLive market
+    data and augments it with governed product discovery, deterministic quality
+    evidence, descriptive calculations, and professional natural-language explanation.
+
+distribution:
+  target: ChatGPT plugin containing an MCP-backed app/connector
+  mcpEndpoint:
+    path: /mcp
+    transport: streamable_http
+    publicHttpsRequired: true
+    hostingPlatform: Cloudflare Workers
+    deploymentStatus: not_deployed
+  appsSdkComponent:
+    status: not_implemented
+    purpose: market board, instrument detail, and progressively disclosed evidence
+    directMarketDataApiCallsPermitted: false
+
+technicalDeliveryReference:
+  authorityArtifactId: technical-requirements
+  classification: non_authoritative_application_projection
+  implementationStatus: not_implemented
+  requirementIDs:
+    - TR-ARCH-001
+    - TR-MCP-001
+    - TR-ACK-002
+    - TR-SEC-003
+    - TR-OPS-001
+    - TR-OBS-001
+    - TR-R2-001
+  rule: >-
+    Cloudflare resource selection, SDK and transport implementation, environments,
+    secrets, observability, deployment, and conditional storage are defined only by
+    the technical requirements. This application contract owns tool and result behavior.
+
+productExperience:
+  coreOutcome: >-
+    Turn one request for the latest stored FX-35 market view into a useful market
+    board plus inspectable governance evidence without leaving the conversation.
+  know: Access latest stored completed-bar evidence and governed product metadata.
+  show: Render a compact market board with UTC intervals, states, and progressive evidence.
+  do: Read and evaluate data only; no order, execution, recommendation, or external write action.
+  firstMeaningfulResponse:
+    explainRoleInOneLine: true
+    returnConcreteEvidenceWhenAcknowledged: true
+    maximumEssentialClarifyingQuestions: 2
+
+componentResources:
+  marketBoard:
+    uri: ui://odp-market-steward/market-board-v1.html
+    mimeType: text/html;profile=mcp-app
+    implementationStatus: not_implemented
+    receivesInitialStateFrom: structuredContent
+    directMarketDataApiCallsPermitted: false
+    _meta:
+      ui:
+        prefersBorder: true
+        csp:
+          connectDomains: []
+          resourceDomains: []
+      openai/widgetDescription: >-
+        Presents the demo disclosure and renders FXLive market-board, instrument,
+        movement, or assessment results with UTC evidence and governed states without
+        duplicating the surrounding conversation.
+    deploymentRequirements:
+      uniqueWidgetDomain: UNRESOLVED_REQUIRED_FOR_SUBMISSION
+      exactCspAllowlistsMustMatchDeployedAssets: true
+
+serverInitialization:
+  instructions: >-
+    Use ODP Market Steward only for FXLive Market Data Demo retrieval, deterministic
+    data-quality evidence, descriptive OHLC calculations, and governed product
+    discovery. Obtain the required demo acknowledgement before a market-data tool.
+    Never provide forecasts, recommendations, signals, orders, or execution guidance.
+    Treat missing calendar or governance evidence as UNKNOWN or INDETERMINATE.
+
+sessionControls:
+  acknowledgement:
+    policyRef: ../policies/publication-policy.yaml#/disclaimer/acknowledgement
+    enforcementOwner: mcp-server
+    deliveryMechanism: signed_component_challenge
+    retrievalBeforeValidAcknowledgementPermitted: false
+    persistentUserTrackingInV1: false
+    boundedSessionStateInV1: required
+    stateBackend: cloudflare_durable_object
+    storedFields:
+      - policyVersion
+      - disclaimerDigest
+      - challengeNonceOrHash
+      - issuedAtUtc
+      - expiresAtUtc
+      - acknowledgedAtUtc
+      - replayState
+    prohibitedStoredFields: [promptText, conversationTranscript, userProfile, marketResponse]
+    flow:
+      - >-
+        A market-data tool call without a valid acknowledgement performs no upstream
+        retrieval and returns a model-visible DISCLOSURE_REQUIRED result plus a
+        component-only validated pending request.
+      - >-
+        The same result carries an opaque, HMAC-signed, short-lived challenge token
+        only in component-visible _meta; the token binds session, policy version,
+        disclaimer digest, issued time, expiry, and a random nonce. The pending request
+        is component continuity state and is not part of the authorization decision.
+      - >-
+        The component renders the exact disclaimer and an explicit acknowledgement
+        control. A user action invokes the component-only
+        acknowledge_market_data_demo tool with the token, affirmed=true, and the
+        matching policy version and disclaimer digest.
+      - >-
+        The server verifies signature, expiry, session binding, policy version,
+        disclaimer digest, and affirmation, records the server's current UTC
+        acknowledgement time in bounded session state, and returns ACKNOWLEDGED.
+        Invalid, expired, replayed, fabricated, or model-only values return
+        DISCLOSURE_REQUIRED and never trigger retrieval.
+      - >-
+        After ACKNOWLEDGED, the component reissues the previously validated pending
+        market-data request for continuity. The server validates that call normally;
+        no security decision relies on the component preserving it unchanged.
+      - >-
+        Subsequent gated tools in the same MCP app session rely on the verified
+        acknowledgement state and do not require the model to carry a
+        hidden token. Session loss or policy-version change requires acknowledgement again.
+    challenge:
+      signatureAlgorithm: HMAC-SHA-256
+      maximumLifetimeSeconds: 600
+      resultMetaKey: odpMarketSteward/acknowledgementChallenge
+      tokenVisibleToModel: false
+      tokenMayContainSecretMaterial: false
+      serverSecretMayAppearInResult: false
+    sessionMapping:
+      technicalRequirement: TR-ACK-002
+      serverIssuedOpaqueSessionIdentifierRequired: true
+      deterministicDurableObjectMappingRequired: true
+      sameValidSessionReconnectsToSameObject: true
+      newExpiredOrLostSessionRequiresNewAcknowledgement: true
+      cleanupAndCrossSessionReplayTestsRequired: true
+    securityProperty: >-
+      The model can request the gate but cannot satisfy it without a server-issued
+      token and the component-mediated user action. A strongly consistent Durable
+      Object retains only bounded expiring session state; no user profile, prompt,
+      transcript, or market response is stored.
+
+bundleConsumption:
+  manifest: ../bundle.yaml
+  loadOrder:
+    - ../bundle.yaml
+    - ../product/fxlive.odps.yaml
+    - ../interface/fxlive.openapi.yaml
+    - ../value-sets/fx35-instrument-set.yaml
+    - ../rules/ohlc-rules.yaml
+    - ../operations/monitoring.yaml
+    - ../policies/publication-policy.yaml
+    - ../application/mcp-application.yaml
+  startupRequirements:
+    - validate every required artifact
+    - resolve every relative reference within the bundle root
+    - verify every manifest digest
+    - expose exact artifact versions and validation layers in governed results
+  invalidBundleBehavior:
+    marketValuesMayRemainViewable: true
+    governedFitnessVerdictPermitted: false
+    requiredResult: identify_failed_artifact_and_validation_layer
+
+responsibilityBoundary:
+  mcpServer:
+    - fixed-origin API retrieval
+    - coherent snapshot assembly
+    - UTC parsing and normalization
+    - exact FX-35 enforcement
+    - deterministic decimal calculation
+    - hard rule and contextual rule evaluation
+    - availability, service-state, plausibility, and fitness classification
+    - artifact validation and evidence pointers
+    - source-mode labelling and disclaimer enforcement
+    - signed acknowledgement challenge issuance and verification
+    - versioned validation-layer evidence in governed results
+    - optional bounded GPT-5.6 Steward Brief generation through the OpenAI Responses API
+    - Cloudflare Durable Object session coordination and replay protection
+  model:
+    targetEvaluationModelLabel: GPT-5.6
+    runtimeSelectionOwner: ChatGPT_host
+    exactModelEnforceableByMcpServer: false
+    implementationStatus: not_implemented
+    permitted:
+      - map conversational intent to approved tools
+      - explain server-calculated structured evidence
+      - adapt terminology for analyst, governance, or developer audiences
+      - ask one bounded clarification when purpose is materially ambiguous
+    prohibited:
+      - recalculate prices or metrics
+      - override deterministic rule or fitness results
+      - infer market-session state
+      - invent missing evidence or product facts
+      - produce forecasts, recommendations, signals, orders, or execution instructions
+    failureBehavior: >-
+      Host narration may summarize deterministic structured content but cannot
+      retroactively populate or alter the completed MCP tool result.
+  stewardBriefGenerator:
+    generationOwner: mcp-server
+    api: OpenAI Responses API
+    requestedApiModel: gpt-5.6
+    implementationStatus: not_implemented
+    invocationCondition: assessment_input_includeStewardBrief_is_true
+    actualModelIdentifierSource: OpenAI_API_response
+    allowedInput:
+      - deterministic assessment summary
+      - decisive rule results and artifact pointers
+      - declared limitations and safe next steps
+      - requested audience
+    prohibitedInput:
+      - complete conversation transcript
+      - credentials
+      - values absent from deterministic assessment evidence
+    outputContract: ../application/mcp-application.yaml#/schemas/StewardBriefResult
+    failureBehavior: >-
+      Preserve the deterministic assessment, set Steward Brief status to UNAVAILABLE,
+      leave governedAnswer and actualModelIdentifier null, and report the safe next step.
+  component:
+    - render server-provided values and states
+    - provide instrument selection and sorting
+    - expose at most refresh evidence and explain selected result as prominent actions
+    - communicate state through text or icon in addition to color
+    - keep detailed evidence progressively disclosed
+
+apiAdapter:
+  contract: ../interface/fxlive.openapi.yaml
+  fixedOrigin: https://fxlive.qmvp.workers.dev
+  operationsUsed: [getHealth, getSnapshotMetadata, getLatestObservation]
+  latestMode: bar
+  tickerModeUsedByMcp: false
+  debugRequestedOrExposed: false
+  internalStorageKeysExposed: false
+  epochUsedForTemporalCorrectness: false
+  arbitraryURLInputPermitted: false
+  cachePolicy: honor_no_store
+  responseValidationRequiredBeforeGovernedUse: true
+
+tools:
+  - name: get_fx_market_board
+    title: Show governed FX market board
+    description: >-
+      Retrieve and evaluate the coherent FX-35 latest-completed-minute board when
+      the user asks to see the market or its current governed state.
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      openWorldHint: true
+      idempotentHint: true
+      x-externalSystemInteraction: true
+    securitySchemes:
+      - { type: noauth }
+    _meta:
+      securitySchemes:
+        - { type: noauth }
+      ui:
+        resourceUri: ui://odp-market-steward/market-board-v1.html
+        visibility: [model, app]
+    inputSchema:
+      $ref: "#/schemas/MarketBoardInput"
+    outputSchema:
+      $ref: "#/schemas/MarketBoardOutput"
+    consumes:
+      - product-contract
+      - api-contract
+      - instrument-set
+      - ohlc-rules
+      - monitoring
+      - publication-policy
+
+  - name: get_fx_instrument
+    title: Inspect one governed FX instrument
+    description: >-
+      Retrieve one governed FX-35 completed bar with hard checks and descriptive
+      calculations when the user names or selects an instrument.
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      openWorldHint: true
+      idempotentHint: true
+      x-externalSystemInteraction: true
+    securitySchemes:
+      - { type: noauth }
+    _meta:
+      securitySchemes:
+        - { type: noauth }
+      ui:
+        resourceUri: ui://odp-market-steward/market-board-v1.html
+        visibility: [model, app]
+    inputSchema:
+      $ref: "#/schemas/InstrumentInput"
+    outputSchema:
+      $ref: "#/schemas/InstrumentOutput"
+    consumes:
+      - product-contract
+      - api-contract
+      - instrument-set
+      - ohlc-rules
+      - monitoring
+      - publication-policy
+
+  - name: summarize_fx_movements
+    title: Summarize descriptive FX movements
+    description: >-
+      Compare transparent descriptive OHLC changes for selected FX-35 instruments
+      without forecasts, recommendations, or opportunity ranking.
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      openWorldHint: true
+      idempotentHint: true
+      x-externalSystemInteraction: true
+    securitySchemes:
+      - { type: noauth }
+    _meta:
+      securitySchemes:
+        - { type: noauth }
+      ui:
+        resourceUri: ui://odp-market-steward/market-board-v1.html
+        visibility: [model, app]
+    inputSchema:
+      $ref: "#/schemas/MovementSummaryInput"
+    outputSchema:
+      $ref: "#/schemas/MovementSummaryOutput"
+    consumes:
+      - product-contract
+      - api-contract
+      - instrument-set
+      - ohlc-rules
+      - monitoring
+      - publication-policy
+
+  - name: assess_fx_data_service
+    title: Assess FX data fitness
+    description: >-
+      Evaluate deterministic data quality and purpose-specific fitness when the user
+      asks whether the FXLive product is usable for an approved professional purpose.
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      openWorldHint: true
+      idempotentHint: true
+      x-externalSystemInteraction: true
+    securitySchemes:
+      - { type: noauth }
+    _meta:
+      securitySchemes:
+        - { type: noauth }
+      ui:
+        resourceUri: ui://odp-market-steward/market-board-v1.html
+        visibility: [model, app]
+    inputSchema:
+      $ref: "#/schemas/AssessmentInput"
+    outputSchema:
+      $ref: "#/schemas/AssessmentOutput"
+    consumes:
+      - product-contract
+      - api-contract
+      - instrument-set
+      - ohlc-rules
+      - monitoring
+      - publication-policy
+
+  - name: acknowledge_market_data_demo
+    title: Acknowledge Market Data Demo disclosure
+    description: >-
+      Record the explicit component-mediated Market Data Demo acknowledgement for
+      this MCP app session after validating the server-issued challenge.
+    annotations:
+      readOnlyHint: false
+      destructiveHint: false
+      openWorldHint: false
+      idempotentHint: false
+      x-externalSystemInteraction: false
+    securitySchemes:
+      - { type: noauth }
+    _meta:
+      securitySchemes:
+        - { type: noauth }
+      ui:
+        visibility: [app]
+    inputSchema:
+      $ref: "#/schemas/Acknowledgement"
+    outputSchema:
+      $ref: "#/schemas/AcknowledgementOutput"
+    consumes:
+      - publication-policy
+
+  - name: get_fx_product_profile
+    title: Discover the governed FX product
+    description: >-
+      Return governed product declarations and stable artifact pointers when the user
+      asks about product identity, purpose, access, SLA, quality, or limitations.
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      openWorldHint: false
+      idempotentHint: true
+      x-externalSystemInteraction: false
+    securitySchemes:
+      - { type: noauth }
+    _meta:
+      securitySchemes:
+        - { type: noauth }
+      ui:
+        visibility: [model]
+    inputSchema:
+      $ref: "#/schemas/ProductProfileInput"
+    outputSchema:
+      $ref: "#/schemas/ProductProfileOutput"
+    consumes:
+      - product-contract
+      - api-contract
+      - instrument-set
+      - ohlc-rules
+      - monitoring
+      - publication-policy
+
+mcpDescriptorMaterialization:
+  purpose: >-
+    This project contract uses local references for maintainability. MCP tool
+    descriptors advertised by the deployed server must instead contain standalone
+    JSON Schemas that do not depend on this enclosing YAML document.
+  algorithmVersion: "1.0.0"
+  sourceRepresentation: project_contract_with_local_schema_references
+  outputRepresentation: standalone_json_schema_per_tool_input_and_output
+  deterministicSteps:
+    - resolve the tool root reference against this document
+    - recursively collect every reachable schema under schemas
+    - reject missing references, duplicate definition names, and unsupported reference cycles
+    - copy reachable definitions under the standalone schema's $defs object
+    - rewrite internal references from '#/schemas/Name' to '#/$defs/Name'
+    - validate the materialized input and output independently as JSON Schema
+    - compare materialized schemas with the handler's generated request and result types
+  releaseGate:
+    expectedStandaloneSchemas: 12
+    unresolvedReferencesPermitted: false
+    enclosingDocumentDependencyPermitted: false
+    handlerTypeParityRequired: true
+    contractMaterializationValidationStatus: PASS_FOCUSED_IN_MEMORY
+    deployedDescriptorStatus: NOT_TESTED
+
+evidenceModeContract:
+  canonicalModes: [LIVE, RECORDED, NONE]
+  noEvidenceRepresentation: NONE
+  requestModeRules:
+    LIVE_ONLY:
+      permittedResultModes: [LIVE, NONE]
+    ALLOW_RECORDED_FALLBACK:
+      permittedResultModes: [LIVE, RECORDED, NONE]
+  reservedModes:
+    LAST_AVAILABLE:
+      permittedInCurrentRelease: false
+      reason: no approved cache or policy semantics
+    SYNTHETIC_TEST_FIXTURE:
+      publicRequestMode: false
+      permittedOnlyInAutomatedTestHarness: true
+  rules:
+    - >-
+      LIVE means evidence retrieved from the fixed upstream origin during the current
+      tool call. It does not imply OPEN, freshness PASS, or permission to show a LIVE badge.
+    - >-
+      A LIVE badge is permitted only when evidence mode is LIVE, service state is
+      OPEN, and the market-open freshness rule is PASS.
+    - >-
+      RECORDED requires an immutable typed evidence manifest and a banner whose
+      captured timestamp equals that manifest's capturedAtUtc value.
+    - >-
+      When no usable evidence exists, the result carries evidenceMode NONE, no
+      market values, and an explicit typed reason; it must not fabricate evidence.
+
+marketResultStateContract:
+  noEvidence:
+    requiredAvailabilityState: UNAVAILABLE
+    requiredServiceState: UNAVAILABLE
+    marketBoardRequirements: [snapshot_is_null, bars_is_empty]
+    instrumentRequirements: [bar_is_null, metrics_are_empty]
+    movementRequirements: [barEndUtc_is_null, observations_are_empty]
+    fitnessAssessmentResult: INDETERMINATE
+  plausibility:
+    separateFromHardValidity: true
+    unconfiguredRequiredState: NOT_EVALUATED
+    mayChangeHardRuleResult: false
+  validation:
+    requiredInEveryGovernanceContext: true
+    requiredLayers:
+      - syntax
+      - controlling-schema
+      - semantic-policy
+      - cross-reference
+      - source-alignment
+      - sdk-compatibility
+    resultIdentity: unique_artifactId_plus_layer
+    inapplicableLayerStatus: NOT_APPLICABLE
+    unexecutedLayerStatus: NOT_TESTED
+  refresh:
+    marketBoardOutcomeRequired: true
+    canonicalOutcomes: [INITIAL, SAME_BAR, NEW_BAR, NOT_EVALUATED]
+    transportOrDependencyErrorsAreOutcomes: false
+    priorIdentitySource: component_supplied_MarketBoardInput_previousBarEndUtc
+    priorFullMarketResponseStorageRequired: false
+    absentPriorIdentityOutcome: INITIAL
+    sameCompletedBarMustNotBeDescribedAsNew: true
+
+stewardBriefContract:
+  deterministicEvidenceAlwaysPreserved: true
+  generatedRequirements:
+    - governedAnswer is non-null
+    - actualModelIdentifier is non-null and identifies the OpenAI API response model
+    - decisiveEvidencePointers is non-empty
+  unavailableOrRejectedRequirements:
+    - governedAnswer is null
+    - deterministic market and governance output remains present
+    - limitations, safeNextSteps, and rejectionReasons explain the state
+  modelMayOverrideDeterministicResult: false
+
+mcpResultEnvelope:
+  structuredContent: must_match_the_advertised_outputSchema_and_contain_all_model_relevant_facts
+  content: one_brief_text_summary_repeating_no_facts_absent_from_structuredContent
+  _meta:
+    permitted:
+      - component-only hydration that duplicates no required model fact
+      - opaque signed acknowledgement challenge issued by the server
+      - validated pending market-data request used only for component continuity and never as authorization
+    prohibited:
+      - credentials or signing secrets
+      - prohibited upstream identity
+      - market or governance facts required by the model
+    acknowledgementChallenge:
+      key: odpMarketSteward/acknowledgementChallenge
+      presentOnlyWhenStructuredStatus: DISCLOSURE_REQUIRED
+      valueSchema:
+        type: object
+        additionalProperties: false
+        required: [challengeToken, policyVersion, disclaimerDigest, issuedAtUtc, expiresAtUtc]
+        properties:
+          challengeToken: { type: string, minLength: 32 }
+          policyVersion: { type: string, const: "1.1.0" }
+          disclaimerDigest: { type: string, pattern: "^[a-f0-9]{64}$" }
+          issuedAtUtc: { type: string, format: date-time, pattern: "Z$" }
+          expiresAtUtc: { type: string, format: date-time, pattern: "Z$" }
+    pendingRequest:
+      key: odpMarketSteward/pendingRequest
+      presentOnlyWhenStructuredStatus: DISCLOSURE_REQUIRED
+      modelVisible: false
+      valueSchema:
+        type: object
+        additionalProperties: false
+        required: [requestId, toolName, validatedArguments]
+        properties:
+          requestId: { type: string, minLength: 16 }
+          toolName:
+            type: string
+            enum: [get_fx_market_board, get_fx_instrument, summarize_fx_movements, assess_fx_data_service]
+          validatedArguments: { type: object, additionalProperties: true }
+  widgetInput: latest_structuredContent_delivered_over_the_MCP_Apps_bridge
+  retrySafety:
+    domainTools: idempotent
+    acknowledgementTool: single_use_challenge_non_idempotent_bounded_session_state_mutation
+
+schemas:
+  Instrument:
+    type: string
+    enum:
+      - AUDCAD
+      - AUDCHF
+      - AUDJPY
+      - AUDNZD
+      - AUDUSD
+      - CADCHF
+      - CADJPY
+      - CHFHUF
+      - CHFJPY
+      - EURAUD
+      - EURCAD
+      - EURCHF
+      - EURGBP
+      - EURHUF
+      - EURJPY
+      - EURNZD
+      - EURPLN
+      - EURUSD
+      - GBPAUD
+      - GBPCAD
+      - GBPCHF
+      - GBPJPY
+      - GBPNZD
+      - GBPUSD
+      - NZDCAD
+      - NZDCHF
+      - NZDJPY
+      - NZDUSD
+      - USDCAD
+      - USDCHF
+      - USDHUF
+      - USDJPY
+      - USDMXN
+      - USDPLN
+      - USDZAR
+
+  EvidenceRequestMode:
+    type: string
+    enum: [LIVE_ONLY, ALLOW_RECORDED_FALLBACK]
+
+  EvidenceMode:
+    type: string
+    enum: [LIVE, RECORDED, NONE]
+
+  AvailabilityState:
+    type: string
+    enum: [AVAILABLE, PARTIAL, UNAVAILABLE, INCOHERENT]
+
+  ServiceState:
+    type: string
+    enum: [OPEN, MARKET_CLOSED, DEGRADED, UNAVAILABLE, UNKNOWN]
+
+  RuleState:
+    type: string
+    enum: [PASS, FAIL, WARNING, NOT_APPLICABLE, UNKNOWN, NOT_EVALUATED]
+
+  FitnessState:
+    type: string
+    enum: [FIT, FIT_WITH_CONDITIONS, NOT_FIT, INDETERMINATE]
+
+  Purpose:
+    type: string
+    enum:
+      - one_minute_descriptive_analysis
+      - governed_product_discovery
+      - api_integration_testing
+      - data_quality_review
+
+  UtcTimestamp:
+    type: string
+    format: date-time
+    pattern: "Z$"
+
+  Acknowledgement:
+    type: object
+    additionalProperties: false
+    required: [affirmed, policyVersion, disclaimerDigest, challengeToken]
+    properties:
+      affirmed: { type: boolean, const: true }
+      policyVersion: { type: string, const: "1.1.0" }
+      disclaimerDigest: { type: string, pattern: "^[a-f0-9]{64}$" }
+      challengeToken:
+        type: string
+        minLength: 32
+        description: >-
+          Opaque server-issued component challenge. Possession alone is insufficient;
+          the server also verifies signature, expiry, session, and policy binding.
+
+  AcknowledgementOutput:
+    oneOf:
+      - { $ref: "#/schemas/DisclosureRequiredOutput" }
+      - { $ref: "#/schemas/AcknowledgementSuccessOutput" }
+
+  AcknowledgementSuccessOutput:
+    type: object
+    additionalProperties: false
+    required: [status, policyVersion, disclaimerDigest, acknowledgedAtUtc, disclaimer, nextAction]
+    properties:
+      status: { type: string, const: ACKNOWLEDGED }
+      policyVersion: { type: string, const: "1.1.0" }
+      disclaimerDigest: { type: string, pattern: "^[a-f0-9]{64}$" }
+      acknowledgedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
+      disclaimer: { $ref: "#/schemas/Disclaimer" }
+      nextAction:
+        type: string
+        const: Reissue the previously validated pending market-data request.
+
+  ArtifactPointer:
+    type: object
+    additionalProperties: false
+    required: [artifactId, artifactVersion, path, sha256]
+    properties:
+      artifactId: { type: string }
+      artifactVersion: { type: string }
+      path: { type: string, description: bundle-relative artifact path }
+      sha256: { type: string, pattern: "^[a-f0-9]{64}$" }
+
+  ValidationLayer:
+    type: string
+    enum:
+      - syntax
+      - controlling-schema
+      - semantic-policy
+      - cross-reference
+      - source-alignment
+      - sdk-compatibility
+
+  ValidationStatus:
+    type: string
+    enum: [PASS, FAIL, WARNING, NOT_APPLICABLE, NOT_TESTED]
+
+  ValidationLayerResult:
+    type: object
+    additionalProperties: false
+    required:
+      - artifact
+      - layer
+      - status
+      - validatorName
+      - validatorVersion
+      - evaluatedAtUtc
+      - schemaUri
+      - schemaSha256
+      - evidence
+    properties:
+      artifact: { $ref: "#/schemas/ArtifactPointer" }
+      layer: { $ref: "#/schemas/ValidationLayer" }
+      status: { $ref: "#/schemas/ValidationStatus" }
+      validatorName: { type: string, minLength: 1 }
+      validatorVersion: { type: string, minLength: 1 }
+      evaluatedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
+      schemaUri:
+        oneOf:
+          - { type: string, format: uri }
+          - { type: "null" }
+      schemaSha256:
+        oneOf:
+          - { type: string, pattern: "^[a-f0-9]{64}$" }
+          - { type: "null" }
+      evidence:
+        type: array
+        minItems: 1
+        items: { type: string }
+
+  ValidationSummary:
+    type: object
+    additionalProperties: false
+    required: [passed, failed, warnings, notApplicable, notTested]
+    properties:
+      passed: { type: integer, minimum: 0 }
+      failed: { type: integer, minimum: 0 }
+      warnings: { type: integer, minimum: 0 }
+      notApplicable: { type: integer, minimum: 0 }
+      notTested: { type: integer, minimum: 0 }
+
+  GovernanceValidation:
+    type: object
+    additionalProperties: false
+    required: [evaluatedAtUtc, completeForRequiredLayers, summary, results]
+    properties:
+      evaluatedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
+      completeForRequiredLayers: { type: boolean }
+      summary: { $ref: "#/schemas/ValidationSummary" }
+      results:
+        type: array
+        minItems: 1
+        items: { $ref: "#/schemas/ValidationLayerResult" }
+
+  GovernanceContext:
+    type: object
+    additionalProperties: false
+    required: [productId, productVersion, bundleVersion, odpsVersion, artifacts, validation]
+    properties:
+      productId: { type: string, const: fxlive-market-data-demo-fx35 }
+      productVersion: { type: string }
+      bundleVersion: { type: string }
+      odpsVersion: { type: number, const: 4.1 }
+      artifacts:
+        type: array
+        minItems: 1
+        items: { $ref: "#/schemas/ArtifactPointer" }
+      validation: { $ref: "#/schemas/GovernanceValidation" }
+
+  SnapshotEvidence:
+    type: object
+    additionalProperties: false
+    required: [createdAtUtc, barStartUtc, barEndUtc, granularity, expectedCount, returnedCount]
+    properties:
+      createdAtUtc:
+        oneOf:
+          - { $ref: "#/schemas/UtcTimestamp" }
+          - { type: "null" }
+      barStartUtc: { $ref: "#/schemas/UtcTimestamp" }
+      barEndUtc: { $ref: "#/schemas/UtcTimestamp" }
+      granularity: { type: string, const: 1m }
+      expectedCount: { type: integer, const: 35 }
+      returnedCount: { type: integer, minimum: 0, maximum: 35 }
+
+  RecordedBarInterval:
+    type: object
+    additionalProperties: false
+    required: [instrument, barStartUtc, barEndUtc]
+    properties:
+      instrument: { $ref: "#/schemas/Instrument" }
+      barStartUtc: { $ref: "#/schemas/UtcTimestamp" }
+      barEndUtc: { $ref: "#/schemas/UtcTimestamp" }
+
+  ResponseHash:
+    type: object
+    additionalProperties: false
+    required: [resourceId, sha256]
+    properties:
+      resourceId: { type: string, minLength: 1 }
+      sha256: { type: string, pattern: "^[a-f0-9]{64}$" }
+
+  RecordedEvidenceManifest:
+    type: object
+    additionalProperties: false
+    required:
+      - capturedAtUtc
+      - originalBarIntervals
+      - productVersion
+      - bundleVersion
+      - policyVersion
+      - artifactVersions
+      - productArtifactDigest
+      - contentSha256
+      - responseHashes
+      - validationResult
+      - retentionClass
+      - writeProtection
+      - immutableManifestDigest
+    properties:
+      capturedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
+      originalBarIntervals:
+        type: array
+        minItems: 1
+        maxItems: 35
+        items: { $ref: "#/schemas/RecordedBarInterval" }
+      productVersion: { type: string, minLength: 1 }
+      bundleVersion: { type: string, minLength: 1 }
+      policyVersion: { type: string, const: "1.1.0" }
+      artifactVersions:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items: { $ref: "#/schemas/ArtifactPointer" }
+      productArtifactDigest: { type: string, pattern: "^[a-f0-9]{64}$" }
+      contentSha256: { type: string, pattern: "^[a-f0-9]{64}$" }
+      responseHashes:
+        type: array
+        minItems: 1
+        items: { $ref: "#/schemas/ResponseHash" }
+      validationResult: { $ref: "#/schemas/GovernanceValidation" }
+      retentionClass: { type: string, minLength: 1 }
+      writeProtection: { type: string, const: CREATE_ONLY_IF_ABSENT }
+      immutableManifestDigest:
+        type: string
+        pattern: "^[a-f0-9]{64}$"
+        description: >-
+          SHA-256 of the canonical manifest representation with this digest field omitted.
+
+  LiveEvidenceContext:
+    type: object
+    additionalProperties: false
+    required:
+      - evidenceMode
+      - fetchedAtUtc
+      - calendarEvaluatedAtUtc
+      - cacheAgeSeconds
+      - displayLabel
+      - liveBadgePermitted
+      - sourceDescription
+    properties:
+      evidenceMode: { type: string, const: LIVE }
+      fetchedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
+      calendarEvaluatedAtUtc:
+        oneOf:
+          - { $ref: "#/schemas/UtcTimestamp" }
+          - { type: "null" }
+      cacheAgeSeconds: { type: integer, minimum: 0 }
+      displayLabel: { type: string, const: LIVE }
+      liveBadgePermitted: { type: boolean }
+      sourceDescription:
+        type: string
+        const: retrieved_from_fixed_origin_during_current_tool_call
+
+  RecordedEvidenceContext:
+    type: object
+    additionalProperties: false
+    required:
+      - evidenceMode
+      - fetchedAtUtc
+      - calendarEvaluatedAtUtc
+      - cacheAgeSeconds
+      - displayLabel
+      - liveBadgePermitted
+      - manifest
+    properties:
+      evidenceMode: { type: string, const: RECORDED }
+      fetchedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
+      calendarEvaluatedAtUtc:
+        oneOf:
+          - { $ref: "#/schemas/UtcTimestamp" }
+          - { type: "null" }
+      cacheAgeSeconds: { type: integer, minimum: 0 }
+      displayLabel:
+        type: string
+        pattern: "^Recorded demo snapshot — captured .+Z — not current market data\\.$"
+      liveBadgePermitted: { type: boolean, const: false }
+      manifest: { $ref: "#/schemas/RecordedEvidenceManifest" }
+
+  NoEvidenceContext:
+    type: object
+    additionalProperties: false
+    required:
+      - evidenceMode
+      - attemptedAtUtc
+      - calendarEvaluatedAtUtc
+      - cacheAgeSeconds
+      - displayLabel
+      - liveBadgePermitted
+      - reason
+    properties:
+      evidenceMode: { type: string, const: NONE }
+      attemptedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
+      calendarEvaluatedAtUtc:
+        oneOf:
+          - { $ref: "#/schemas/UtcTimestamp" }
+          - { type: "null" }
+      cacheAgeSeconds: { type: "null" }
+      displayLabel: { type: string, const: No market evidence available. }
+      liveBadgePermitted: { type: boolean, const: false }
+      reason: { type: string, minLength: 1 }
+
+  EvidenceContext:
+    oneOf:
+      - { $ref: "#/schemas/LiveEvidenceContext" }
+      - { $ref: "#/schemas/RecordedEvidenceContext" }
+      - { $ref: "#/schemas/NoEvidenceContext" }
+
+  Disclaimer:
+    type: object
+    additionalProperties: false
+    required: [label, statement, policyVersion]
+    properties:
+      label: { type: string, const: MARKET DATA DEMO }
+      statement:
+        type: string
+        const: >-
+          MARKET DATA DEMO. For technical demonstration and evaluation only. Data
+          may be delayed, incomplete, unavailable, or contain errors. Nothing
+          presented is investment advice, a recommendation, or an offer to buy or
+          sell any financial instrument. The product must not be used for live
+          trading or order execution.
+      policyVersion: { type: string }
+
+  Bar:
+    type: object
+    additionalProperties: false
+    required: [Currency, Epoch, BarStart, BarEnd, Granularity, Open, High, Low, Close]
+    properties:
+      Currency: { $ref: "#/schemas/Instrument" }
+      Epoch:
+        type: string
+        pattern: "^[0-9]+$"
+        description: >-
+          Original non-negative epoch integer rendered losslessly as a decimal string;
+          BarStart and BarEnd, not Epoch, control temporal correctness.
+      BarStart: { $ref: "#/schemas/UtcTimestamp" }
+      BarEnd: { $ref: "#/schemas/UtcTimestamp" }
+      Granularity: { type: string, const: 1m }
+      Open: { type: string, description: canonical decimal string }
+      High: { type: string, description: canonical decimal string }
+      Low: { type: string, description: canonical decimal string }
+      Close: { type: string, description: canonical decimal string }
+
+  RuleResult:
+    type: object
+    additionalProperties: false
+    required: [ruleId, state, artifact, pointer, evidence]
+    properties:
+      ruleId: { type: string }
+      state: { $ref: "#/schemas/RuleState" }
+      artifact: { $ref: "#/schemas/ArtifactPointer" }
+      pointer: { type: string, description: stable JSON Pointer within the artifact }
+      evidence: { type: object, additionalProperties: true }
+
+  QualitySummary:
+    type: object
+    additionalProperties: false
+    required: [passed, failed, warnings, notApplicable, unknown, notEvaluated, results]
+    properties:
+      passed: { type: integer, minimum: 0 }
+      failed: { type: integer, minimum: 0 }
+      warnings: { type: integer, minimum: 0 }
+      notApplicable: { type: integer, minimum: 0 }
+      unknown: { type: integer, minimum: 0 }
+      notEvaluated: { type: integer, minimum: 0 }
+      results:
+        type: array
+        items: { $ref: "#/schemas/RuleResult" }
+
+  PlausibilityState:
+    type: string
+    enum: [NORMAL, UNUSUAL, NOT_EVALUATED]
+
+  PlausibilityResult:
+    type: object
+    additionalProperties: false
+    required: [state, method, configurationStatus, artifact, pointer, evidence, limitations]
+    properties:
+      state: { $ref: "#/schemas/PlausibilityState" }
+      method: { type: string, const: rolling_median_and_median_absolute_deviation }
+      configurationStatus: { type: string, enum: [CONFIGURED, UNCONFIGURED] }
+      artifact: { $ref: "#/schemas/ArtifactPointer" }
+      pointer: { type: string, const: /spec/contextualRules/contextual-ohlc-plausibility }
+      evidence: { type: object, additionalProperties: true }
+      limitations: { type: array, minItems: 1, items: { type: string } }
+
+  RefreshResult:
+    type: object
+    additionalProperties: false
+    required:
+      - outcome
+      - requestedAtUtc
+      - completedAtUtc
+      - previousBarEndUtc
+      - currentBarEndUtc
+      - message
+    properties:
+      outcome:
+        type: string
+        enum: [INITIAL, SAME_BAR, NEW_BAR, NOT_EVALUATED]
+      requestedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
+      completedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
+      previousBarEndUtc:
+        oneOf:
+          - { $ref: "#/schemas/UtcTimestamp" }
+          - { type: "null" }
+      currentBarEndUtc:
+        oneOf:
+          - { $ref: "#/schemas/UtcTimestamp" }
+          - { type: "null" }
+      message: { type: string, minLength: 1 }
+
+  StewardBriefStatus:
+    type: string
+    enum: [GENERATED, NOT_REQUESTED, UNAVAILABLE, REJECTED]
+
+  StewardBriefResult:
+    type: object
+    additionalProperties: false
+    required:
+      - status
+      - targetModel
+      - actualModelIdentifier
+      - governedAnswer
+      - decisiveEvidencePointers
+      - limitations
+      - safeNextSteps
+      - rejectionReasons
+    properties:
+      status: { $ref: "#/schemas/StewardBriefStatus" }
+      targetModel: { type: string, const: gpt-5.6 }
+      actualModelIdentifier:
+        oneOf:
+          - { type: string, minLength: 1 }
+          - { type: "null" }
+      governedAnswer:
+        oneOf:
+          - { type: string, minLength: 1 }
+          - { type: "null" }
+      decisiveEvidencePointers:
+        type: array
+        items: { type: string, minLength: 1 }
+      limitations: { type: array, items: { type: string } }
+      safeNextSteps: { type: array, items: { type: string } }
+      rejectionReasons: { type: array, items: { type: string } }
+
+  DisclosureRequiredOutput:
+    type: object
+    additionalProperties: false
+    required: [status, summary, nextAction, evidence, disclaimer]
+    properties:
+      status: { type: string, const: DISCLOSURE_REQUIRED }
+      summary:
+        type: string
+        const: Explicit acknowledgement is required before market-data retrieval.
+      nextAction:
+        type: string
+        const: Review the disclaimer in the component and activate Acknowledge and continue.
+      evidence: { $ref: "#/schemas/NoEvidenceContext" }
+      disclaimer: { $ref: "#/schemas/Disclaimer" }
+
+  MarketBoardInput:
+    type: object
+    additionalProperties: false
+    required: [evidenceMode]
+    properties:
+      evidenceMode: { $ref: "#/schemas/EvidenceRequestMode" }
+      previousBarEndUtc:
+        oneOf:
+          - { $ref: "#/schemas/UtcTimestamp" }
+          - { type: "null" }
+        description: >-
+          Optional prior completed-bar identity supplied by the component solely to
+          distinguish INITIAL, SAME_BAR, NEW_BAR, and NOT_EVALUATED outcomes.
+
+  MarketBoardOutput:
+    oneOf:
+      - { $ref: "#/schemas/DisclosureRequiredOutput" }
+      - { $ref: "#/schemas/MarketBoardSuccessOutput" }
+
+  MarketBoardSuccessOutput:
+    type: object
+    additionalProperties: false
+    required:
+      - productId
+      - bundleVersion
+      - summary
+      - governance
+      - evidence
+      - availabilityState
+      - serviceState
+      - snapshot
+      - bars
+      - quality
+      - plausibility
+      - refresh
+      - limitations
+      - disclaimer
+    properties:
+      productId: { type: string, const: fxlive-market-data-demo-fx35 }
+      bundleVersion: { type: string }
+      summary: { type: string }
+      governance: { $ref: "#/schemas/GovernanceContext" }
+      evidence: { $ref: "#/schemas/EvidenceContext" }
+      availabilityState: { $ref: "#/schemas/AvailabilityState" }
+      serviceState: { $ref: "#/schemas/ServiceState" }
+      snapshot:
+        oneOf:
+          - { $ref: "#/schemas/SnapshotEvidence" }
+          - { type: "null" }
+      bars:
+        type: array
+        maxItems: 35
+        items: { $ref: "#/schemas/Bar" }
+      quality: { $ref: "#/schemas/QualitySummary" }
+      plausibility: { $ref: "#/schemas/PlausibilityResult" }
+      refresh: { $ref: "#/schemas/RefreshResult" }
+      limitations: { type: array, items: { type: string } }
+      disclaimer: { $ref: "#/schemas/Disclaimer" }
+
+  InstrumentInput:
+    type: object
+    additionalProperties: false
+    required: [instrument, evidenceMode]
+    properties:
+      instrument: { $ref: "#/schemas/Instrument" }
+      evidenceMode: { $ref: "#/schemas/EvidenceRequestMode" }
+
+  InstrumentOutput:
+    oneOf:
+      - { $ref: "#/schemas/DisclosureRequiredOutput" }
+      - { $ref: "#/schemas/InstrumentSuccessOutput" }
+
+  InstrumentSuccessOutput:
+    type: object
+    additionalProperties: false
+    required:
+      - summary
+      - governance
+      - instrument
+      - evidence
+      - availabilityState
+      - serviceState
+      - bar
+      - metrics
+      - ruleResults
+      - plausibility
+      - limitations
+      - disclaimer
+    properties:
+      summary: { type: string }
+      governance: { $ref: "#/schemas/GovernanceContext" }
+      instrument: { $ref: "#/schemas/Instrument" }
+      evidence: { $ref: "#/schemas/EvidenceContext" }
+      availabilityState: { $ref: "#/schemas/AvailabilityState" }
+      serviceState: { $ref: "#/schemas/ServiceState" }
+      bar:
+        oneOf:
+          - { $ref: "#/schemas/Bar" }
+          - { type: "null" }
+      metrics:
+        type: object
+        additionalProperties:
+          oneOf:
+            - { type: string }
+            - { type: "null" }
+      ruleResults:
+        type: array
+        items: { $ref: "#/schemas/RuleResult" }
+      plausibility: { $ref: "#/schemas/PlausibilityResult" }
+      limitations: { type: array, items: { type: string } }
+      disclaimer: { $ref: "#/schemas/Disclaimer" }
+
+  MovementSummaryInput:
+    type: object
+    additionalProperties: false
+    required: [instruments, metric, evidenceMode]
+    properties:
+      instruments:
+        oneOf:
+          - { type: string, const: STANDARD_SET }
+          - { type: array, minItems: 1, maxItems: 35, uniqueItems: true, items: { $ref: "#/schemas/Instrument" } }
+      metric:
+        type: string
+        enum: [closeMinusOpen, basisPointMovement, absoluteRange, rangeBasisPoints, upperWick, lowerWick, bodyToRangeRatio, crossBarGap]
+      evidenceMode: { $ref: "#/schemas/EvidenceRequestMode" }
+
+  MovementSummaryOutput:
+    oneOf:
+      - { $ref: "#/schemas/DisclosureRequiredOutput" }
+      - { $ref: "#/schemas/MovementSummarySuccessOutput" }
+
+  MovementSummarySuccessOutput:
+    type: object
+    additionalProperties: false
+    required:
+      - summary
+      - governance
+      - metric
+      - evidence
+      - availabilityState
+      - serviceState
+      - barEndUtc
+      - observations
+      - plausibility
+      - limitations
+      - disclaimer
+    properties:
+      summary: { type: string }
+      governance: { $ref: "#/schemas/GovernanceContext" }
+      metric: { type: string }
+      evidence: { $ref: "#/schemas/EvidenceContext" }
+      availabilityState: { $ref: "#/schemas/AvailabilityState" }
+      serviceState: { $ref: "#/schemas/ServiceState" }
+      barEndUtc:
+        oneOf:
+          - { $ref: "#/schemas/UtcTimestamp" }
+          - { type: "null" }
+      observations:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [instrument, signedValue, absoluteValue, state, evidence]
+          properties:
+            instrument: { $ref: "#/schemas/Instrument" }
+            signedValue:
+              oneOf:
+                - { type: string }
+                - { type: "null" }
+            absoluteValue:
+              oneOf:
+                - { type: string }
+                - { type: "null" }
+            state: { $ref: "#/schemas/RuleState" }
+            evidence: { type: object, additionalProperties: true }
+      plausibility: { $ref: "#/schemas/PlausibilityResult" }
+      limitations: { type: array, items: { type: string } }
+      disclaimer: { $ref: "#/schemas/Disclaimer" }
+
+  AssessmentInput:
+    type: object
+    additionalProperties: false
+    required: [purpose, instruments, evidenceMode, audience]
+    properties:
+      purpose: { $ref: "#/schemas/Purpose" }
+      instruments:
+        oneOf:
+          - { type: string, const: STANDARD_SET }
+          - { type: array, minItems: 1, maxItems: 35, uniqueItems: true, items: { $ref: "#/schemas/Instrument" } }
+      evidenceMode: { $ref: "#/schemas/EvidenceRequestMode" }
+      audience: { type: string, enum: [analyst, governance, developer] }
+      includeStewardBrief:
+        type: boolean
+        default: true
+        description: >-
+          When true, the MCP server makes the bounded gpt-5.6 Responses API call
+          after deterministic assessment; false returns status NOT_REQUESTED.
+
+  AssessmentOutput:
+    oneOf:
+      - { $ref: "#/schemas/DisclosureRequiredOutput" }
+      - { $ref: "#/schemas/AssessmentSuccessOutput" }
+
+  AssessmentSuccessOutput:
+    type: object
+    additionalProperties: false
+    required:
+      - summary
+      - governance
+      - purpose
+      - fitness
+      - evidence
+      - availabilityState
+      - serviceState
+      - decisiveRules
+      - plausibility
+      - stewardBrief
+      - limitations
+      - disclaimer
+    properties:
+      summary: { type: string }
+      governance: { $ref: "#/schemas/GovernanceContext" }
+      purpose: { $ref: "#/schemas/Purpose" }
+      fitness: { $ref: "#/schemas/FitnessState" }
+      evidence: { $ref: "#/schemas/EvidenceContext" }
+      availabilityState: { $ref: "#/schemas/AvailabilityState" }
+      serviceState: { $ref: "#/schemas/ServiceState" }
+      decisiveRules:
+        type: array
+        items: { $ref: "#/schemas/RuleResult" }
+      plausibility: { $ref: "#/schemas/PlausibilityResult" }
+      stewardBrief: { $ref: "#/schemas/StewardBriefResult" }
+      limitations: { type: array, items: { type: string } }
+      disclaimer: { $ref: "#/schemas/Disclaimer" }
+
+  ProductProfileInput:
+    type: object
+    additionalProperties: false
+    required: [sections]
+    properties:
+      sections:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          enum: [identity, purpose, use_cases, access, SLA, quality, instruments, monitoring, calculations, publication, limitations, validation]
+
+  ProductProfileOutput:
+    type: object
+    additionalProperties: false
+    required:
+      - summary
+      - governance
+      - generatedAtUtc
+      - productId
+      - productVersion
+      - odpsVersion
+      - artifactDigest
+      - declarations
+      - validation
+      - disclaimer
+    properties:
+      summary: { type: string }
+      governance: { $ref: "#/schemas/GovernanceContext" }
+      generatedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
+      productId: { type: string, const: fxlive-market-data-demo-fx35 }
+      productVersion: { type: string }
+      odpsVersion: { type: number, const: 4.1 }
+      artifactDigest: { type: string, pattern: "^[a-f0-9]{64}$" }
+      declarations:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [artifact, pointer, value]
+          properties:
+            artifact: { $ref: "#/schemas/ArtifactPointer" }
+            pointer: { type: string }
+            value: {}
+      validation:
+        $ref: "#/schemas/GovernanceValidation"
+      disclaimer: { $ref: "#/schemas/Disclaimer" }
+
+securityAndPrivacy:
+  allToolsReadOnly: false
+  modelVisibleDomainToolsReadOnly: true
+  acknowledgementMutationBoundary: bounded_per_session_policy_state_only
+  authentication: none_for_public_first_release
+  arbitraryUrlsOrPathsAccepted: false
+  instrumentInputBoundedToValueSet: true
+  minimumTaskSpecificInputsOnly: true
+  acceptsConversationTranscript: false
+  acceptsCredentials: false
+  acceptsPreciseLocation: false
+  serverManagedOpenAICredentialOnly: true
+  OpenAICredentialMayAppearInToolInputOrResult: false
+  stewardBriefOutboundPayloadBoundedBy: responsibilityBoundary.stewardBriefGenerator.allowedInput
+  componentContentSecurityPolicy: exact_domains_required_before_deployment
+  secretsInToolResultsOrComponentMetadata: prohibited
+  opaqueSignedAcknowledgementChallengesAreSecrets: false
+
+requirements:
+  source: ../requirements/FuncitionalRequirements.html
+  sourceDraft: "0.3"
+  technicalSource: ../requirements/TechnicalRequirements.html
+  technicalDraft: "0.1"
+  principalIDs:
+    - FR-ODP-001
+    - FR-ODP-002
+    - FR-ODP-003
+    - FR-ODP-004
+    - FR-LIVE-001
+    - FR-LIVE-004
+    - FR-AI-001
+    - FR-AI-002
+    - FR-AI-003
+    - FR-AI-004
+    - FR-CHAT-001
+    - FR-CHAT-002
+    - FR-CHAT-003
+    - FR-CHAT-004
+    - FR-CHAT-005
+    - FR-CHAT-006
+    - FR-PLUG-001
+    - FR-PLUG-002
+    - FR-EVAL-001
+    - FR-ACK-001
+    - FR-ACK-002
+    - FR-EVID-001
+    - FR-DEP-001
+    - FR-DEP-002
+    - FR-DEP-003
+    - FR-DEP-004
+    - NFR-REL-001
+    - NFR-PERF-001
+    - NFR-DEP-001
+    - NFR-SEC-001
+    - NFR-SEC-002
+    - NFR-PRIV-001
+    - NFR-PUB-001
+    - NFR-ACC-001
+    - NFR-OBS-001
+    - NFR-TEST-001
+    - NFR-UX-001
+    - NFR-META-001
+  principalTechnicalIDs:
+    - TR-ARCH-001
+    - TR-ARCH-002
+    - TR-ARCH-003
+    - TR-ARCH-004
+    - TR-MCP-001
+    - TR-MCP-002
+    - TR-MCP-003
+    - TR-MCP-004
+    - TR-MCP-005
+    - TR-MCP-006
+    - TR-DATA-001
+    - TR-DATA-002
+    - TR-DATA-003
+    - TR-DATA-004
+    - TR-DATA-005
+    - TR-ACK-001
+    - TR-ACK-002
+    - TR-ACK-003
+    - TR-STATE-001
+    - TR-STATE-002
+    - TR-STATE-003
+    - TR-AI-001
+    - TR-AI-002
+    - TR-AI-003
+    - TR-SEC-001
+    - TR-SEC-002
+    - TR-SEC-003
+    - TR-SEC-004
+    - TR-PRIV-001
+    - TR-PUB-001
+    - TR-OPS-001
+    - TR-OPS-002
+    - TR-OPS-003
+    - TR-OPS-004
+    - TR-OBS-001
+    - TR-R2-001
+    - TR-TEST-001
+    - TR-TEST-002
+    - TR-TEST-003
+    - TR-TEST-004
+    - TR-TEST-005
+    - TR-TEST-006
+    - TR-TEST-007
+    - TR-TEST-008
+    - TR-PERF-001
+    - TR-REL-001
+    - TR-COST-001

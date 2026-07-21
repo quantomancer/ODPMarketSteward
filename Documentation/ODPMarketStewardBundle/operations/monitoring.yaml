@@ -1,0 +1,245 @@
+apiVersion: odp-market-steward.qmvp/v1
+kind: OperationalMonitoringProfile
+
+metadata:
+  id: fxlive-utc-market-monitoring
+  name: "FXLive UTC session, freshness, and evidence monitoring"
+  version: "1.1.0"
+  status: testing
+  classification: project_operational_configuration
+  description: >-
+    Operational configuration for coherent snapshot retrieval, authoritative
+    calendar integration, freshness, service-state classification, caching, and
+    recorded evidence. It is not an ODPS, ODPG, or ODPR artifact.
+
+dependencies:
+  productContract: ../product/fxlive.odps.yaml
+  apiContract: ../interface/fxlive.openapi.yaml
+  instrumentSet: ../value-sets/fx35-instrument-set.yaml
+  rules: ../rules/ohlc-rules.yaml
+
+spec:
+  time:
+    canonicalTimezone: UTC
+    publicTimestampFormat: RFC3339
+    requiredSuffix: Z
+    hostLocaleMayAffectEvaluation: false
+    hostTimezoneMayAffectEvaluation: false
+
+  calendar:
+    adapterStatus: UNCONFIGURED
+    authorityRequirement: >-
+      A named authoritative foreign-exchange market calendar expressed in UTC and
+      covering holidays, daylight-saving transitions, and maintenance windows must
+      be configured and contract-tested before OPEN or MARKET_CLOSED can be issued.
+    hardcodedWeekdayHoursPermitted: false
+    resultWhenUnavailable: UNKNOWN
+    unresolvedDecisionID: OD-002
+
+  createdAtProvenance:
+    publicField: CreatedAt
+    apiOperation: getSnapshotMetadata
+    implementationMapping: current_snapshot_generation_timestamp
+    mappingEvidence: reviewed_worker_source
+    producerSemanticConfirmation: PENDING
+    useForFreshnessBeforeConfirmation: prohibited
+    unresolvedDecisionID: OD-011
+
+  freshness:
+    ruleID: market-open-freshness
+    appliesWhen: calendar_state_is_OPEN
+    thresholds:
+      createdAtMaximumAgeSeconds: 120
+      barEndMaximumAgeSeconds: 120
+      inclusive: true
+    marketClosedResult: NOT_APPLICABLE
+    calendarUnknownResult: UNKNOWN
+    missingOrInvalidCreatedAtResult: UNKNOWN
+    prohibition: stale_data_alone_must_not_imply_market_closed
+
+  coherentSnapshot:
+    metadataReadBeforeFanOut: required
+    metadataReadAfterFanOut: required
+    requiredSharedField: BarEnd
+    boundedRereadsAfterRollover: 1
+    continuedMismatchAvailabilityState: INCOHERENT
+    fullBoardConcurrency: bounded_by_runtime_configuration
+    fullBoardExpectedInstrumentCount: 35
+
+  serviceState:
+    allowedStates: [OPEN, MARKET_CLOSED, DEGRADED, UNAVAILABLE, UNKNOWN]
+    classificationOrder:
+      - priority: 1
+        when: api_unreachable_or_unparseable
+        result: UNAVAILABLE
+      - priority: 2
+        when: parseable_response_but_no_usable_market_evidence
+        result: UNAVAILABLE
+      - priority: 3
+        when: authoritative_calendar_unavailable
+        result: UNKNOWN
+      - priority: 4
+        when: authoritative_calendar_closed
+        result: MARKET_CLOSED
+      - priority: 5
+        when: authoritative_calendar_open_and_mandatory_rule_fails
+        result: DEGRADED
+      - priority: 6
+        when: authoritative_calendar_open_and_any_mandatory_rule_is_UNKNOWN_or_NOT_EVALUATED
+        result: UNKNOWN
+      - priority: 7
+        when: authoritative_calendar_open_and_all_mandatory_rules_pass
+        result: OPEN
+      - priority: 8
+        when: any_other_parseable_state
+        result: UNKNOWN
+    totalMappingDefault: UNKNOWN
+    liveBadgeCondition: service_state_is_OPEN_and_freshness_is_PASS
+    successfulHealthAloneMayProduceOpen: false
+
+  availability:
+    allowedStates: [AVAILABLE, PARTIAL, UNAVAILABLE, INCOHERENT]
+    partialPolicy: identify_missing_instruments_and_failed_checks
+    unavailablePolicy: return_no_evidence_under_current_no_store_policy
+    mayRelabelCachedAsNewlyFetched: false
+
+  evidenceModes:
+    requestModes: [LIVE_ONLY, ALLOW_RECORDED_FALLBACK]
+    allowedResults: [LIVE, RECORDED, NONE]
+    noUsableEvidence:
+      evidenceMode: NONE
+      requiredLabel: No market evidence available.
+      requiredFields: [attemptedAtUtc, reason]
+      marketValuesPermitted: false
+    LIVE:
+      requirements:
+        - response retrieved from the fixed origin during the current tool call
+        - original UTC evidence values retained
+      doesNotImply:
+        - service state is OPEN
+        - freshness result is PASS
+        - LIVE badge is permitted
+    RECORDED:
+      requiredBanner: "Recorded demo snapshot — captured {capturedAtUtc} — not current market data."
+      mayPassCurrentFreshness: false
+      immutableManifestRequired: true
+      prerequisites:
+        - request mode is ALLOW_RECORDED_FALLBACK
+        - written capture, storage, display, retention, and redistribution rights are approved
+        - immutable manifest integrity passes
+      requiredManifestFields:
+        - capturedAtUtc
+        - originalBarIntervals
+        - productVersion
+        - bundleVersion
+        - policyVersion
+        - artifactVersions
+        - productArtifactDigest
+        - contentSha256
+        - responseHashes
+        - validationResult
+        - retentionClass
+        - writeProtection
+        - immutableManifestDigest
+      storageWriteContract:
+        mode: create_only_if_absent
+        overwritePermitted: false
+        approvedRetentionClassRequired: true
+        lifecycleAndImmutabilityPolicyRequired: true
+    NONE:
+      marketValuesPermitted: false
+      reasonRequired: true
+    reservedModes:
+      LAST_AVAILABLE:
+        implementationStatus: PROHIBITED_IN_V1_UNDER_NO_STORE
+      SYNTHETIC_TEST_FIXTURE:
+        publicRequestMode: false
+        permittedOnlyInAutomatedTestHarness: true
+  testEvidence:
+    SYNTHETIC_TEST_FIXTURE:
+      requiredLabel: SYNTHETIC TEST FIXTURE
+      mayMixWithLiveOrRecordedEvidence: false
+      automatedExpectedFailureTestRequired: true
+
+  refresh:
+    mvpMode: manual_user_or_model_tool_action
+    backgroundPollingPermitted: false
+    priorIdentityField: previousBarEndUtc
+    outcomes: [INITIAL, SAME_BAR, NEW_BAR, NOT_EVALUATED]
+    transportOrDependencyErrorsUseSeparateTypedResults: true
+
+  cache:
+    upstreamResponseDirective: no-store
+    persistentOrCrossToolResponseCache: prohibited_until_api_policy_changes
+    inFlightRequestCoalescing: permitted
+    coherentRequestScopedReuse: permitted
+    retainConsecutiveBarsPerInstrument: requires_separate_authorized_evidence_store
+    evidenceModeAndCacheAgeRequiredInResults: true
+    cacheAgeDefinition: >-
+      Whole non-negative seconds from the original evidence retrieval or capture
+      instant to the current tool evaluation time; null when no evidence exists.
+    arbitraryUpstreamURLInputPermitted: false
+
+  network:
+    allowedOrigin: https://fxlive.qmvp.workers.dev
+    allowedMethods: [GET]
+    allowedPaths: [/health, /meta, /latest]
+    timeout: runtime_configuration_required
+    maximumTransientRetries: 1
+    arbitraryOriginOrPathInputPermitted: false
+
+  implementationAssumptions:
+    selectedBarBehavior: worker_returns_last_bar_array_entry
+    storageOrderingInvariantStatus: UNCONFIRMED
+    applicationMitigation: >-
+      Do not infer temporal correctness from array position or Epoch. Validate
+      BarStart and BarEnd and require equality with the coherent metadata snapshot.
+    epochUseForCorrectness: prohibited
+
+observability:
+  requiredFields:
+    - correlationId
+    - toolName
+    - resultCode
+    - evaluatedAtUtc
+    - calendarEvaluatedAtUtc
+    - evidenceMode
+    - cacheAgeSeconds
+    - snapshotId
+    - serviceState
+    - availabilityState
+    - statusCounts
+    - dependencyDurationsMilliseconds
+    - durationMilliseconds
+    - modelBriefState
+    - buildVersion
+  nullableWhenNoEvidence: [calendarEvaluatedAtUtc, cacheAgeSeconds, snapshotId]
+  applicabilityRules:
+    dependencyDurationsMilliseconds: required_map_empty_when_no_dependency_was_called
+    modelBriefState: use_NOT_REQUESTED_when_the_steward_brief_path_did_not_run
+    buildVersion: exact_deployed_mcp_service_build_identifier
+  fieldDefinitions:
+    correlationId: server_generated_non_reversible_request_identifier
+    snapshotId: server_generated_opaque_non_reversible_surrogate_not_an_upstream_identifier_or_encoded_market_value
+  retentionAllowlist: requiredFields_only_after_sanitization_and_environment_specific_retention_approval
+  optionalEvidenceFields: [fetchedAtUtc, attemptedAtUtc, capturedAtUtc, originalFetchedAtUtc]
+  prohibitedLogContent:
+    - credentials
+    - complete conversation transcripts
+    - unnecessary raw payloads
+    - upstream source identity in public logs or responses
+
+requirementIDs:
+  - FR-LIVE-003
+  - FR-LIVE-004
+  - FR-LIVE-005
+  - FR-QUAL-003
+  - FR-TIME-001
+  - FR-STATE-001
+  - FR-STATE-002
+  - FR-STATE-003
+  - FR-STATE-004
+  - FR-EVID-001
+  - NFR-REL-001
+  - NFR-PERF-001
+  - NFR-OBS-001

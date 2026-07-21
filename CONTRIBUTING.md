@@ -2,11 +2,12 @@
 
 ## Change workflow
 
-1. Identify the governing project-plan and design records.
+1. Inspect `Documentation/ProjectPlan.html` and identify the governing project-plan and design records.
 2. Keep the change small and respect the module boundaries in `AGENTS.md`.
 3. Add or update the relevant automated tests and evidence.
 4. Review the diff in WebStorm, including generated-file and secret checks.
 5. Record only verified results; keep incomplete acceptance items open.
+6. Update the project plan, comments, UTC change log, risks, and evidence references whenever project state changed.
 
 ## WebStorm review checklist
 
