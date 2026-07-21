@@ -5,7 +5,11 @@ import {
   createStewardMcpServer,
 } from "../../apps/worker/src/mcp/server";
 import { MCP_TOOL_SCHEMAS } from "../../generated/standalone-tool-schemas";
-import type { GovernedSnapshotSourcePort } from "../../packages/application/src";
+import {
+  InMemoryAcknowledgementState,
+  SessionAcknowledgementService,
+  type GovernedSnapshotSourcePort,
+} from "../../packages/application/src";
 import type { CompletedBarLexemes } from "../../packages/domain/src";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -45,6 +49,7 @@ describe("MCP product-profile vertical slice", () => {
     );
 
     expect(tools.tools.map((candidate) => candidate.name)).toEqual([
+      "acknowledge_market_data_demo",
       "get_fx_market_board",
       "get_fx_product_profile",
     ]);
@@ -68,7 +73,7 @@ describe("MCP product-profile vertical slice", () => {
       productVersion: "1.1.4",
       odpsVersion: 4.1,
       governance: {
-        bundleVersion: "1.7.0",
+        bundleVersion: "1.8.0",
         validation: {
           completeForRequiredLayers: false,
           summary: { passed: 3, failed: 0, notTested: 3 },
@@ -270,7 +275,7 @@ describe("MCP governed market-board vertical slice", () => {
     expect(result.isError, JSON.stringify(result)).not.toBe(true);
     expect(result.structuredContent).toMatchObject({
       productId: "fxlive-market-data-demo-fx35",
-      bundleVersion: "1.7.0",
+      bundleVersion: "1.8.0",
       availabilityState: "AVAILABLE",
       serviceState: "UNKNOWN",
       evidence: {
@@ -293,6 +298,133 @@ describe("MCP governed market-board vertical slice", () => {
     ).toHaveLength(35);
     expect(source.getSnapshotMetadata.mock.calls).toHaveLength(2);
     expect(source.getLatestObservation.mock.calls).toHaveLength(35);
+    expect(source.getHealth.mock.calls).toHaveLength(0);
+  });
+
+  it("issues a component-only challenge, commits once, and then permits retrieval", async () => {
+    const source = boardSource();
+    const acknowledgementService = acknowledgementFixture();
+    const client = await connectInMemory({
+      snapshotSource: source,
+      acknowledgementService,
+      nowUtc: () => "2026-07-21T18:45:00.000Z",
+    });
+    const disclosure = await client.callTool({
+      name: "get_fx_market_board",
+      arguments: { evidenceMode: "LIVE_ONLY" },
+    });
+    expect(disclosure.structuredContent).toMatchObject({
+      status: "DISCLOSURE_REQUIRED",
+      disclaimer: { policyVersion: "1.2.0" },
+    });
+    const challenge = (
+      disclosure as {
+        _meta?: {
+          "odpMarketSteward/acknowledgementChallenge"?: {
+            challengeToken: string;
+            policyVersion: "1.2.0";
+            disclaimerDigest: string;
+          };
+        };
+      }
+    )._meta?.["odpMarketSteward/acknowledgementChallenge"];
+    expect(challenge).toBeDefined();
+    if (challenge === undefined)
+      throw new Error("Expected challenge metadata.");
+    expect(source.getSnapshotMetadata.mock.calls).toHaveLength(0);
+
+    const acknowledgement = await client.callTool({
+      name: "acknowledge_market_data_demo",
+      arguments: {
+        affirmed: true,
+        policyVersion: challenge.policyVersion,
+        disclaimerDigest: challenge.disclaimerDigest,
+        challengeToken: challenge.challengeToken,
+      },
+    });
+    expect(acknowledgement.isError).not.toBe(true);
+    expect(acknowledgement.structuredContent).toMatchObject({
+      status: "ACKNOWLEDGED",
+      policyVersion: "1.2.0",
+      disclaimerDigest: challenge.disclaimerDigest,
+      nextAction:
+        "Reissue the previously validated pending market-data request.",
+    });
+
+    const board = await client.callTool({
+      name: "get_fx_market_board",
+      arguments: { evidenceMode: "LIVE_ONLY" },
+    });
+    expect(board.isError, JSON.stringify(board)).not.toBe(true);
+    expect(board.structuredContent).toMatchObject({
+      availabilityState: "AVAILABLE",
+      snapshot: { returnedCount: 35 },
+    });
+    expect(source.getSnapshotMetadata.mock.calls).toHaveLength(2);
+
+    const replay = await client.callTool({
+      name: "acknowledge_market_data_demo",
+      arguments: {
+        affirmed: true,
+        policyVersion: challenge.policyVersion,
+        disclaimerDigest: challenge.disclaimerDigest,
+        challengeToken: challenge.challengeToken,
+      },
+    });
+    expect(replay.structuredContent).toMatchObject({
+      status: "DISCLOSURE_REQUIRED",
+      evidence: { reason: "ACKNOWLEDGEMENT_ALREADY_ACKNOWLEDGED" },
+    });
+  });
+
+  it("rejects a modified component challenge and keeps source-call count zero", async () => {
+    const source = boardSource();
+    const client = await connectInMemory({
+      snapshotSource: source,
+      acknowledgementService: acknowledgementFixture(),
+      nowUtc: () => "2026-07-21T18:45:00.000Z",
+    });
+    const disclosure = await client.callTool({
+      name: "get_fx_market_board",
+      arguments: { evidenceMode: "LIVE_ONLY" },
+    });
+    const challenge = (
+      disclosure as {
+        _meta?: {
+          "odpMarketSteward/acknowledgementChallenge"?: {
+            challengeToken: string;
+            policyVersion: "1.2.0";
+            disclaimerDigest: string;
+          };
+        };
+      }
+    )._meta?.["odpMarketSteward/acknowledgementChallenge"];
+    if (challenge === undefined)
+      throw new Error("Expected challenge metadata.");
+    const last = challenge.challengeToken.at(-1)!;
+    const modified = `${challenge.challengeToken.slice(0, -1)}${last === "A" ? "B" : "A"}`;
+    const rejected = await client.callTool({
+      name: "acknowledge_market_data_demo",
+      arguments: {
+        affirmed: true,
+        policyVersion: challenge.policyVersion,
+        disclaimerDigest: challenge.disclaimerDigest,
+        challengeToken: modified,
+      },
+    });
+    expect(rejected.structuredContent).toMatchObject({
+      status: "DISCLOSURE_REQUIRED",
+      evidence: { reason: "ACKNOWLEDGEMENT_INVALID_SIGNATURE" },
+    });
+    const stillBlocked = await client.callTool({
+      name: "get_fx_market_board",
+      arguments: { evidenceMode: "LIVE_ONLY" },
+    });
+    expect(stillBlocked.structuredContent).toMatchObject({
+      status: "DISCLOSURE_REQUIRED",
+    });
+    expect(source.getSnapshotMetadata.mock.calls).toHaveLength(0);
+    expect(source.getLatestObservation.mock.calls).toHaveLength(0);
     expect(source.getHealth.mock.calls).toHaveLength(0);
   });
 
@@ -397,4 +529,19 @@ function boardSource(failedInstrument?: string): GovernedSnapshotSourcePort & {
       return Promise.resolve(value);
     }),
   };
+}
+
+function acknowledgementFixture(): SessionAcknowledgementService {
+  return new SessionAcknowledgementService({
+    sessionIdentifier: "oms_mcp_session_fixture_000000000001",
+    currentKey: {
+      id: "fixture",
+      secret: new Uint8Array(32).fill(31),
+    },
+    challengeLifetimeSeconds: 600,
+    maximumClockSkewSeconds: 30,
+    state: new InMemoryAcknowledgementState(),
+    now: () => new Date("2026-07-21T18:45:00.000Z"),
+    randomBytes: (length) => new Uint8Array(length).fill(47),
+  });
 }

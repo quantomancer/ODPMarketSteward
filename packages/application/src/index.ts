@@ -10,6 +10,7 @@ import type {
 
 export * from "./module-catalog";
 export * from "./module-ports";
+export * from "./acknowledgement";
 export * from "./governed-snapshot-acquirer";
 export * from "./market-board";
 export * from "./snapshot-assembler";

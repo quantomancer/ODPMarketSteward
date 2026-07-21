@@ -4,7 +4,7 @@ kind: GovernedProductBundle
 metadata:
   id: odp-market-steward-fxlive-bundle
   name: "ODP Market Steward — FXLive governed product bundle"
-  version: "1.7.0"
+  version: "1.8.0"
   status: draft
   classification: project_bundle_manifest
   constructName: ODPS-centred-market-data-product-package
@@ -131,11 +131,11 @@ artifacts:
     role: MCP tools, schemas, acknowledgement contract, responsibility boundaries, application safety, and ChatGPT delivery target
     path: application/mcp-application.yaml
     classification: project_companion
-    artifactVersion: "1.5.1"
+    artifactVersion: "1.5.2"
     mediaType: application/yaml
     normative: true
     requiredAtRuntime: true
-    sha256: 21f48b0bcfc170430e5081fde72decf534863f230ae296fae87c6cdd2714b0bc
+    sha256: e3a1886e6a283a840e4b69d37ebd138bf96145c39407d1c9b872bc4593cc60f9
     dependsOn: [product-contract, api-contract, instrument-set, ohlc-rules, monitoring, publication-policy]
 
   - id: source-functional-requirements

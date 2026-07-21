@@ -8,11 +8,13 @@ import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { FxLiveClient } from "@odp-market-steward/adapter-source-api";
 import {
   GovernedSnapshotAcquirer,
+  acknowledgementPolicy,
   disclosureRequired,
   getMarketBoard,
   getProductProfile,
   type GovernedSnapshotAcquirerConfig,
   type GovernedSnapshotSourcePort,
+  type SessionAcknowledgementService,
 } from "@odp-market-steward/application";
 import {
   BundleLoader,
@@ -24,6 +26,8 @@ import {
 import {
   MCP_TOOL_SCHEMAS,
   createMcpToolSchema,
+  type AcknowledgementInput,
+  type AcknowledgementSuccessOutput,
   type MarketBoardInput,
   type MarketBoardSuccessOutput,
   type ProductProfile,
@@ -59,6 +63,7 @@ export interface StewardMcpServerDependencies {
   readonly marketDataAcknowledged?: () => boolean | Promise<boolean>;
   readonly snapshotSource?: GovernedSnapshotSourcePort;
   readonly snapshotConfig?: GovernedSnapshotAcquirerConfig;
+  readonly acknowledgementService?: SessionAcknowledgementService;
 }
 
 export async function createStewardMcpServer(
@@ -68,10 +73,21 @@ export async function createStewardMcpServer(
   const profileSource = registry.productProfile();
   const profileTool = registry.mcpTool("get_fx_product_profile");
   const boardTool = registry.mcpTool("get_fx_market_board");
+  const acknowledgementTool = registry.mcpTool("acknowledge_market_data_demo");
   assertDescriptorSchemaParity(
     "get_fx_product_profile",
     profileTool.inputSchemaRef,
     "input",
+  );
+  assertDescriptorSchemaParity(
+    "acknowledge_market_data_demo",
+    acknowledgementTool.inputSchemaRef,
+    "input",
+  );
+  assertDescriptorSchemaParity(
+    "acknowledge_market_data_demo",
+    acknowledgementTool.outputSchemaRef,
+    "output",
   );
   assertDescriptorSchemaParity(
     "get_fx_product_profile",
@@ -104,6 +120,15 @@ export async function createStewardMcpServer(
     "get_fx_market_board",
     "output",
   );
+  const acknowledgementInputSchema = createMcpToolSchema<AcknowledgementInput>(
+    "acknowledge_market_data_demo",
+    "input",
+  );
+  const acknowledgementOutputSchema =
+    createMcpToolSchema<AcknowledgementSuccessOutput>(
+      "acknowledge_market_data_demo",
+      "output",
+    );
   const server = new McpServer(
     {
       name: "odp-market-steward",
@@ -216,14 +241,33 @@ export async function createStewardMcpServer(
     async (input: MarketBoardInput) => {
       const requestedAtUtc =
         dependencies.nowUtc?.() ?? new Date().toISOString();
-      if (!(await dependencies.marketDataAcknowledged?.())) {
+      const policy = acknowledgementPolicy(profileSource.disclaimer);
+      const acknowledged =
+        (await dependencies.marketDataAcknowledged?.()) ??
+        (await dependencies.acknowledgementService?.isAcknowledged(policy)) ??
+        false;
+      if (!acknowledged) {
         const required = disclosureRequired(
           profileSource.disclaimer,
           requestedAtUtc,
         );
+        const challenge =
+          await dependencies.acknowledgementService?.issue(policy);
         return {
           content: [{ type: "text" as const, text: required.summary }],
           structuredContent: required as unknown as Record<string, unknown>,
+          ...(challenge === undefined
+            ? {}
+            : {
+                _meta: {
+                  "odpMarketSteward/acknowledgementChallenge": challenge,
+                  "odpMarketSteward/pendingRequest": {
+                    requestId: `oms_pending_${crypto.randomUUID().replaceAll("-", "")}`,
+                    toolName: "get_fx_market_board",
+                    validatedArguments: input,
+                  },
+                },
+              }),
         };
       }
       const validation = profileSource.validation(requestedAtUtc);
@@ -284,8 +328,79 @@ export async function createStewardMcpServer(
     },
   );
 
+  registerAppTool(
+    server,
+    acknowledgementTool.name,
+    {
+      title: acknowledgementTool.title,
+      description: acknowledgementTool.description,
+      inputSchema: acknowledgementInputSchema,
+      outputSchema: acknowledgementOutputSchema,
+      annotations: acknowledgementTool.annotations,
+      _meta: acknowledgementTool.meta,
+    },
+    async (input: AcknowledgementInput) => {
+      const service = dependencies.acknowledgementService;
+      if (service === undefined) {
+        return mapApplicationToolError(
+          invalidSessionError(
+            profileSource.disclaimer,
+            dependencies.correlationId?.() ?? opaqueCorrelationId(),
+          ),
+        );
+      }
+      const policy = acknowledgementPolicy(profileSource.disclaimer);
+      const committed = await service.commit(input, policy);
+      if (committed.status === "REJECTED") {
+        const required = disclosureRequired(
+          profileSource.disclaimer,
+          dependencies.nowUtc?.() ?? new Date().toISOString(),
+        );
+        const rejected = {
+          ...required,
+          evidence: {
+            ...required.evidence,
+            reason: `ACKNOWLEDGEMENT_${committed.reason}`,
+          },
+        };
+        return {
+          content: [{ type: "text" as const, text: rejected.summary }],
+          structuredContent: rejected as unknown as Record<string, unknown>,
+        };
+      }
+      const output: AcknowledgementSuccessOutput = {
+        status: "ACKNOWLEDGED",
+        policyVersion: "1.2.0",
+        disclaimerDigest: committed.disclaimerDigest,
+        acknowledgedAtUtc: committed.acknowledgedAtUtc,
+        disclaimer: profileSource.disclaimer,
+        nextAction:
+          "Reissue the previously validated pending market-data request.",
+      };
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: "Market Data Demo acknowledgement recorded for this MCP session.",
+          },
+        ],
+        structuredContent: output as unknown as Record<string, unknown>,
+      };
+    },
+  );
+
   server.server.setRequestHandler(ListToolsRequestSchema, () => ({
     tools: [
+      {
+        name: acknowledgementTool.name,
+        title: acknowledgementTool.title,
+        description: acknowledgementTool.description,
+        inputSchema: MCP_TOOL_SCHEMAS.acknowledge_market_data_demo.input,
+        outputSchema: MCP_TOOL_SCHEMAS.acknowledge_market_data_demo.output,
+        annotations: acknowledgementTool.annotations,
+        securitySchemes: acknowledgementTool.securitySchemes,
+        _meta: acknowledgementTool.meta,
+      },
       {
         name: boardTool.name,
         title: boardTool.title,
@@ -359,12 +474,31 @@ function contractUnavailableError(
   };
 }
 
+function invalidSessionError(
+  disclaimer: ToolErrorOutput["disclaimer"],
+  correlationId: string,
+): ToolErrorOutput {
+  return {
+    status: "ERROR",
+    code: "INVALID_SESSION",
+    message: "Acknowledgement state is unavailable for this MCP session.",
+    retryable: false,
+    safeNextAction:
+      "Reinitialize the MCP session and review the disclosure again.",
+    correlationId,
+    disclaimer,
+  };
+}
+
 function opaqueCorrelationId(): string {
   return `oms_contract_${crypto.randomUUID().replaceAll("-", "")}`;
 }
 
 function assertDescriptorSchemaParity(
-  tool: "get_fx_market_board" | "get_fx_product_profile",
+  tool:
+    | "acknowledge_market_data_demo"
+    | "get_fx_market_board"
+    | "get_fx_product_profile",
   declaredReference: string,
   direction: "input" | "output",
 ): void {

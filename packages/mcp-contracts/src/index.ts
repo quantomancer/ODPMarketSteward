@@ -34,6 +34,22 @@ export interface MarketBoardInput {
   readonly previousBarEndUtc?: string | null;
 }
 
+export interface AcknowledgementInput {
+  readonly affirmed: true;
+  readonly policyVersion: "1.2.0";
+  readonly disclaimerDigest: string;
+  readonly challengeToken: string;
+}
+
+export interface AcknowledgementSuccessOutput {
+  readonly status: "ACKNOWLEDGED";
+  readonly policyVersion: "1.2.0";
+  readonly disclaimerDigest: string;
+  readonly acknowledgedAtUtc: string;
+  readonly disclaimer: Disclaimer;
+  readonly nextAction: "Reissue the previously validated pending market-data request.";
+}
+
 export interface ArtifactPointer {
   readonly artifactId: string;
   readonly artifactVersion: string;

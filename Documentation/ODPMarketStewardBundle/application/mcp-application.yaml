@@ -5,7 +5,7 @@ metadata:
   id: odp-market-steward
   name: ODP Market Steward
   competitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
-  version: "1.5.1"
+  version: "1.5.2"
   status: planned
   classification: project_mcp_application_contract
   description: >-
@@ -587,7 +587,7 @@ mcpResultEnvelope:
         required: [challengeToken, policyVersion, disclaimerDigest, issuedAtUtc, expiresAtUtc]
         properties:
           challengeToken: { type: string, minLength: 32 }
-          policyVersion: { type: string, const: "1.1.0" }
+          policyVersion: { type: string, const: "1.2.0" }
           disclaimerDigest: { type: string, pattern: "^[a-f0-9]{64}$" }
           issuedAtUtc: { type: string, format: date-time, pattern: "Z$" }
           expiresAtUtc: { type: string, format: date-time, pattern: "Z$" }
@@ -693,7 +693,7 @@ schemas:
     required: [affirmed, policyVersion, disclaimerDigest, challengeToken]
     properties:
       affirmed: { type: boolean, const: true }
-      policyVersion: { type: string, const: "1.1.0" }
+      policyVersion: { type: string, const: "1.2.0" }
       disclaimerDigest: { type: string, pattern: "^[a-f0-9]{64}$" }
       challengeToken:
         type: string
@@ -714,7 +714,7 @@ schemas:
     required: [status, policyVersion, disclaimerDigest, acknowledgedAtUtc, disclaimer, nextAction]
     properties:
       status: { type: string, const: ACKNOWLEDGED }
-      policyVersion: { type: string, const: "1.1.0" }
+      policyVersion: { type: string, const: "1.2.0" }
       disclaimerDigest: { type: string, pattern: "^[a-f0-9]{64}$" }
       acknowledgedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
       disclaimer: { $ref: "#/schemas/Disclaimer" }
@@ -876,7 +876,7 @@ schemas:
         items: { $ref: "#/schemas/RecordedBarInterval" }
       productVersion: { type: string, minLength: 1 }
       bundleVersion: { type: string, minLength: 1 }
-      policyVersion: { type: string, const: "1.1.0" }
+      policyVersion: { type: string, const: "1.2.0" }
       artifactVersions:
         type: array
         minItems: 1
