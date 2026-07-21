@@ -117,6 +117,36 @@ export interface InstrumentSetProjection {
   readonly members: readonly InstrumentSetMemberProjection[];
 }
 
+export interface OhlcCalculationPolicyProjection {
+  readonly workingPrecisionSignificantDigits: 34;
+  readonly roundingMode: "ROUND_HALF_EVEN";
+  readonly machineResultPolicy: "canonical_decimal_string_without_presentation_rounding";
+  readonly roundOnlyAtPresentationBoundary: true;
+  readonly displayPolicy: {
+    readonly priceAndPriceDelta: {
+      readonly decimalPlacesByQuoteCurrency: {
+        readonly HUF: 3;
+        readonly JPY: 3;
+        readonly default: 5;
+      };
+      readonly trailingZeros: "retain_except_zero_normalized_to_0";
+    };
+    readonly percentage: {
+      readonly decimalPlaces: 2;
+      readonly trailingZeros: "retain_except_zero_normalized_to_0";
+    };
+    readonly basisPoints: {
+      readonly decimalPlaces: 2;
+      readonly trailingZeros: "retain_except_zero_normalized_to_0";
+    };
+    readonly ratio: {
+      readonly decimalPlaces: 4;
+      readonly trailingZeros: "retain_except_zero_normalized_to_0";
+    };
+    readonly negativeZeroDisplay: "0";
+  };
+}
+
 export class ContractRegistry {
   constructor(private readonly bundle: VerifiedBundle) {}
 
@@ -353,6 +383,58 @@ export class ContractRegistry {
     };
   }
 
+  ohlcCalculationPolicy(): OhlcCalculationPolicyProjection {
+    const arithmetic = asRecord(
+      this.resolve("ohlc-rules", "/spec/calculations/arithmeticPolicy"),
+    );
+    const display = asRecord(arithmetic.displayPolicy);
+    const price = asRecord(display.priceAndPriceDelta);
+    const byQuote = asRecord(price.decimalPlacesByQuoteCurrency);
+    const percentage = asRecord(display.percentage);
+    const basisPoints = asRecord(display.basisPoints);
+    const ratio = asRecord(display.ratio);
+    const trailingZeros = "retain_except_zero_normalized_to_0" as const;
+    return {
+      workingPrecisionSignificantDigits: requiredNumber(
+        arithmetic,
+        "workingPrecisionSignificantDigits",
+        34,
+      ),
+      roundingMode: requiredLiteral(
+        arithmetic,
+        "roundingMode",
+        "ROUND_HALF_EVEN",
+      ),
+      machineResultPolicy: requiredLiteral(
+        arithmetic,
+        "machineResultPolicy",
+        "canonical_decimal_string_without_presentation_rounding",
+      ),
+      roundOnlyAtPresentationBoundary: requiredTrue(
+        arithmetic,
+        "roundOnlyAtPresentationBoundary",
+      ),
+      displayPolicy: {
+        priceAndPriceDelta: {
+          decimalPlacesByQuoteCurrency: {
+            HUF: requiredNumber(byQuote, "HUF", 3),
+            JPY: requiredNumber(byQuote, "JPY", 3),
+            default: requiredNumber(byQuote, "default", 5),
+          },
+          trailingZeros: requiredLiteral(price, "trailingZeros", trailingZeros),
+        },
+        percentage: displayMetricPolicy(percentage, 2, trailingZeros),
+        basisPoints: displayMetricPolicy(basisPoints, 2, trailingZeros),
+        ratio: displayMetricPolicy(ratio, 4, trailingZeros),
+        negativeZeroDisplay: requiredLiteral(
+          display,
+          "negativeZeroDisplay",
+          "0",
+        ),
+      },
+    };
+  }
+
   private governanceValidation(
     evaluatedAtUtc: string,
   ): GovernanceValidationProjection {
@@ -487,6 +569,16 @@ function requiredBoolean(value: Record<string, unknown>, key: string): boolean {
   return field;
 }
 
+function requiredTrue(value: Record<string, unknown>, key: string): true {
+  if (requiredBoolean(value, key) !== true) {
+    throw new BundleValidationError(
+      "POINTER_INVALID",
+      `Expected ${key} to equal true.`,
+    );
+  }
+  return true;
+}
+
 function requiredNumber<const NumberLiteral extends number>(
   value: Record<string, unknown>,
   key: string,
@@ -515,4 +607,18 @@ function requiredLiteral<const Literal extends string>(
     );
   }
   return expected;
+}
+
+function displayMetricPolicy<const DecimalPlaces extends number>(
+  value: Record<string, unknown>,
+  decimalPlaces: DecimalPlaces,
+  trailingZeros: "retain_except_zero_normalized_to_0",
+): {
+  readonly decimalPlaces: DecimalPlaces;
+  readonly trailingZeros: "retain_except_zero_normalized_to_0";
+} {
+  return {
+    decimalPlaces: requiredNumber(value, "decimalPlaces", decimalPlaces),
+    trailingZeros: requiredLiteral(value, "trailingZeros", trailingZeros),
+  };
 }

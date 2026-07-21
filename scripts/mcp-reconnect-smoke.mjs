@@ -109,9 +109,9 @@ try {
     toolsBody.result?.tools?.length !== 1 ||
     toolsBody.result.tools[0]?.name !== "get_fx_product_profile" ||
     toolsBody.result.tools[0]?.inputSchema?.$id !==
-      "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.2.0" ||
+      "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.3.0" ||
     toolsBody.result.tools[0]?.outputSchema?.$id !==
-      "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.2.0" ||
+      "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.3.0" ||
     toolsBody.result.tools[0]?.securitySchemes?.[0]?.type !== "noauth" ||
     toolsBody.result.tools[0]?._meta?.securitySchemes?.[0]?.type !== "noauth"
   ) {

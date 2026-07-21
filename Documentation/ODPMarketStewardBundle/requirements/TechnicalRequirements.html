@@ -322,8 +322,8 @@
         existing FXLive Worker as an independent read-only market-data origin.
       </p>
       <div class="badges" aria-label="Document status">
-        <span class="badge">Draft 0.1</span>
-        <span class="badge">20 July 2026</span>
+        <span class="badge">Draft 0.2</span>
+        <span class="badge">21 July 2026</span>
         <span class="badge">Status: Proposed</span>
         <span class="badge">Runtime: Not implemented</span>
       </div>
@@ -359,12 +359,12 @@
           <table>
             <tbody>
               <tr><th>Document</th><td>ODP Market Steward — Technical Requirements</td></tr>
-              <tr><th>Version</th><td>Draft 0.1</td></tr>
+              <tr><th>Version</th><td>Draft 0.2</td></tr>
               <tr><th>Product</th><td><strong>ODP Market Steward</strong></td></tr>
               <tr><th>Competition title</th><td><strong>ODP Market Steward — Governed Live Market Data in ChatGPT</strong></td></tr>
-              <tr><th>Functional baseline</th><td><a href="FuncitionalRequirements.html"><code>FuncitionalRequirements.html</code></a>, Draft 0.3. The historical filename is retained for bundle compatibility.</td></tr>
+              <tr><th>Functional baseline</th><td><a href="FuncitionalRequirements.html"><code>FuncitionalRequirements.html</code></a>, Draft 0.4. The historical filename is retained for bundle compatibility.</td></tr>
               <tr><th>Governed manifest</th><td><a href="../bundle.yaml"><code>../bundle.yaml</code></a></td></tr>
-              <tr><th>Product contract</th><td><a href="../product/fxlive.odps.yaml"><code>../product/fxlive.odps.yaml</code></a>, ODPS 4.1 product version 1.1.0.</td></tr>
+              <tr><th>Product contract</th><td><a href="../product/fxlive.odps.yaml"><code>../product/fxlive.odps.yaml</code></a>, ODPS 4.1 product version 1.1.1.</td></tr>
               <tr><th>Time convention</th><td>UTC only; public temporal values use RFC 3339 with trailing <code>Z</code>.</td></tr>
               <tr><th>Requirement state</th><td>All <code>TR-*</code> requirements are proposed. None is an implementation or deployment claim.</td></tr>
             </tbody>
@@ -500,7 +500,7 @@
 
         <article class="req"><div class="req-head"><span class="req-id">TR-DATA-002</span><strong>Enforce the standard 35-instrument set</strong><span class="tag">Must</span></div><div class="req-body"><p>The server shall resolve allowed instrument membership exclusively from <a href="../value-sets/fx35-instrument-set.yaml"><code>../value-sets/fx35-instrument-set.yaml</code></a>.</p><ul><li>A standard-set snapshot contains exactly 35 unique members or is marked partial/incoherent.</li><li>Unknown, duplicated, missing, or additional identifiers are reported; they are not silently normalized into membership.</li></ul></div></article>
 
-        <article class="req"><div class="req-head"><span class="req-id">TR-DATA-003</span><strong>Normalize numbers safely</strong><span class="tag">Must</span></div><div class="req-body"><p>OHLC values shall be parsed and calculated with an approved decimal strategy and integer nanosecond timestamps shall avoid unsafe JavaScript number coercion.</p><ul><li>Raw source values and normalized values remain distinguishable in test evidence.</li><li>Open, high, low, close, change, range, body, basis-point, and ratio calculations follow versioned rule IDs in <a href="../rules/ohlc-rules.yaml"><code>../rules/ohlc-rules.yaml</code></a>.</li><li>Rounding and display precision remain unresolved until OD-008 is approved.</li></ul></div></article>
+        <article class="req"><div class="req-head"><span class="req-id">TR-DATA-003</span><strong>Normalize numbers safely</strong><span class="tag">Must</span></div><div class="req-body"><p>OHLC values shall be parsed and calculated with the approved decimal strategy in ADR-003 and integer nanosecond timestamps shall avoid unsafe JavaScript number coercion.</p><ul><li>Raw source values, canonical machine values, and rounded display values remain distinguishable in test evidence.</li><li>Open, high, low, close, change, range, body, basis-point, percentage, and ratio calculations follow versioned rule IDs in <a href="../rules/ohlc-rules.yaml"><code>../rules/ohlc-rules.yaml</code></a>.</li><li>Calculations use 34 significant decimal digits; display rounding is ROUND_HALF_EVEN and occurs only at the presentation boundary.</li><li>JPY- and HUF-quoted prices and quote-currency deltas display 3 decimals, other governed FX-35 prices and deltas display 5, percentages and basis points display 2, ratios display 4, nonzero trailing zeros are retained, and rounded negative zero displays as <code>0</code>.</li></ul></div></article>
 
         <article class="req"><div class="req-head"><span class="req-id">TR-DATA-004</span><strong>Use bounded upstream requests</strong><span class="tag">Must</span></div><div class="req-body"><p>Every call shall apply a deadline, maximum response size, JSON content validation, redirect policy, and finite retry policy appropriate to a read-only current-data request.</p><ul><li>Retries do not extend beyond the approved user-facing latency budget.</li><li>Network and parsing failures preserve the exact attempt time and return evidence mode <code>NONE</code> unless an approved recorded fallback is selected.</li></ul></div></article>
 
@@ -675,10 +675,13 @@
         <h3>Change log</h3>
         <table>
           <thead><tr><th>Version</th><th>Date</th><th>Status</th><th>Change</th></tr></thead>
-          <tbody><tr><td>0.1</td><td>2026-07-20</td><td>Proposed</td><td>Initial technical baseline for a separate Cloudflare MCP Worker, versioned ChatGPT component, Durable Object session acknowledgement, fixed FXLive OpenAPI adapter, optional GPT-5.6 brief, sanitized observability, and rights-gated R2 evidence.</td></tr></tbody>
+          <tbody>
+            <tr><td>0.2</td><td>2026-07-21</td><td>Proposed</td><td>Incorporated the approved ADR-003 decimal calculation and presentation policy into TR-DATA-003, including machine/display separation, precision, rounding mode, display scales, trailing-zero behavior, and signed-zero normalization.</td></tr>
+            <tr><td>0.1</td><td>2026-07-20</td><td>Proposed</td><td>Initial technical baseline for a separate Cloudflare MCP Worker, versioned ChatGPT component, Durable Object session acknowledgement, fixed FXLive OpenAPI adapter, optional GPT-5.6 brief, sanitized observability, and rights-gated R2 evidence.</td></tr>
+          </tbody>
         </table>
 
-        <p class="footer-note">Draft 0.1 requirements only · No implementation, deployment, runtime, or public-submission readiness is claimed.</p>
+        <p class="footer-note">Draft 0.2 requirements only · No deployment, live-runtime, or public-submission readiness is claimed.</p>
       </section>
     </main>
   </div>

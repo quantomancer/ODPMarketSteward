@@ -3,31 +3,33 @@ kind: RequirementsNormalization
 
 metadata:
   id: odp-market-steward-bundle-requirements
-  version: "1.1.0"
+  version: "1.2.0"
   status: incorporated
   classification: project_requirements_mapping
   sourceDocument: FuncitionalRequirements.html
-  sourceDraft: "0.3"
+  sourceDraft: "0.4"
   priorSourceDraft: "0.2"
   technicalDocument: TechnicalRequirements.html
-  technicalDraft: "0.1"
-  sourceRequirementStatus: all_proposed
+  technicalDraft: "0.2"
+  sourceRequirementStatus: tracked_item_by_item_in_project_plan
 
 purpose: >-
   Record how the responsibility issues found in Draft 0.2 were incorporated into
-  Functional Requirements Draft 0.3 and map both the functional and technical
-  requirements to the responsibility-correct governed bundle. This file is a
-  migration and traceability record; it does not override the current requirements
-  or claim that any runtime behavior is implemented or verified.
+  Functional Requirements Draft 0.3, retain that migration history, and map current
+  Functional Requirements Draft 0.4 and Technical Requirements Draft 0.2 to the
+  responsibility-correct governed bundle. This file is a migration and traceability
+  record; it does not override current requirements or the evidence status controlled
+  by ProjectPlan.html.
 
 authority:
   sourceDocumentStatus: normative_project_requirements_draft
   technicalDocumentStatus: normative_project_requirements_draft
   normalizationStatus: migration_and_traceability_record
   precedence: >-
-    Draft 0.3 and Technical Requirements Draft 0.1 contain the current proposed
-    requirements. The normalizations below describe the completed wording migration
-    from Draft 0.2 and must not be used as a hidden runtime override.
+    Functional Requirements Draft 0.4 and Technical Requirements Draft 0.2 contain
+    the current requirements. The normalizations below describe the completed wording
+    migration from Draft 0.2 through Draft 0.3 and must not be used as a hidden runtime
+    or implementation-status override.
 
 normalizations:
   - id: NR-001
@@ -241,6 +243,13 @@ resolvedDecisions:
     resolution: manual refresh for MVP with completed BarEnd comparison
   - decisionID: OD-007
     resolution: separate Cloudflare MCP Worker, Durable Object session state, versioned component, and rights-gated R2
+  - decisionID: OD-008
+    resolution: >-
+      Arbitrary-precision decimal at 34 significant digits; ROUND_HALF_EVEN;
+      canonical machine strings without presentation rounding; JPY- and HUF-quoted
+      prices and deltas at 3 decimals and other governed instruments at 5;
+      percentage and basis points at 2; ratios at 4; trailing zeros retained except
+      every rounded signed zero displays as 0; presentation-boundary rounding only.
 
 unresolvedRequirements:
   - decisionID: OD-002
@@ -259,10 +268,6 @@ unresolvedRequirements:
     topic: remaining GPT-5.6 structured output, prompting, latency, retry, and evaluation contract
     affectedRequirements: [FR-AI-001, FR-AI-004]
     safeDefault: steward_brief_not_implemented
-  - decisionID: OD-008
-    topic: decimal rounding and display precision
-    affectedRequirement: FR-BAR-003
-    safeDefault: requirement_remains_unverified
   - decisionID: OD-009
     topic: plausibility lookback, minimum sample size, and threshold
     affectedRequirement: FR-QUAL-004

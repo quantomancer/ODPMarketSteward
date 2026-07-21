@@ -4,7 +4,7 @@ kind: DeterministicRuleSet
 metadata:
   id: fxlive-ohlc-governance-rules
   name: "FXLive OHLC quality, calculation, and fitness rules"
-  version: "1.0.0"
+  version: "1.1.0"
   status: testing
   classification: project_executable_rule_contract
   description: >-
@@ -104,26 +104,42 @@ spec:
 
   calculations:
     arithmeticPolicy:
-      status: PARTIALLY_DEFINED
+      status: APPROVED
       numericModel: arbitrary_precision_decimal
       inputConversion: parse_the_JSON_number_lexical_representation_as_decimal
       workingPrecisionSignificantDigits: 34
-      roundingMode: UNRESOLVED
-      roundOnlyAtPresentationBoundary: proposed_not_approved
+      roundingMode: ROUND_HALF_EVEN
+      machineResultPolicy: canonical_decimal_string_without_presentation_rounding
+      roundOnlyAtPresentationBoundary: true
       displayPolicy:
         priceAndPriceDelta:
-          decimalPlaces: UNRESOLVED
+          decimalPlacesByQuoteCurrency:
+            HUF: 3
+            JPY: 3
+            default: 5
+          trailingZeros: retain_except_zero_normalized_to_0
+        percentage:
+          decimalPlaces: 2
+          trailingZeros: retain_except_zero_normalized_to_0
         basisPoints:
-          decimalPlaces: UNRESOLVED
+          decimalPlaces: 2
+          trailingZeros: retain_except_zero_normalized_to_0
         ratio:
-          decimalPlaces: UNRESOLVED
+          decimalPlaces: 4
+          trailingZeros: retain_except_zero_normalized_to_0
+        negativeZeroDisplay: "0"
       modelReceivesServerCalculatedValues: true
       acceptanceEffect: >-
-        FR-BAR-003 remains unverified until rounding mode and display precision are
-        approved and covered by deterministic tests.
+        FR-BAR-003 public calculation verification uses this policy and requires
+        deterministic golden vectors before it can pass.
 
     closeMinusOpen:
       formula: "Close - Open"
+      requiredInputs: [Open, Close]
+      classification: descriptive
+    percentageMovement:
+      formula: "100 * (Close - Open) / Open"
+      denominator: Open
       requiredInputs: [Open, Close]
       classification: descriptive
     basisPointMovement:
@@ -134,6 +150,10 @@ spec:
     absoluteRange:
       formula: "High - Low"
       requiredInputs: [High, Low]
+      classification: descriptive
+    absoluteBody:
+      formula: "abs(Close - Open)"
+      requiredInputs: [Open, Close]
       classification: descriptive
     rangeBasisPoints:
       formula: "10000 * (High - Low) / Open"

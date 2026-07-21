@@ -31,7 +31,7 @@
   <div class="shell">
     <aside class="side">
       <div class="brand">ODP Market Steward</div>
-      <div class="small">Bundle Documentation · v1.1.0</div>
+      <div class="small">Bundle Documentation · v1.2.0</div>
       <nav aria-label="Document sections">
         <a href="#executive">Executive summary</a>
         <a href="#scope">Scope and terminology</a>
@@ -55,7 +55,7 @@
         <p class="eyebrow">Professional architecture and governance documentation</p>
         <h1>ODP Market Steward Bundle</h1>
         <p>A responsibility-separated specification package for the FXLive Market Data Demo and the planned ChatGPT MCP App and Cloudflare service.</p>
-        <div class="badges"><span class="badge">MARKET DATA DEMO</span><span class="badge">UTC</span><span class="badge">ODPS 4.1</span><span class="badge">OpenAPI 3.1.2</span><span class="badge">Draft bundle v1.1.0</span></div>
+        <div class="badges"><span class="badge">MARKET DATA DEMO</span><span class="badge">UTC</span><span class="badge">ODPS 4.1</span><span class="badge">OpenAPI 3.1.2</span><span class="badge">Draft bundle v1.3.0</span></div>
       </header>
 
       <section id="executive">
@@ -67,7 +67,7 @@
           <article class="status-card"><strong>5</strong><span>runtime project companion contracts</span></article>
           <article class="status-card"><strong>14</strong><span>package files including manifest</span></article>
         </div>
-        <div class="callout"><strong>Outcome.</strong> ODPS describes the product and its commitments. OpenAPI describes the existing HTTP surface. The product-defined instrument set, runtime rules, monitoring, publication policy, MCP behavior, Functional Requirements Draft 0.3, Technical Requirements Draft 0.1, and migration traceability each have an explicit responsibility. Detailed Level Design Draft 0.1 translates them into non-normative modules, interfaces, sequences, test layers, release gates, and implementation work packages. The technical baseline selects a separate Cloudflare MCP Worker, a strongly consistent per-session Durable Object, a versioned MCP App component, sanitized Workers observability, server-side GPT-5.6 access, and rights-gated R2 only for optional recorded evidence.</div>
+        <div class="callout"><strong>Outcome.</strong> ODPS describes the product and its commitments. OpenAPI describes the existing HTTP surface. The product-defined instrument set, runtime rules, monitoring, publication policy, MCP behavior, Functional Requirements Draft 0.4, Technical Requirements Draft 0.2, and migration traceability each have an explicit responsibility. Detailed Level Design Draft 0.2 translates them into non-normative modules, interfaces, sequences, test layers, release gates, and implementation work packages. The technical baseline selects a separate Cloudflare MCP Worker, a strongly consistent per-session Durable Object, a versioned MCP App component, sanitized Workers observability, server-side GPT-5.6 access, and rights-gated R2 only for optional recorded evidence.</div>
         <div class="callout warn"><strong>Boundary.</strong> This is the proposed artifact set for the current draft scope, with unresolved decisions recorded instead of invented. It is not a decision-complete production specification, a complete ODP-family implementation, an ODPI certification, or proof that the Cloudflare MCP service, component, Durable Object, model integration, or R2 path has been implemented or deployed.</div>
       </section>
 
@@ -155,10 +155,10 @@
           <article class="artifact"><span class="pill info">Project companion</span><h3>Monitoring profile</h3><p>Defines UTC handling, authoritative-calendar requirements, inclusive two-minute freshness, availability and service states, evidence modes, cache age, recorded/synthetic separation, source-aligned no-store constraints, and observability. <code>LIVE</code> means current retrieval provenance; only <code>LIVE + OPEN + freshness PASS</code> permits a live badge. Calendar absence produces <code>UNKNOWN</code>.</p></article>
           <article class="artifact"><span class="pill info">Project companion</span><h3>Publication policy</h3><p>Contains exact demo wording, the requirement for explicit verifiable session acknowledgement, required surfaces, permitted public identities, UTC presentation, evidence labels, semantic accessibility requirements, and prohibited financial behavior. It delegates the signing and runtime mechanism to the app and technical contracts and makes data rights a release condition rather than pretending a disclaimer grants permission.</p></article>
           <article class="artifact"><span class="pill info">Project companion</span><h3>MCP application contract</h3><p>Defines five model-visible read-only domain tools plus one component-only acknowledgement action, bounded inputs, twelve standalone-schema materializations, a signed disclosure gate backed by bounded per-session state, public result modes <code>LIVE</code>, <code>RECORDED</code>, and <code>NONE</code>, six per-artifact validation layers, separate plausibility, manual component-identified refresh outcomes, a bounded server-side <code>gpt-5.6</code> Steward Brief, the exact 35-value enum, the versioned MCP Apps resource, and an explicit reference to the separately authoritative technical delivery baseline.</p></article>
-          <article class="artifact"><span class="pill warn">Proposed requirements</span><h3>Functional requirements Draft 0.3</h3><p>The current <code>FuncitionalRequirements.html</code> incorporates the responsibility critique directly. Its 49 functional and 12 non-functional requirements define the governed bundle, acknowledgement, evidence, Cloudflare delivery, ChatGPT experience, quality, safety, acceptance, and competition constraints. Every requirement remains <strong>Proposed</strong>.</p></article>
-          <article class="artifact"><span class="pill warn">Proposed requirements</span><h3>Technical requirements Draft 0.1</h3><p>Defines 47 proposed <code>TR-*</code> requirements for service separation, Streamable HTTP MCP, the Apps SDK resource, Cloudflare Worker and Durable Object behavior, fixed-origin ingestion, deterministic rules, optional GPT-5.6, secrets, privacy, observability, environments, rollback, verification, performance, reliability, and cost. R2 is conditional on written rights; D1, Queues, Vectorize, and Workers AI are not selected for the MVP.</p></article>
+          <article class="artifact"><span class="pill warn">Requirements baseline</span><h3>Functional requirements Draft 0.4</h3><p>The current <code>FuncitionalRequirements.html</code> incorporates the responsibility critique directly. Its 49 functional and 12 non-functional requirements define the governed bundle, acknowledgement, evidence, Cloudflare delivery, ChatGPT experience, quality, safety, acceptance, and competition constraints. Implementation and verification status is controlled item-by-item in the living project plan.</p></article>
+          <article class="artifact"><span class="pill warn">Requirements baseline</span><h3>Technical requirements Draft 0.2</h3><p>Defines 47 proposed <code>TR-*</code> requirements for service separation, Streamable HTTP MCP, the Apps SDK resource, Cloudflare Worker and Durable Object behavior, fixed-origin ingestion, deterministic rules, optional GPT-5.6, secrets, privacy, observability, environments, rollback, verification, performance, reliability, and cost. It now incorporates the approved ADR-003 arithmetic and presentation policy. R2 is conditional on written rights; D1, Queues, Vectorize, and Workers AI are not selected for the MVP.</p></article>
           <article class="artifact"><span class="pill info">Migration mapping</span><h3>Requirements normalization</h3><p>Records how all five Draft 0.2 responsibility issues were incorporated into Draft 0.3, maps the current functional, non-functional, and technical requirements to their owning artifacts, and separates resolved from unresolved decisions. It is traceability evidence rather than a hidden override.</p></article>
-          <article class="artifact"><span class="pill warn">Proposed design</span><h3>Detailed Level Design Draft 0.1</h3><p>Provides the non-normative implementation-planning baseline for the Cloudflare edge router, stateful Agent and persistent WorkerTransport, signed session and acknowledgement flow, contract registry, fixed-origin source adapter, coherent snapshot pipeline, deterministic evaluation, six MCP tools, versioned component, optional Steward Brief, security, privacy, observability, failure handling, test layers, release gates, and delivery work packages. It records rather than guesses pre-coding blockers, including typed tool errors, session and challenge semantics, the component fitness projection, automatic fetch-trace query privacy, Cloudflare plan limits, and immutable validation-evidence provenance.</p></article>
+          <article class="artifact"><span class="pill info">Accepted design</span><h3>Detailed Level Design Draft 0.2</h3><p>Provides the accepted non-normative implementation-planning baseline for the Cloudflare edge router, stateful Agent and persistent WorkerTransport, signed session and acknowledgement flow, contract registry, fixed-origin source adapter, coherent snapshot pipeline, deterministic evaluation, six MCP tools, versioned component, optional Steward Brief, security, privacy, observability, failure handling, test layers, release gates, and delivery work packages. DLD-001 and DLD-007 are closed through ADR-002 and ADR-003; remaining decisions retain their explicit blockers.</p></article>
           <article class="artifact"><span class="pill info">Documentation</span><h3>Professional documentation</h3><p>This document explains scope, artifact ownership, runtime consumption, critique resolution, validation evidence, implementation gaps, and competition readiness. It is descriptive, not normative, and its digest is recorded by the manifest.</p></article>
           <article class="artifact"><span class="pill info">Entry point</span><h3>README</h3><p>The compact HTML entry point identifies the bundle, links every principal artifact, carries the exact disclaimer, and states that the MCP runtime and component are not yet implemented.</p></article>
         </div>
@@ -169,7 +169,7 @@
           <li><strong>Data holder:</strong> legal entity, address, and accountable contact facts are not supplied.</li>
           <li><strong>Market calendar:</strong> no authoritative UTC adapter has been selected.</li>
           <li><strong>CreatedAt semantics:</strong> the Worker mapping is known, but producer-level semantic confirmation is pending. The field is nullable in governed snapshot evidence; missing or unconfirmed values force freshness to <code>UNKNOWN</code> rather than suppressing an otherwise valid bar.</li>
-          <li><strong>Decimal presentation:</strong> deterministic decimal arithmetic is required; rounding mode and display precision remain unresolved.</li>
+          <li><strong>Decimal presentation:</strong> ADR-003 and OHLC rules 1.1.0 approve 34-significant-digit arithmetic, canonical machine values, presentation-boundary ROUND_HALF_EVEN, quote-currency display scales, retained nonzero trailing zeros, and signed-zero normalization.</li>
         </ul>
       </section>
 
@@ -186,7 +186,7 @@
             <tr><td>How are freshness and operational state evaluated?</td><td>Monitoring profile</td></tr>
             <tr><td>How must public output be labelled and constrained?</td><td>Publication policy</td></tr>
             <tr><td>Which MCP tools and model boundaries apply?</td><td>MCP application contract</td></tr>
-            <tr><td>How is the app hosted, secured, observed, deployed, and verified?</td><td>Technical Requirements Draft 0.1</td></tr>
+            <tr><td>How is the app hosted, secured, observed, deployed, and verified?</td><td>Technical Requirements Draft 0.2</td></tr>
           </tbody>
         </table>
         <h3>Bundle dependency map</h3>
@@ -274,17 +274,17 @@ source-functional-requirements
 
       <section id="requirements">
         <h2>Requirements alignment</h2>
-        <p>Functional Requirements Draft 0.3 incorporates the responsibility critique directly. Technical Requirements Draft 0.1 turns the selected ChatGPT MCP App and Cloudflare service architecture into an acceptance baseline. The normalization file now records the migration and traceability; it no longer overrides the current drafts.</p>
+        <p>Functional Requirements Draft 0.4 incorporates the responsibility critique and closes OD-008. Technical Requirements Draft 0.2 turns the selected ChatGPT MCP App and Cloudflare service architecture plus the approved decimal policy into an acceptance baseline. The normalization file records migration, traceability, and the resolved decision; it does not override the current drafts.</p>
         <table>
           <thead><tr><th>Requirement area</th><th>Configuration owner</th><th>Implementation state</th></tr></thead>
           <tbody>
             <tr><td>Product governance and discovery</td><td>Manifest + responsibility-owning product and companion artifacts + application contract</td><td>Specified, app not implemented</td></tr>
             <tr><td>API retrieval and shapes</td><td>OpenAPI</td><td>Specified and source-reviewed</td></tr>
             <tr><td>FX-35 exact membership</td><td>Value set</td><td>Specified</td></tr>
-            <tr><td>OHLC integrity and calculations</td><td>Rule contract</td><td>Specified; display rounding unresolved</td></tr>
+            <tr><td>OHLC integrity and calculations</td><td>Rule contract</td><td>Specified; decimal/display policy approved and locally tested</td></tr>
             <tr><td>Freshness, state, and evidence modes</td><td>Monitoring</td><td>Specified; calendar and CreatedAt semantics unresolved</td></tr>
             <tr><td>Public display and safety</td><td>Publication policy</td><td>Specified; current root page non-compliant</td></tr>
-            <tr><td>MCP tools and ChatGPT component</td><td>Application contract</td><td>Specified, not implemented</td></tr>
+            <tr><td>MCP tools and ChatGPT component</td><td>Application contract</td><td>Specified; one local profile handler implemented, five domain handlers and finished component open</td></tr>
             <tr><td>Cloudflare hosting, session state, security, operations, and verification</td><td>Technical requirements</td><td>Specified, resources not provisioned</td></tr>
           </tbody>
         </table>
@@ -327,7 +327,7 @@ source-functional-requirements
           <li>All 9 YAML documents parsed with duplicate-key detection; all 14 package files were present and non-empty.</li>
           <li>The bundled ODPS instance passed full evaluation against every validation keyword used by the refreshed official ODPS 4.1 YAML schema. The schema bytes used had SHA-256 <code>b7e75d7b1f967efc58d178cc58222a5b81d90bfe6f9fd228e283a049bf9e16a5</code>.</li>
           <li>The OpenAPI contract passed focused OAS 3.1.2 structural review across 4 paths, 8 operations, 3 query parameters, anonymous access, and 60 local reference occurrences resolving to 21 unique targets.</li>
-          <li>All 13 manifest artifacts, dependency IDs, bundle-relative paths, cross-file pointers, versions, and final SHA-256 values agreed. Draft 0.3 uses the correct <code>../product/fxlive.odps.yaml</code> reference and product version 1.1.0; all five Draft 0.2 migration issues are recorded as incorporated. Detailed Level Design Draft 0.1 is explicitly non-normative and depends on the accepted requirements, normalization, and MCP application contract.</li>
+          <li>All 13 manifest artifacts, dependency IDs, bundle-relative paths, versions, and final SHA-256 values agreed in the current local validation. Draft 0.4 uses the correct <code>../product/fxlive.odps.yaml</code> reference and product version 1.1.1; all five Draft 0.2 migration issues remain recorded as incorporated. Detailed Level Design Draft 0.2 is explicitly non-normative and depends on the requirements, normalization, and MCP application contract.</li>
           <li>The exact 35-symbol value set was unique, alphabetical, correctly decomposed into base/quote codes, and byte-for-value equal to the MCP instrument enum.</li>
           <li>All 61 current FR/NFR identifiers, all 47 technical requirement identifiers, all 10 Build Week constraints, and every resolved or unresolved review decision were represented in the traceability contract.</li>
           <li>The exact disclaimer was present in the public governed specifications and visible HTML; UTC and prohibited-public-identity scans passed for the complete bundle.</li>
@@ -346,7 +346,6 @@ source-functional-requirements
           <li><strong>Data rights.</strong> Public display, recording, redistribution, judge access, and attribution treatment require written confirmation.</li>
           <li><strong>Calendar.</strong> No authoritative UTC market calendar is configured; session-dependent state remains <code>UNKNOWN</code>.</li>
           <li><strong>CreatedAt.</strong> Producer-level semantics remain pending; governed freshness cannot pass until resolved.</li>
-          <li><strong>Decimal display.</strong> Rounding mode and display precision remain unresolved under FR-BAR-003.</li>
           <li><strong>Plausibility.</strong> Lookback, sample size, and MAD threshold are unset; the only valid result is <code>NOT_EVALUATED</code>.</li>
           <li><strong>License and accountable data holder.</strong> Owner-approved facts are not present and must not be invented.</li>
           <li><strong>Application delivery.</strong> The separate Cloudflare MCP Worker, pinned Agents SDK version, Durable Object binding and migration, secrets, sanitized observability, Apps SDK component, public HTTPS endpoint, deployed standalone tool descriptors, privacy policy, support contact, unique app domain/CSP, and ChatGPT developer-mode tests do not yet exist.</li>
@@ -377,7 +376,7 @@ source-functional-requirements
         <div class="callout warn"><strong>MARKET DATA DEMO.</strong> For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.</div>
       </section>
 
-      <div class="footer">ODP Market Steward — Governed Live Market Data in ChatGPT · Bundle documentation v1.1.0 · Proposed specification package, not runtime certification</div>
+      <div class="footer">ODP Market Steward — Governed Live Market Data in ChatGPT · Bundle documentation v1.2.0 · Governed draft package with local partial implementation evidence, not runtime certification</div>
     </main>
   </div>
 </body>

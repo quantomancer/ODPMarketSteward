@@ -681,7 +681,7 @@
         bundle with deterministic evidence and GPT-5.6 stewardship.
       </p>
       <div class="header-meta" aria-label="Document status">
-        <span class="badge">Draft v0.3</span>
+        <span class="badge">Draft v0.4</span>
         <span class="badge">20 July 2026</span>
         <span class="badge">Status: Proposed</span>
         <span class="badge">Review: Iterative</span>
@@ -721,7 +721,7 @@
           </tr>
           <tr>
             <th>Document version</th>
-            <td>Draft 0.3</td>
+            <td>Draft 0.4</td>
           </tr>
           <tr>
             <th>Product and plugin name</th>
@@ -743,7 +743,7 @@
             <th>Controlling product artifact</th>
             <td>
               <a href="../product/fxlive.odps.yaml"><code>../product/fxlive.odps.yaml</code></a>,
-              product <code>fxlive-market-data-demo-fx35</code>, version <code>1.1.0</code>
+              product <code>fxlive-market-data-demo-fx35</code>, version <code>1.1.1</code>
             </td>
           </tr>
           <tr>
@@ -754,7 +754,7 @@
           </tr>
           <tr>
             <th>Requirement status</th>
-            <td>Every functional requirement in Draft 0.3 remains <strong>Proposed</strong>, not implemented or verified.</td>
+            <td>Draft 0.4 remains the requirements baseline; implementation and verification status is controlled item-by-item in <a href="../../ProjectPlan.html"><code>ProjectPlan.html</code></a>.</td>
           </tr>
           <tr>
             <th>Purpose</th>
@@ -778,7 +778,7 @@
           </tr>
           <tr>
             <th>Technical baseline</th>
-            <td><a href="TechnicalRequirements.html"><code>TechnicalRequirements.html</code></a>, Draft 0.1.</td>
+            <td><a href="TechnicalRequirements.html"><code>TechnicalRequirements.html</code></a>, Draft 0.2.</td>
           </tr>
         </table>
 
@@ -994,6 +994,12 @@
               </tr>
             </thead>
             <tbody>
+              <tr>
+                <td>0.4</td>
+                <td>2026-07-21</td>
+                <td>Proposed</td>
+                <td>Closed OD-008 through ADR-003 and OHLC rules 1.1.0, recording the approved decimal precision, canonical machine-value, presentation rounding, display-scale, trailing-zero, and signed-zero policy.</td>
+              </tr>
               <tr>
                 <td><code>UC-01</code></td>
                 <td>“Show the current FXLive market.”</td>
@@ -2462,11 +2468,14 @@
           </p>
         </details>
 
-        <details>
-          <summary>OD-008 · Decimal display and rounding</summary>
+        <details open>
+          <summary>OD-008 · RESOLVED · Decimal calculation and presentation</summary>
           <p>
-            Approve decimal parsing, calculation precision, rounding mode, and display precision for raw
-            prices, quote-currency changes, basis points, and ratios.
+            ADR-003 and OHLC rules 1.1.0 approve 34-significant-digit decimal calculation, canonical
+            unrounded machine strings, and ROUND_HALF_EVEN only at the presentation boundary. JPY- and
+            HUF-quoted prices and quote-currency deltas display 3 decimals; the other governed FX-35
+            instruments display 5. Percentages and basis points display 2 decimals, ratios display 4,
+            nonzero trailing zeros are retained, and rounded negative zero displays as <code>0</code>.
           </p>
         </details>
 
@@ -2557,7 +2566,7 @@
         </div>
 
         <p class="footer-note">
-          Draft 0.3 requirements only · No implementation or deployment is claimed by this document.
+          Draft 0.4 requirements baseline · Implementation evidence is controlled by ProjectPlan.html; no deployment is claimed by this document.
         </p>
       </section>
     </main>

@@ -12,6 +12,8 @@ export interface OhlcLexemes {
   readonly close: string;
 }
 
+export type OhlcStrings = OhlcLexemes;
+
 export type OhlcHardConditionId =
   | "finite-decimal"
   | "greater-than-zero"

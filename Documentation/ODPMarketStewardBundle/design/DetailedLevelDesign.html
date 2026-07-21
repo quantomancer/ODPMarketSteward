@@ -92,12 +92,12 @@
       <header class="hero">
         <p class="eyebrow">ODP Market Steward — Governed Live Market Data in ChatGPT</p>
         <h1>Detailed Level Design</h1>
-        <p class="lead">A proposed implementation-planning baseline for the Cloudflare-hosted MCP service and ChatGPT component, derived from the governed ODP Market Steward bundle without moving product, API, rule, monitoring, AI, or presentation responsibilities into the wrong artifact. Coding readiness begins only after the Definition of Ready and WP00 contract decisions pass.</p>
+        <p class="lead">An accepted implementation-planning baseline for the Cloudflare-hosted MCP service and ChatGPT component, derived from the governed ODP Market Steward bundle without moving product, API, rule, monitoring, AI, or presentation responsibilities into the wrong artifact. Individual open decisions and release gates retain their explicit safe states.</p>
         <div class="badges">
           <span class="badge">Document OMS-DLD-001</span>
-          <span class="badge">Draft 0.1</span>
-          <span class="badge">Status: Proposed</span>
-          <span class="badge">Baseline: Bundle 1.1.0</span>
+          <span class="badge">Draft 0.2</span>
+          <span class="badge">Status: Accepted baseline</span>
+          <span class="badge">Baseline: Bundle 1.3.0</span>
           <span class="badge">UTC only</span>
         </div>
         <div class="hero-grid">
@@ -135,11 +135,11 @@
         <div class="table-wrap">
           <table>
             <tbody>
-              <tr><th>Document ID</th><td><code>OMS-DLD-001</code></td><th>Version</th><td>Draft 0.1</td></tr>
+              <tr><th>Document ID</th><td><code>OMS-DLD-001</code></td><th>Version</th><td>Draft 0.2</td></tr>
               <tr><th>Status</th><td><span class="pill proposed">PROPOSED</span></td><th>Prepared</th><td>2026-07-21 UTC design baseline</td></tr>
               <tr><th>Product</th><td>FXLive Market Data Demo - Standard FX-35</td><th>Application</th><td>ODP Market Steward</td></tr>
               <tr><th>Source baseline</th><td>Governed bundle 1.1.0</td><th>Runtime state</th><td><span class="pill blocked">NOT IMPLEMENTED</span></td></tr>
-              <tr><th>Normative effect</th><td colspan="3">Non-normative. Functional Requirements Draft 0.3, Technical Requirements Draft 0.1, the bundle manifest, and responsibility-owning artifacts control acceptance and runtime facts.</td></tr>
+              <tr><th>Normative effect</th><td colspan="3">Non-normative. Functional Requirements Draft 0.4, Technical Requirements Draft 0.2, the bundle manifest, and responsibility-owning artifacts control acceptance and runtime facts.</td></tr>
             </tbody>
           </table>
         </div>
@@ -271,7 +271,7 @@
   "service": "odp-market-steward",
   "status": "READY | NOT_READY",
   "buildVersion": "&lt;immutable build id&gt;",
-  "bundleVersion": "1.1.0",
+  "bundleVersion": "1.3.0",
   "checkedAtUtc": "&lt;RFC3339 UTC Z&gt;"
 }</pre>
 
@@ -613,8 +613,10 @@ type ContractReadiness =
             <thead><tr><th>Metric</th><th>Formula</th><th>Special behavior</th></tr></thead>
             <tbody>
               <tr><td><code>closeMinusOpen</code></td><td><code>Close - Open</code></td><td>Descriptive signed decimal</td></tr>
+              <tr><td><code>percentageMovement</code></td><td><code>100 × (Close - Open) / Open</code></td><td>Display at 2 decimal places</td></tr>
               <tr><td><code>basisPointMovement</code></td><td><code>10000 × (Close - Open) / Open</code></td><td>Suppressed when Open is invalid; valid Open is greater than zero</td></tr>
               <tr><td><code>absoluteRange</code></td><td><code>High - Low</code></td><td>Requires hard OHLC integrity</td></tr>
+              <tr><td><code>absoluteBody</code></td><td><code>abs(Close - Open)</code></td><td>Non-negative after valid integrity</td></tr>
               <tr><td><code>rangeBasisPoints</code></td><td><code>10000 × (High - Low) / Open</code></td><td>Same denominator policy</td></tr>
               <tr><td><code>upperWick</code></td><td><code>High - max(Open, Close)</code></td><td>Non-negative after valid integrity</td></tr>
               <tr><td><code>lowerWick</code></td><td><code>min(Open, Close) - Low</code></td><td>Non-negative after valid integrity</td></tr>
@@ -623,7 +625,7 @@ type ContractReadiness =
             </tbody>
           </table>
         </div>
-        <div class="callout block"><strong>Decimal release blocker.</strong> Rounding mode, display scale, trailing-zero policy, and negative-zero normalization are not approved. The decimal adapter and golden outputs cannot be finalized until OD-008 is resolved. Internal exact decimal strings may be implemented; public formatting cannot be called verified.</div>
+        <div class="callout ok"><strong>Decimal policy accepted.</strong> OD-008 and ADR-003 require arbitrary-precision decimal at 34 significant digits, ROUND_HALF_EVEN, canonical machine strings, presentation-boundary rounding, 3 price decimals for JPY/HUF quotes and 5 otherwise, 2 decimals for percentage/basis points, 4 for ratios, retained nonzero trailing zeros, and signed zero displayed as <code>0</code>.</div>
 
         <h3>Orthogonal state vocabularies</h3>
         <div class="table-wrap">
@@ -718,7 +720,7 @@ type ContractReadiness =
 }</pre>
 
         <h3>Resolved error contract</h3>
-        <div class="callout good"><strong>DLD-001 closed.</strong> MCP application contract 1.2.0 defines one <code>ToolErrorOutput</code> branch for every tool output, the eight stable error codes required by TR-MCP-005, safe guidance, retryability, an opaque correlation identifier, and the MARKET DATA DEMO disclaimer. Completed application failures return <code>isError: true</code> with schema-valid structured content; malformed arguments and transport/protocol failures remain standard MCP/JSON-RPC errors.</div>
+        <div class="callout good"><strong>DLD-001 closed.</strong> MCP application contract 1.3.0 retains one <code>ToolErrorOutput</code> branch for every tool output, the eight stable error codes required by TR-MCP-005, safe guidance, retryability, an opaque correlation identifier, and the MARKET DATA DEMO disclaimer. Completed application failures return <code>isError: true</code> with schema-valid structured content; malformed arguments and transport/protocol failures remain standard MCP/JSON-RPC errors.</div>
         <p><a href="../../decisions/ADR-002-MCP-Tool-Error-and-Schema-Materialization.md">ADR-002</a> records the decision and <a href="../../development/WP02-Standalone-MCP-Schema-Report.md">the WP02 report</a> records exact-runtime materialization and mapping evidence. Handler-specific business behavior remains separate work.</p>
 
         <h3>Deliberate component coupling</h3>
@@ -1062,7 +1064,7 @@ interface ComponentState {
               <tr><td>WP00</td><td>Contract and evidence unblock</td><td>Design review</td><td>Typed errors, three lifetimes, challenge concurrency, Cloudflare plan, tracing privacy, degraded criticality, UI fitness projection, exhaustive acceptance-ledger mapping, and durable validation-evidence provenance approved in owning artifacts</td></tr>
               <tr><td>WP01</td><td>Repository, package pins, build skeleton</td><td>WP00 decisions needed for configuration shape</td><td>Dedicated repository, exact lockfile, dependency/ADR report, reproducible local build, no secrets or nested repositories</td></tr>
               <tr><td>WP02</td><td>Contract compiler and runtime registry</td><td>WP01</td><td>Eight runtime inputs embedded; digests/paths/pointers verified; 12 schemas materialized; product-profile use case passes T0/T1</td></tr>
-              <tr><td>WP03</td><td>Pure deterministic domain core</td><td>WP02; decimal decision for public formatting</td><td>Lossless parsing, UTC, FX-35, OHLC, formulas, state/fitness tables pass T2; unresolved features return safe states</td></tr>
+              <tr><td>WP03</td><td>Pure deterministic domain core</td><td>WP02; DLD-007 closed for public formatting</td><td>Lossless parsing, UTC, FX-35, OHLC, formulas, state/fitness tables pass T2; unresolved features return safe states</td></tr>
               <tr><td>WP04</td><td>Bounded source adapter and snapshot assembler</td><td>WP03; selected plan limits</td><td>OpenAPI-only egress, lossless bodies, concurrency ≤6, coherence/rollover, fixture suite and bounded live T3 sample</td></tr>
               <tr><td>WP05</td><td>Agent, transport, session and acknowledgement</td><td>WP01, WP02, session decisions</td><td>Persistent WorkerTransport, signed session, stateless challenge, serialized acknowledgement, replay/expiry/reconnect T4</td></tr>
               <tr><td>WP06</td><td>MCP endpoint and six tools</td><td>WP02–WP05; typed error contract</td><td><code>/mcp</code>, <code>/healthz</code>, descriptors, result schemas, common gate, Inspector T5</td></tr>
@@ -1129,8 +1131,8 @@ interface ComponentState {
         <p>WP00 creates the individual acceptance ledger and a machine check that extracts all 61 FR/NFR identifiers and all 47 TR identifiers from the accepted baselines, then fails when any identifier lacks an owner, interface, test case, and gate. The grouped matrix above is a design index; it is not a substitute for that exhaustive generated ledger.</p>
 
         <h3>Design-to-artifact dependency map</h3>
-        <pre>Functional Requirements Draft 0.3
-└── Technical Requirements Draft 0.1
+        <pre>Functional Requirements Draft 0.4
+└── Technical Requirements Draft 0.2
     ├── bundle.yaml + seven runtime responsibility artifacts
     ├── application/mcp-application.yaml tool and result contract
     └── OMS-DLD-001 Detailed Level Design (this document)
@@ -1148,13 +1150,13 @@ interface ComponentState {
           <table>
             <thead><tr><th>ID</th><th>Decision</th><th>Blocks</th><th>Safe state until approved</th></tr></thead>
             <tbody>
-              <tr><td>DLD-001</td><td>Add and version the stable typed tool-error schema and MCP mapping</td><td>WP06</td><td>CLOSED in MCP application contract 1.2.0 and ADR-002; no unadvertised runtime error envelope</td></tr>
+              <tr><td>DLD-001</td><td>Add and version the stable typed tool-error schema and MCP mapping</td><td>WP06</td><td>CLOSED in MCP application contract 1.3.0 and ADR-002; no unadvertised runtime error envelope</td></tr>
               <tr><td>DLD-002</td><td>Pin Agents, MCP, Apps helper, validator, YAML, lossless JSON, decimal, bundler, and test versions</td><td>WP01 onward</td><td>No SDK compatibility claim</td></tr>
               <tr><td>DLD-003</td><td>Select Cloudflare plan/subrequest/CPU budget that supports one full rollover reread</td><td>WP04, G5</td><td>Return INCOHERENT when safe budget is insufficient</td></tr>
               <tr><td>DLD-004</td><td>Approve signed session-ID format, lifetime, clock skew, rotation, and cleanup</td><td>WP05</td><td>Session implementation not released</td></tr>
               <tr><td>DLD-005</td><td>Select and contract-test authoritative UTC FX calendar</td><td>OPEN/MARKET_CLOSED, freshness, G2</td><td>UNKNOWN</td></tr>
               <tr><td>DLD-006</td><td>Confirm producer semantics for <code>CreatedAt</code></td><td>Freshness PASS</td><td>UNKNOWN</td></tr>
-              <tr><td>DLD-007</td><td>Approve decimal rounding, scales, trailing zeros, and negative-zero normalization</td><td>Public calculation verification</td><td>Exact internal strings; requirement unverified</td></tr>
+              <tr><td>DLD-007</td><td>Approve decimal rounding, scales, trailing zeros, and negative-zero normalization</td><td>Public calculation verification</td><td>CLOSED in OHLC rules 1.1.0 and ADR-003; golden vectors control implementation</td></tr>
               <tr><td>DLD-008</td><td>Approve plausibility window, minimum samples, and MAD threshold</td><td>Plausibility feature</td><td>NOT_EVALUATED</td></tr>
               <tr><td>DLD-009</td><td>Confirm display/redistribution/judge rights, attribution, product licence, and data holder</td><td>G1, G6, G7</td><td>Publication and recorded fallback blocked</td></tr>
               <tr><td>DLD-010</td><td>Approve unique component domain and exact compiled CSP</td><td>WP07 public release</td><td>No plugin submission</td></tr>
@@ -1182,7 +1184,7 @@ interface ComponentState {
               <tr><td>DLD-004</td><td>Session/security engineer</td><td>Security lead</td><td>Three-lifetime ADR, signed-ID format, skew/rotation/cleanup tests; before WP05</td><td>OPEN</td></tr>
               <tr><td>DLD-005</td><td>Data governance lead</td><td>Product owner</td><td>Calendar source decision, UTC contract and open/closed/unknown fixture report; before G2</td><td>OPEN</td></tr>
               <tr><td>DLD-006</td><td>Source-service owner</td><td>Data governance lead</td><td>Producer semantic confirmation and timestamp fixtures; before freshness PASS</td><td>OPEN</td></tr>
-              <tr><td>DLD-007</td><td>Rules owner</td><td>Product owner</td><td>Versioned decimal/display policy and golden vectors; before public metric verification</td><td>OPEN</td></tr>
+              <tr><td>DLD-007</td><td>Rules owner</td><td>Product owner</td><td>Versioned decimal/display policy and golden vectors; before public metric verification</td><td>CLOSED · ADR-003 · 2026-07-21 UTC</td></tr>
               <tr><td>DLD-008</td><td>Quality-rules owner</td><td>Product owner</td><td>Versioned parameters, minimum-sample rule and normal/unusual/not-evaluated fixtures</td><td>OPEN</td></tr>
               <tr><td>DLD-009</td><td>Data-rights owner</td><td>Product/competition accountable</td><td>Written display, redistribution, judge, attribution, licence and data-holder record; before G1</td><td>OPEN</td></tr>
               <tr><td>DLD-010</td><td>Component lead</td><td>Security lead</td><td>Unique domain, built-asset inventory, exact CSP and deployed enforcement test; before WP07 release</td><td>OPEN</td></tr>
@@ -1214,7 +1216,7 @@ interface ComponentState {
           <li><a href="../operations/monitoring.yaml"><code>operations/monitoring.yaml</code> — UTC, state, evidence, no-store, and observability</a></li>
           <li><a href="../policies/publication-policy.yaml"><code>policies/publication-policy.yaml</code> — exact disclosure, safety, identity, and accessibility</a></li>
           <li><a href="../application/mcp-application.yaml"><code>application/mcp-application.yaml</code> — tools, schemas, app, session, model boundaries</a></li>
-          <li><a href="../requirements/FuncitionalRequirements.html">Functional Requirements Draft 0.3</a> and <a href="../requirements/TechnicalRequirements.html">Technical Requirements Draft 0.1</a></li>
+          <li><a href="../requirements/FuncitionalRequirements.html">Functional Requirements Draft 0.4</a> and <a href="../requirements/TechnicalRequirements.html">Technical Requirements Draft 0.2</a></li>
         </ul>
 
         <h3>Current official implementation guidance consulted</h3>
@@ -1246,7 +1248,7 @@ interface ComponentState {
       </section>
 
       <footer class="footer">
-        ODP Market Steward · OMS-DLD-001 · Draft 0.1 · Proposed · Design only; runtime not implemented
+        ODP Market Steward · OMS-DLD-001 · Draft 0.2 · Accepted baseline · Open decisions and release gates remain controlling
       </footer>
     </main>
   </div>

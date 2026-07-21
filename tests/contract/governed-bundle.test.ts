@@ -20,7 +20,7 @@ describe("two-phase governed bundle loader", () => {
     ).toEqual({
       state: "READY",
       operation: "get_fx_product_profile",
-      bundleVersion: "1.2.0",
+      bundleVersion: "1.3.0",
       requiredArtifacts: [
         "bundle-manifest",
         "product-contract",
@@ -65,10 +65,45 @@ describe("two-phase governed bundle loader", () => {
       "Low is less than or equal to Open and Close.",
       "High is greater than or equal to Open and Close.",
     ]);
+    expect(registry.ohlcCalculationPolicy()).toEqual({
+      workingPrecisionSignificantDigits: 34,
+      roundingMode: "ROUND_HALF_EVEN",
+      machineResultPolicy:
+        "canonical_decimal_string_without_presentation_rounding",
+      roundOnlyAtPresentationBoundary: true,
+      displayPolicy: {
+        priceAndPriceDelta: {
+          decimalPlacesByQuoteCurrency: { HUF: 3, JPY: 3, default: 5 },
+          trailingZeros: "retain_except_zero_normalized_to_0",
+        },
+        percentage: {
+          decimalPlaces: 2,
+          trailingZeros: "retain_except_zero_normalized_to_0",
+        },
+        basisPoints: {
+          decimalPlaces: 2,
+          trailingZeros: "retain_except_zero_normalized_to_0",
+        },
+        ratio: {
+          decimalPlaces: 4,
+          trailingZeros: "retain_except_zero_normalized_to_0",
+        },
+        negativeZeroDisplay: "0",
+      },
+    });
+    expect(
+      registry.resolve(
+        "ohlc-rules",
+        "/spec/calculations/percentageMovement/formula",
+      ),
+    ).toBe("100 * (Close - Open) / Open");
+    expect(
+      registry.resolve("ohlc-rules", "/spec/calculations/absoluteBody/formula"),
+    ).toBe("abs(Close - Open)");
     expect(registry.productProfile()).toMatchObject({
       productName: "FXLive Market Data Demo - Standard FX-35",
       productId: "fxlive-market-data-demo-fx35",
-      productVersion: "1.1.0",
+      productVersion: "1.1.1",
       odpsVersion: 4.1,
       disclaimer: { label: "MARKET DATA DEMO", policyVersion: "1.1.0" },
     });
