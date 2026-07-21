@@ -24,14 +24,24 @@ export interface ProductProfileSource {
   validation(evaluatedAtUtc: string): GovernanceValidation;
 }
 
+export interface ProductProfileReadinessContext {
+  readonly state: "READY" | "DEGRADED";
+  readonly disabledCapabilities: readonly string[];
+  readonly nonBlockingFailures: readonly {
+    readonly artifactId: string;
+    readonly layer: string;
+  }[];
+}
+
 export function getProductProfile(
   input: ProductProfileInput,
   source: ProductProfileSource,
   generatedAtUtc: string,
+  readiness: ProductProfileReadinessContext,
 ): ProductProfile {
   const validation = source.validation(generatedAtUtc);
   return {
-    summary: `${source.productName}: governed declarations for ${input.sections.join(", ")}. No market-data network request was made.`,
+    summary: profileSummary(source.productName, input, readiness),
     governance: {
       productId: source.productId,
       productVersion: source.productVersion,
@@ -49,4 +59,28 @@ export function getProductProfile(
     validation,
     disclaimer: source.disclaimer,
   };
+}
+
+function profileSummary(
+  productName: string,
+  input: ProductProfileInput,
+  readiness: ProductProfileReadinessContext,
+): string {
+  const sentences = [
+    `${productName}: governed declarations for ${input.sections.join(", ")}.`,
+    "No market-data network request was made.",
+  ];
+  if (readiness.state === "DEGRADED") {
+    sentences.push(
+      `Readiness is DEGRADED; disabled claims: ${readiness.disabledCapabilities.join(", ")}.`,
+    );
+  }
+  if (readiness.nonBlockingFailures.length > 0) {
+    sentences.push(
+      `Non-blocking contract failures: ${readiness.nonBlockingFailures
+        .map((failure) => `${failure.artifactId}/${failure.layer}`)
+        .join(", ")}.`,
+    );
+  }
+  return sentences.join(" ");
 }

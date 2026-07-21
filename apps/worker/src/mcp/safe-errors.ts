@@ -1,10 +1,10 @@
 import type { ToolErrorOutput } from "@odp-market-steward/mcp-contracts";
 
-export interface SafeToolErrorResult {
+export type SafeToolErrorResult = {
   readonly isError: true;
-  readonly structuredContent: ToolErrorOutput;
-  readonly content: readonly [{ readonly type: "text"; readonly text: string }];
-}
+  readonly structuredContent: ToolErrorOutput & Record<string, unknown>;
+  readonly content: [{ readonly type: "text"; readonly text: string }];
+} & Record<string, unknown>;
 
 export const MCP_PROTOCOL_ERROR_POLICY = {
   malformedArguments: {
@@ -22,7 +22,7 @@ export function mapApplicationToolError(
 ): SafeToolErrorResult {
   return {
     isError: true,
-    structuredContent: error,
+    structuredContent: error as ToolErrorOutput & Record<string, unknown>,
     content: [{ type: "text", text: error.message }],
   };
 }

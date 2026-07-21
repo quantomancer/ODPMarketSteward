@@ -9,15 +9,21 @@ import { getProductProfile } from "@odp-market-steward/application";
 import {
   BundleLoader,
   ContractRegistry,
+  readinessArtifactIds,
+  type ReadinessArtifactId,
+  type ReadinessObservation,
 } from "@odp-market-steward/contract-runtime";
 import {
   MCP_TOOL_SCHEMAS,
   createMcpToolSchema,
   type ProductProfile,
   type ProductProfileInput,
+  type ToolErrorOutput,
+  type ValidationLayerResult,
 } from "@odp-market-steward/mcp-contracts";
 import { componentHtml } from "../../../../generated/component-resource";
 import { governedBundle } from "../../../../generated/governed-bundle";
+import { mapApplicationToolError } from "./safe-errors";
 export {
   MCP_PROTOCOL_ERROR_POLICY,
   mapApplicationToolError,
@@ -35,8 +41,17 @@ async function loadRegistry(): Promise<ContractRegistry> {
   return await registryPromise;
 }
 
-export async function createStewardMcpServer(): Promise<McpServer> {
-  const registry = await loadRegistry();
+export interface StewardMcpServerDependencies {
+  readonly registry?: ContractRegistry;
+  readonly nowUtc?: () => string;
+  readonly correlationId?: () => string;
+  readonly additionalReadinessObservations?: readonly ReadinessObservation[];
+}
+
+export async function createStewardMcpServer(
+  dependencies: StewardMcpServerDependencies = {},
+): Promise<McpServer> {
+  const registry = dependencies.registry ?? (await loadRegistry());
   const profileSource = registry.productProfile();
   const profileTool = registry.mcpTool("get_fx_product_profile");
   assertDescriptorSchemaParity(profileTool.inputSchemaRef, "input");
@@ -110,11 +125,31 @@ export async function createStewardMcpServer(): Promise<McpServer> {
       _meta: profileTool.meta,
     },
     (input: ProductProfileInput) => {
-      const profile = getProductProfile(
-        input,
-        profileSource,
-        new Date().toISOString(),
-      );
+      const generatedAtUtc =
+        dependencies.nowUtc?.() ?? new Date().toISOString();
+      const validation = profileSource.validation(generatedAtUtc);
+      const readiness = registry.readiness({
+        operation: "get_fx_product_profile",
+        profileSections: input.sections,
+        observations: [
+          ...readinessObservations(validation.results),
+          ...(dependencies.additionalReadinessObservations ?? []),
+        ],
+      });
+      if (readiness.state === "BLOCKED") {
+        return mapApplicationToolError(
+          contractUnavailableError(
+            profileSource.disclaimer,
+            dependencies.correlationId?.() ?? opaqueCorrelationId(),
+          ),
+        );
+      }
+      const profile = getProductProfile(input, profileSource, generatedAtUtc, {
+        state: readiness.state,
+        disabledCapabilities:
+          readiness.state === "DEGRADED" ? readiness.disabledCapabilities : [],
+        nonBlockingFailures: readiness.nonBlockingFailures,
+      });
       return {
         content: [
           {
@@ -143,6 +178,57 @@ export async function createStewardMcpServer(): Promise<McpServer> {
   }));
 
   return server;
+}
+
+function readinessObservations(
+  results: readonly ValidationLayerResult[],
+): readonly ReadinessObservation[] {
+  return results.flatMap((result): readonly ReadinessObservation[] => {
+    if (
+      result.status !== "PASS" &&
+      result.status !== "FAIL" &&
+      result.status !== "NOT_TESTED"
+    ) {
+      return [];
+    }
+    if (!isReadinessArtifactId(result.artifact.artifactId)) {
+      throw new Error(
+        `Validation result references unknown runtime artifact ${result.artifact.artifactId}.`,
+      );
+    }
+    return [
+      {
+        artifactId: result.artifact.artifactId,
+        layer: result.layer,
+        status: result.status,
+        evidence: result.evidence,
+      },
+    ];
+  });
+}
+
+function isReadinessArtifactId(value: string): value is ReadinessArtifactId {
+  return readinessArtifactIds.some((artifactId) => artifactId === value);
+}
+
+function contractUnavailableError(
+  disclaimer: ToolErrorOutput["disclaimer"],
+  correlationId: string,
+): ToolErrorOutput {
+  return {
+    status: "ERROR",
+    code: "CONTRACT_UNAVAILABLE",
+    message: "Governed contract evidence is unavailable for this request.",
+    retryable: false,
+    safeNextAction:
+      "Retry after the governed contract validation issue has been resolved.",
+    correlationId,
+    disclaimer,
+  };
+}
+
+function opaqueCorrelationId(): string {
+  return `oms_contract_${crypto.randomUUID().replaceAll("-", "")}`;
 }
 
 function assertDescriptorSchemaParity(

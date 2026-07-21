@@ -15,10 +15,12 @@ afterEach(async () => {
   );
 });
 
-async function connectInMemory() {
+async function connectInMemory(
+  dependencies: Parameters<typeof createStewardMcpServer>[0] = {},
+) {
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair();
-  const server = await createStewardMcpServer();
+  const server = await createStewardMcpServer(dependencies);
   const client = new Client({
     name: "odp-market-steward-test-client",
     version: "0.1.0",
@@ -71,6 +73,14 @@ describe("MCP product-profile vertical slice", () => {
       },
       disclaimer: { label: "MARKET DATA DEMO", policyVersion: "1.1.0" },
     });
+    const summary = (
+      result.structuredContent as Record<string, unknown> | undefined
+    )?.summary;
+    expect(typeof summary).toBe("string");
+    if (typeof summary !== "string") {
+      throw new Error("Expected the profile summary to be a string.");
+    }
+    expect(summary).toContain("Readiness is DEGRADED");
     const structured = result.structuredContent as {
       declarations?: Array<{
         artifact: { artifactId: string };
@@ -87,6 +97,90 @@ describe("MCP product-profile vertical slice", () => {
       ["instrument-set", "/spec/members"],
       ["mcp-application-contract", "/marketResultStateContract/validation"],
     ]);
+  });
+
+  it("returns the schema-valid typed contract error when readiness is blocked", async () => {
+    const client = await connectInMemory({
+      correlationId: () => "oms_contract_test_0001",
+      additionalReadinessObservations: [
+        {
+          artifactId: "product-contract",
+          layer: "semantic-policy",
+          status: "FAIL",
+          evidence: ["fixture:product-contract:semantic-policy"],
+        },
+      ],
+    });
+    const result = await client.callTool({
+      name: "get_fx_product_profile",
+      arguments: { sections: ["identity"] },
+    });
+
+    expect(result).toMatchObject({
+      isError: true,
+      structuredContent: {
+        status: "ERROR",
+        code: "CONTRACT_UNAVAILABLE",
+        retryable: false,
+        correlationId: "oms_contract_test_0001",
+        disclaimer: { label: "MARKET DATA DEMO" },
+      },
+    });
+  });
+
+  it("generates an opaque schema-valid correlation ID for blocked readiness", async () => {
+    const client = await connectInMemory({
+      additionalReadinessObservations: [
+        {
+          artifactId: "product-contract",
+          layer: "semantic-policy",
+          status: "FAIL",
+        },
+      ],
+    });
+    const result = await client.callTool({
+      name: "get_fx_product_profile",
+      arguments: { sections: ["identity"] },
+    });
+    const correlationId = (
+      result.structuredContent as Record<string, unknown> | undefined
+    )?.correlationId;
+
+    expect(result.isError).toBe(true);
+    expect(typeof correlationId).toBe("string");
+    expect(correlationId).toMatch(/^oms_contract_[a-f0-9]{32}$/);
+  });
+
+  it("continues an isolated profile request and discloses unrelated failures", async () => {
+    const client = await connectInMemory({
+      additionalReadinessObservations: [
+        {
+          artifactId: "api-contract",
+          layer: "controlling-schema",
+          status: "FAIL",
+          evidence: ["fixture:api-contract:controlling-schema"],
+        },
+      ],
+    });
+    const result = await client.callTool({
+      name: "get_fx_product_profile",
+      arguments: { sections: ["identity"] },
+    });
+
+    expect(result.isError, JSON.stringify(result)).not.toBe(true);
+    expect(result.structuredContent).toMatchObject({
+      productId: "fxlive-market-data-demo-fx35",
+    });
+    const summary = (
+      result.structuredContent as Record<string, unknown> | undefined
+    )?.summary;
+    expect(typeof summary).toBe("string");
+    if (typeof summary !== "string") {
+      throw new Error("Expected the profile summary to be a string.");
+    }
+    expect(summary).toContain(
+      "Non-blocking contract failures: api-contract/controlling-schema.",
+    );
   });
 
   it("rejects arguments that do not satisfy the advertised profile schema", async () => {
