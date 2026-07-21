@@ -10,6 +10,7 @@ import type {
 
 export * from "./module-catalog";
 export * from "./module-ports";
+export * from "./governed-snapshot-acquirer";
 export * from "./snapshot-assembler";
 
 export interface ProductProfileSource {
