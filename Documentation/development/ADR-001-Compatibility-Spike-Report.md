@@ -1,6 +1,7 @@
 # ADR-001 compatibility spike report
 
 - **Evidence timestamp:** 2026-07-21T11:15:31Z
+- **Implementation source revision:** `58cf496dfc7072575d96e06c79478570b7ce999c`
 - **Scope:** local implementation compatibility only
 - **Runtime:** Node.js 24.18.0, pnpm 11.15.1
 - **Cloud boundary:** no Cloudflare deployment, account mutation, secret access, or remote resource write occurred
@@ -9,6 +10,8 @@
 ## Outcome
 
 The exact ADR-001 dependency baseline is locally compatible. A frozen install, strict source type-check, generated Worker type drift check, lint, formatting, dependency-direction rules, focused tests, coverage bootstrap, React component build, Cloudflare Worker build, and a stateful MCP restart test completed successfully under the exact Node.js 24.18.0 runtime. The spike establishes a buildable foundation; it does not claim staging, ChatGPT-host, live-source, security, accessibility, or production acceptance.
+
+The implementation source revision was committed and verified against the private repository's `main` branch. This report remains execution evidence for that revision; a later documentation-only project-control commit does not alter the tested implementation source.
 
 ## Acceptance evidence
 

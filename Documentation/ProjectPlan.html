@@ -105,7 +105,7 @@
       <h1>ODP Market Steward</h1>
       <p class="subtitle">Detailed project plan for delivering <strong>ODP Market Steward — Governed Live Market Data in ChatGPT</strong> from approved contracts through implementation, Cloudflare operations, ChatGPT integration, verification, publication, and competition submission.</p>
       <div class="badges">
-        <span class="badge">Version 0.7</span>
+        <span class="badge">Version 0.8</span>
         <span class="badge">Status: ACTIVE</span>
         <span class="badge">Baseline: 2026-07-21 UTC</span>
         <span class="badge">MARKET DATA DEMO</span>
@@ -417,6 +417,7 @@
     <section id="changes">
       <h2>Plan change log</h2>
       <div class="table-wrap"><table><thead><tr><th>UTC</th><th>Version</th><th>Affected IDs</th><th>Change</th><th>Validation scope</th><th>Actor</th></tr></thead><tbody>
+        <tr><td>2026-07-21T11:24:01Z</td><td>0.8</td><td>WP01-002; WP01-003; DLD-002; repository evidence</td><td>Recorded implementation source revision <code>58cf496dfc7072575d96e06c79478570b7ce999c</code> after committing and pushing the accepted ADR-001 compatibility spike to the private main branch. Completion booleans remain 13 true and 133 false.</td><td>Commit creation completed; the work tree was clean immediately afterward; current <code>git ls-remote</code> returned the exact same hash for <code>refs/heads/main</code>. This repository synchronization evidence does not expand the local runtime validation scope and no Cloudflare remote state changed.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T11:15:31Z</td><td>0.7</td><td>WP01-002; WP01-003; WP01-004; DLD-002; R-004</td><td>Recorded product-owner acceptance of ADR-001 and the completed local compatibility spike. WP01-002, WP01-003 and DLD-002 changed to true/COMPLETED. WP01-004 remains false/IN_PROGRESS because the buildable vertical slice does not yet materialize every M01–M18 boundary. R-004 was reduced from HIGH to MEDIUM after persistent local-workerd restart evidence.</td><td>Exact Node 24.18.0 and pnpm 11.15.1 frozen install; generated Worker type drift check; TypeScript, ESLint, Prettier and dependency-direction checks; 3 files/6 focused tests; 81.66% statement and 85.71% line coverage bootstrap; component and Worker production builds; local workerd initialize/restart/tools-list/tools-call pass; production advisory and licence inventory; lock and bundle digests inspected. No Cloudflare deployment or remote write occurred. ChatGPT host, live source, staging and clean second-environment evidence remain unproven.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T10:29:25Z</td><td>0.6</td><td>WP01-002; WP01-003; DLD-002; R-004</td><td>Added proposed <code>ADR-001</code> with exact candidate runtime, toolchain and application dependency pins, package-boundary rules, Cloudflare runtime policy, alternatives and a nine-part compatibility-spike contract. The three affected records changed from false/NOT_STARTED to false/IN_PROGRESS; no completion box changed.</td><td>Current official OpenAI, Cloudflare and Node documentation review plus npm version/engine/peer metadata snapshot; 13/13 governed-bundle digests matched; 66 current local links resolved; 146 plan records retained 10 true and 136 false with unique IDs and checkbox/data/text consistency; focused public-safety scan and diff whitespace check passed; plan HTML structural tag counts balanced. No package was installed, no lockfile/build was produced, no compatibility spike ran and no cloud state changed.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T10:18:04Z</td><td>0.5</td><td>WP01-001; WP10-005; G7; repository evidence</td><td>Created <code>quantomancer/ODPMarketSteward</code> on GitHub with private visibility, configured HTTPS origin, and pushed the existing main history. WP01-001 remains true/COMPLETED with remote evidence. WP10-005 changed to false/IN_PROGRESS because the repository and initial README exist, but judge access and complete competition disclosures remain open. G7 remains false.</td><td>GitHub UI showed owner, exact repository name, Private visibility, main branch, three commits, Documentation and README. Git ls-remote returned <code>aec501c242cd2095dbf997f8abe0ea4a65add7df</code>, exactly matching local HEAD after the first push; upstream is origin/main and the work tree was clean.</td><td>Codex</td></tr>
@@ -428,7 +429,7 @@
     </section>
 
     <footer>
-      ODP Market Steward · OMS-PLAN-001 · Version 0.7 · ACTIVE · MARKET DATA DEMO · All times UTC<br>
+      ODP Market Steward · OMS-PLAN-001 · Version 0.8 · ACTIVE · MARKET DATA DEMO · All times UTC<br>
       This plan is an internal execution control and does not itself prove runtime, rights, conformance, deployment, or release readiness.
     </footer>
   </main>
