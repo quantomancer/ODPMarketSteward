@@ -73,7 +73,7 @@ describe("MCP product-profile vertical slice", () => {
       productVersion: "1.1.4",
       odpsVersion: 4.1,
       governance: {
-        bundleVersion: "1.8.2",
+        bundleVersion: "1.8.3",
         validation: {
           completeForRequiredLayers: false,
           summary: { passed: 3, failed: 0, notTested: 3 },
@@ -275,7 +275,7 @@ describe("MCP governed market-board vertical slice", () => {
     expect(result.isError, JSON.stringify(result)).not.toBe(true);
     expect(result.structuredContent).toMatchObject({
       productId: "fxlive-market-data-demo-fx35",
-      bundleVersion: "1.8.2",
+      bundleVersion: "1.8.3",
       availabilityState: "AVAILABLE",
       serviceState: "UNKNOWN",
       evidence: {

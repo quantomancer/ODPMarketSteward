@@ -20,7 +20,7 @@ describe("two-phase governed bundle loader", () => {
     ).toEqual({
       state: "READY",
       operation: "get_fx_product_profile",
-      bundleVersion: "1.8.2",
+      bundleVersion: "1.8.3",
       requiredArtifacts: [
         "bundle-manifest",
         "product-contract",

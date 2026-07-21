@@ -5,7 +5,7 @@ metadata:
   id: odp-market-steward
   name: ODP Market Steward
   competitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
-  version: "1.5.4"
+  version: "1.5.5"
   status: planned
   classification: project_mcp_application_contract
   description: >-
@@ -104,7 +104,7 @@ sessionControls:
         component-only validated pending request.
       - >-
         The same result carries an opaque, HMAC-signed, short-lived challenge token
-        only in component-visible _meta; the token binds session, policy version,
+        only in component-visible _meta; the demo token binds policy version,
         disclaimer digest, issued time, expiry, and a random nonce. The pending request
         is component continuity state and is not part of the authorization decision.
       - >-
@@ -113,7 +113,7 @@ sessionControls:
         acknowledge_market_data_demo tool with the token, affirmed=true, and the
         matching policy version and disclaimer digest.
       - >-
-        The server verifies signature, expiry, session binding, policy version,
+        The server verifies signature, expiry, policy version,
         disclaimer digest, and affirmation, then atomically retrieves and returns the
         governed market board in the same read-style component tool interaction.
         Invalid, expired, replayed, fabricated, or model-only values return
@@ -134,14 +134,15 @@ sessionControls:
       serverSecretMayAppearInResult: false
     sessionMapping:
       technicalRequirement: TR-ACK-002
-      serverIssuedOpaqueSessionIdentifierRequired: true
+      serverIssuedOpaqueSessionIdentifierRequired: false
       deterministicDurableObjectMappingRequired: false
       sameValidSessionReconnectsToSameObject: false
       newExpiredOrLostSessionRequiresNewAcknowledgement: true
       cleanupAndCrossSessionReplayTestsRequired: false
     securityProperty: >-
       The model can request the gate but cannot satisfy it without a server-issued
-      token and the component-mediated user action. The demo accepts replay of a valid
+      token and the component-mediated user action across ChatGPT transport sessions.
+      The demo accepts replay of a valid
       token only within its 60-second lifetime and stores no acknowledgement, user
       profile, prompt, transcript, or market response.
 

@@ -275,7 +275,7 @@ export class SessionAcknowledgementService {
     input: AcknowledgementCommitInput,
     policy: AcknowledgementPolicyIdentity,
   ): Promise<AcknowledgementValidationResult> {
-    const verified = await this.#verify(input, policy);
+    const verified = await this.#verify(input, policy, false);
     if (!verified.valid) {
       return Object.freeze({ status: "REJECTED", reason: verified.reason });
     }
@@ -293,6 +293,7 @@ export class SessionAcknowledgementService {
   async #verify(
     input: AcknowledgementCommitInput,
     policy: AcknowledgementPolicyIdentity,
+    requireSessionMatch = true,
   ): Promise<VerifiedChallenge> {
     const parts = input.challengeToken.split(".");
     if (
@@ -317,6 +318,7 @@ export class SessionAcknowledgementService {
       return invalid("INVALID_SIGNATURE");
     }
     if (
+      requireSessionMatch &&
       claims.sessionDigest !== (await sha256Base16(this.#sessionIdentifier))
     ) {
       return invalid("SESSION_MISMATCH");

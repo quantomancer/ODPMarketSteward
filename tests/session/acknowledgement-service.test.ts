@@ -71,6 +71,41 @@ describe("server-owned acknowledgement service", () => {
     expect(await state.read()).toBeNull();
   });
 
+  it("validates a signed demo challenge across ChatGPT transport sessions", async () => {
+    const issuer = fixture({
+      session: "oms_transport_issuer_00000000000001",
+    });
+    const validator = fixture({
+      session: "oms_transport_button_00000000000001",
+    });
+    const challenge = await issuer.service.issue(policy);
+    await expect(
+      validator.service.validate(
+        {
+          affirmed: true,
+          policyVersion: challenge.policyVersion,
+          disclaimerDigest: challenge.disclaimerDigest,
+          challengeToken: challenge.challengeToken,
+        },
+        policy,
+      ),
+    ).resolves.toMatchObject({ status: "VALID" });
+    await expect(
+      validator.service.commit(
+        {
+          affirmed: true,
+          policyVersion: challenge.policyVersion,
+          disclaimerDigest: challenge.disclaimerDigest,
+          challengeToken: challenge.challengeToken,
+        },
+        policy,
+      ),
+    ).resolves.toMatchObject({
+      status: "REJECTED",
+      reason: "SESSION_MISMATCH",
+    });
+  });
+
   it("issues a policy/session-bound challenge and commits bounded state", async () => {
     const { service, state } = fixture({});
     expect(await service.isAcknowledged(policy)).toBe(false);
