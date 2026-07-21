@@ -6,15 +6,31 @@ import {
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { getProductProfile } from "@odp-market-steward/application";
 import {
+  BundleLoader,
+  ContractRegistry,
+} from "@odp-market-steward/contract-runtime";
+import {
   productProfileInputSchema,
   productProfileOutputSchema,
 } from "@odp-market-steward/mcp-contracts";
 import { componentHtml } from "../../../../generated/component-resource";
+import { governedBundle } from "../../../../generated/governed-bundle";
 
 export const COMPONENT_URI =
   "ui://odp-market-steward/product-passport-v0.1.0.html";
 
-export function createStewardMcpServer(): McpServer {
+let registryPromise: Promise<ContractRegistry> | undefined;
+
+async function loadRegistry(): Promise<ContractRegistry> {
+  registryPromise ??= new BundleLoader()
+    .load(governedBundle)
+    .then((bundle) => new ContractRegistry(bundle));
+  return await registryPromise;
+}
+
+export async function createStewardMcpServer(): Promise<McpServer> {
+  const registry = await loadRegistry();
+  const profileSource = registry.productProfile();
   const server = new McpServer(
     {
       name: "odp-market-steward",
@@ -86,7 +102,7 @@ export function createStewardMcpServer(): McpServer {
       },
     },
     () => {
-      const profile = getProductProfile();
+      const profile = getProductProfile(profileSource);
       return {
         content: [
           {

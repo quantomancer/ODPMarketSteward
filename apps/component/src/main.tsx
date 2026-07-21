@@ -23,7 +23,7 @@ const fallback: ProfileView = {
   timeBasis: "UTC",
 };
 
-function MarketStewardPassport() {
+export function MarketBoardComponent() {
   const [profile, setProfile] = useState<ProfileView>(fallback);
   const [bridgeState, setBridgeState] = useState("Connecting to host…");
 
@@ -99,6 +99,6 @@ const root = document.getElementById("root");
 if (root === null) throw new Error("Missing component root element.");
 createRoot(root).render(
   <StrictMode>
-    <MarketStewardPassport />
+    <MarketBoardComponent />
   </StrictMode>,
 );

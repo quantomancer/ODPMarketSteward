@@ -1,5 +1,7 @@
 import Decimal from "decimal.js";
 
+export * from "./module-ports";
+
 export interface OhlcStrings {
   readonly open: string;
   readonly high: string;

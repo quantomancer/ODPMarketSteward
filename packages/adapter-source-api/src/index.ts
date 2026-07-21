@@ -1,6 +1,8 @@
 import type { OhlcStrings } from "@odp-market-steward/domain";
 import { isLosslessNumber, parse } from "lossless-json";
 
+export * from "./module-port";
+
 interface SourceBarShape {
   readonly open: unknown;
   readonly high: unknown;

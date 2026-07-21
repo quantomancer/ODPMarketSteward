@@ -2,6 +2,9 @@ import Ajv2020, { type ErrorObject } from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { parseDocument } from "yaml";
 
+export * from "./bundle";
+export * from "./registry";
+
 const instrumentSetSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
   type: "object",

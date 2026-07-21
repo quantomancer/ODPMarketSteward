@@ -17,7 +17,7 @@ afterEach(async () => {
 async function connectInMemory() {
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair();
-  const server = createStewardMcpServer();
+  const server = await createStewardMcpServer();
   const client = new Client({
     name: "odp-market-steward-test-client",
     version: "0.1.0",
@@ -50,6 +50,7 @@ describe("MCP product-profile vertical slice", () => {
       application: "ODP Market Steward",
       classification: "MARKET DATA DEMO",
       instrumentCount: 35,
+      product: "FXLive Market Data Demo - Standard FX-35",
       timeBasis: "UTC",
     });
   });

@@ -30,7 +30,11 @@ module.exports = {
     {
       name: "no-orphans",
       severity: "warn",
-      from: { orphan: true, pathNot: "(^|/)(vite|vitest)\\.config\\.ts$" },
+      from: {
+        orphan: true,
+        pathNot:
+          "(^|/)(vite|vitest)\\.config\\.ts$|^packages/telemetry/src/index\\.ts$|^apps/worker/src/security/session-id-codec\\.ts$",
+      },
       to: {},
     },
   ],

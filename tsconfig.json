@@ -2,9 +2,11 @@
   "compilerOptions": {
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
     "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
+    "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "module": "ESNext",
@@ -14,6 +16,23 @@
     "noImplicitOverride": true,
     "noUncheckedIndexedAccess": true,
     "resolveJsonModule": true,
+    "paths": {
+      "@odp-market-steward/adapter-openai": [
+        "packages/adapter-openai/src/index.ts"
+      ],
+      "@odp-market-steward/adapter-source-api": [
+        "packages/adapter-source-api/src/index.ts"
+      ],
+      "@odp-market-steward/application": ["packages/application/src/index.ts"],
+      "@odp-market-steward/contract-runtime": [
+        "packages/contract-runtime/src/index.ts"
+      ],
+      "@odp-market-steward/domain": ["packages/domain/src/index.ts"],
+      "@odp-market-steward/mcp-contracts": [
+        "packages/mcp-contracts/src/index.ts"
+      ],
+      "@odp-market-steward/telemetry": ["packages/telemetry/src/index.ts"]
+    },
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2024",

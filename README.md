@@ -30,7 +30,7 @@ The implementation is planned in TypeScript, with:
 
 ## Development and review
 
-WebStorm is the primary development and code-review IDE. Begin with the [documentation index](Documentation/README.md), [living project plan](Documentation/ProjectPlan.html), [accepted toolchain ADR](Documentation/decisions/ADR-001-Toolchain-and-Dependency-Baseline.md), and [compatibility-spike report](Documentation/development/ADR-001-Compatibility-Spike-Report.md). Follow [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
+WebStorm is the primary development and code-review IDE. Begin with the [documentation index](Documentation/README.md), [living project plan](Documentation/ProjectPlan.html), [accepted toolchain ADR](Documentation/decisions/ADR-001-Toolchain-and-Dependency-Baseline.md), [compatibility-spike report](Documentation/development/ADR-001-Compatibility-Spike-Report.md), and [governed bundle compiler report](Documentation/development/WP02-Governed-Bundle-Compiler-Report.md). Follow [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The exact local baseline is Node.js 24.18.0 and pnpm 11.15.1. With those versions active:
 

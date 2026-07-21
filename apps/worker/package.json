@@ -10,6 +10,7 @@
     "@odp-market-steward/contract-runtime": "workspace:*",
     "@odp-market-steward/domain": "workspace:*",
     "@odp-market-steward/mcp-contracts": "workspace:*",
+    "@odp-market-steward/telemetry": "workspace:*",
     "agents": "0.17.4",
     "zod": "4.4.3"
   }

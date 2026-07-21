@@ -14,7 +14,7 @@ export class OdpMarketStewardAgent extends Agent<Env> {
   private mcpTransport: WorkerTransport | undefined;
 
   override async onRequest(request: Request): Promise<Response> {
-    this.mcpServer ??= createStewardMcpServer();
+    this.mcpServer ??= await createStewardMcpServer();
     this.mcpTransport ??= new WorkerTransport({
       enableJsonResponse: true,
       sessionIdGenerator: () => this.name,

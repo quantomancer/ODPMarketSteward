@@ -1,13 +1,27 @@
 import type { ProductProfile } from "@odp-market-steward/mcp-contracts";
 
-export function getProductProfile(): ProductProfile {
+export * from "./module-catalog";
+export * from "./module-ports";
+
+export interface ProductProfileSource {
+  readonly product: string;
+  readonly application: "ODP Market Steward";
+  readonly classification: "MARKET DATA DEMO";
+  readonly timeBasis: "UTC";
+  readonly instrumentCount: number;
+  readonly standards: readonly string[];
+}
+
+export function getProductProfile(
+  source: ProductProfileSource,
+): ProductProfile {
   return {
-    product: "FXLive Standard FX-35",
-    application: "ODP Market Steward",
-    classification: "MARKET DATA DEMO",
-    timeBasis: "UTC",
-    instrumentCount: 35,
-    standards: ["ODPS 4.1", "OpenAPI 3.1.2", "MCP Apps"],
+    product: source.product,
+    application: source.application,
+    classification: source.classification,
+    timeBasis: source.timeBasis,
+    instrumentCount: source.instrumentCount,
+    standards: [...source.standards],
     evidenceMode: "DECLARED_PRODUCT_PROFILE",
     limitations: [
       "This profile contains governed declarations and no current market observation.",

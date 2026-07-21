@@ -6,6 +6,10 @@ catalogMode: strict
 
 strictPeerDependencies: true
 
+peerDependencyRules:
+  allowedVersions:
+    "@cloudflare/workers-types": "*"
+
 saveExact: true
 
 minimumReleaseAgeExclude:
