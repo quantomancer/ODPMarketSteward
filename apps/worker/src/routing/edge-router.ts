@@ -1,5 +1,7 @@
 import { getAgentByName } from "agents";
 
+const COMPETITION_DEMO_SESSION = "odp-market-steward-build-week-demo";
+
 function json(payload: unknown, status = 200): Response {
   return Response.json(payload, {
     status,
@@ -39,9 +41,13 @@ export async function routeEdgeRequest(
     if (!["GET", "POST", "DELETE", "OPTIONS"].includes(request.method)) {
       return methodNotAllowed("GET, POST, DELETE, OPTIONS");
     }
-    const sessionId =
-      request.headers.get("mcp-session-id") ?? crypto.randomUUID();
-    const agent = await getAgentByName(env.MCP_SESSION_AGENT, sessionId);
+    // Explicitly approved POC bridge: ChatGPT may issue model and component
+    // calls with different transport sessions. The acknowledgement is therefore
+    // shared for the configured short demo lifetime, not as production isolation.
+    const agent = await getAgentByName(
+      env.MCP_SESSION_AGENT,
+      COMPETITION_DEMO_SESSION,
+    );
     return await agent.fetch(request);
   }
 

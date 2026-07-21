@@ -167,6 +167,17 @@ export class SessionAcknowledgementService {
   ): Promise<boolean> {
     const state = await this.#state.read();
     if (state === null || state.replayState !== "ACKNOWLEDGED") return false;
+    const now = this.#now();
+    assertValidDate(now);
+    const expiresAt = new Date(state.expiresAtUtc);
+    if (
+      !Number.isFinite(expiresAt.getTime()) ||
+      now.getTime() >
+        expiresAt.getTime() + this.#maximumClockSkewSeconds * 1_000
+    ) {
+      await this.#state.clear();
+      return false;
+    }
     return (
       state.policyVersion === policy.policyVersion &&
       state.disclaimerDigest ===
