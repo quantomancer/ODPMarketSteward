@@ -706,7 +706,7 @@ type ContractReadiness =
 
   const readiness = await deps.registry.readiness(tool.operation);
   if (readiness.state === "BLOCKED")
-    return deps.results.contractUnavailable(readiness); // available after DLD-001
+    return deps.results.contractUnavailable(readiness); // ToolErrorOutput in contract 1.2.0
 
   const deterministic = await tool.useCase(input, readiness.snapshot, deps, {
     disabledCapabilities: readiness.state === "DEGRADED"
@@ -717,9 +717,9 @@ type ContractReadiness =
   return result;
 }</pre>
 
-        <h3>Error-contract blocker</h3>
-        <div class="callout block"><strong>Contract revision required before tool coding.</strong> Technical requirement TR-MCP-005 requires stable error codes, safe guidance, and a correlation identifier, but the current six output schemas contain only disclosure and success branches. Dependency, bundle, and internal failures therefore have no canonical schema-valid typed error representation. Before implementation, the application contract must either add a common <code>ToolErrorOutput</code> branch to the affected outputs or define an equally testable MCP protocol-error contract. Implementation must not invent an unadvertised error envelope.</div>
-        <p>The revision should distinguish at least <code>INVALID_INPUT</code>, <code>INVALID_SESSION</code>, <code>CONTRACT_UNAVAILABLE</code>, <code>SOURCE_UNAVAILABLE</code>, <code>SOURCE_INVALID</code>, <code>OUTPUT_INVALID</code>, <code>MODEL_UNAVAILABLE</code>, and <code>INTERNAL_ERROR</code>. The final vocabulary and HTTP/MCP mapping remain an application-contract decision.</p>
+        <h3>Resolved error contract</h3>
+        <div class="callout good"><strong>DLD-001 closed.</strong> MCP application contract 1.2.0 defines one <code>ToolErrorOutput</code> branch for every tool output, the eight stable error codes required by TR-MCP-005, safe guidance, retryability, an opaque correlation identifier, and the MARKET DATA DEMO disclaimer. Completed application failures return <code>isError: true</code> with schema-valid structured content; malformed arguments and transport/protocol failures remain standard MCP/JSON-RPC errors.</div>
+        <p><a href="../../decisions/ADR-002-MCP-Tool-Error-and-Schema-Materialization.md">ADR-002</a> records the decision and <a href="../../development/WP02-Standalone-MCP-Schema-Report.md">the WP02 report</a> records exact-runtime materialization and mapping evidence. Handler-specific business behavior remains separate work.</p>
 
         <h3>Deliberate component coupling</h3>
         <p>Current OpenAI guidance supports separating data tools from render tools for some apps. This design does <strong>not</strong> add a seventh render tool: the accepted baseline explicitly associates one coherent market component with each gated market-data intent. Adding a render tool would change the six-tool contract, evaluation surface, and traceability. Reconsider only through a versioned requirements and application-contract change.</p>
@@ -1148,7 +1148,7 @@ interface ComponentState {
           <table>
             <thead><tr><th>ID</th><th>Decision</th><th>Blocks</th><th>Safe state until approved</th></tr></thead>
             <tbody>
-              <tr><td>DLD-001</td><td>Add and version the stable typed tool-error schema and MCP mapping</td><td>WP06</td><td>No unadvertised runtime error envelope</td></tr>
+              <tr><td>DLD-001</td><td>Add and version the stable typed tool-error schema and MCP mapping</td><td>WP06</td><td>CLOSED in MCP application contract 1.2.0 and ADR-002; no unadvertised runtime error envelope</td></tr>
               <tr><td>DLD-002</td><td>Pin Agents, MCP, Apps helper, validator, YAML, lossless JSON, decimal, bundler, and test versions</td><td>WP01 onward</td><td>No SDK compatibility claim</td></tr>
               <tr><td>DLD-003</td><td>Select Cloudflare plan/subrequest/CPU budget that supports one full rollover reread</td><td>WP04, G5</td><td>Return INCOHERENT when safe budget is insufficient</td></tr>
               <tr><td>DLD-004</td><td>Approve signed session-ID format, lifetime, clock skew, rotation, and cleanup</td><td>WP05</td><td>Session implementation not released</td></tr>
@@ -1176,7 +1176,7 @@ interface ComponentState {
           <table>
             <thead><tr><th>ID</th><th>Responsible owner</th><th>Required approver</th><th>Closure evidence</th><th>Status</th></tr></thead>
             <tbody>
-              <tr><td>DLD-001</td><td>MCP contract owner</td><td>Architecture lead</td><td>Versioned app contract, materialized error branches, handler/protocol mapping tests; before WP06</td><td>OPEN</td></tr>
+              <tr><td>DLD-001</td><td>MCP contract owner</td><td>Architecture lead</td><td>Versioned app contract, materialized error branches, handler/protocol mapping tests; before WP06</td><td>CLOSED · ADR-002 · 2026-07-21 UTC</td></tr>
               <tr><td>DLD-002</td><td>Technical lead</td><td>Architecture lead</td><td>Exact lockfile, compatibility matrix, runtime spike and ADR; before WP01 completion</td><td>OPEN</td></tr>
               <tr><td>DLD-003</td><td>Cloud operations lead</td><td>Architecture lead</td><td>Selected plan, documented limits and representative rollover benchmark; before WP04</td><td>OPEN</td></tr>
               <tr><td>DLD-004</td><td>Session/security engineer</td><td>Security lead</td><td>Three-lifetime ADR, signed-ID format, skew/rotation/cleanup tests; before WP05</td><td>OPEN</td></tr>

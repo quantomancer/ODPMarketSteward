@@ -5,7 +5,7 @@ metadata:
   id: odp-market-steward
   name: ODP Market Steward
   competitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
-  version: "1.1.0"
+  version: "1.2.0"
   status: planned
   classification: project_mcp_application_contract
   description: >-
@@ -449,8 +449,38 @@ mcpDescriptorMaterialization:
     unresolvedReferencesPermitted: false
     enclosingDocumentDependencyPermitted: false
     handlerTypeParityRequired: true
-    contractMaterializationValidationStatus: PASS_FOCUSED_IN_MEMORY
+    contractMaterializationValidationStatus: PASS_FOCUSED_LOCAL_EXACT_RUNTIME
     deployedDescriptorStatus: NOT_TESTED
+
+toolErrorContract:
+  schemaRef: "#/schemas/ToolErrorOutput"
+  resultMapping:
+    applicationFailure:
+      mcpResultIsError: true
+      structuredContent: ToolErrorOutput
+      content: one safe summary containing no fact absent from structuredContent
+      httpStatus: 200
+      rule: >-
+        A completed MCP tools/call exchange returns a typed ToolErrorOutput when a
+        validated request cannot be completed safely. HTTP 200 describes transport
+        completion and does not convert the application failure into success.
+    malformedArguments:
+      mcpMapping: invalid_params
+      typedToolOutputReturned: false
+      rule: >-
+        Arguments that fail the advertised standalone input schema are rejected by
+        the MCP protocol validation boundary before the tool handler runs.
+    transportOrProtocolFailure:
+      mcpMapping: standard_json_rpc_error
+      typedToolOutputReturned: false
+      rule: >-
+        Initialization, framing, unsupported-method, and transport failures remain
+        protocol errors and are not disguised as domain ToolErrorOutput values.
+  privacy:
+    correlationIdentifierOpaque: true
+    stackTracePermitted: false
+    upstreamPayloadPermitted: false
+    credentialOrInternalIdentifierPermitted: false
 
 evidenceModeContract:
   canonicalModes: [LIVE, RECORDED, NONE]
@@ -666,6 +696,7 @@ schemas:
     oneOf:
       - { $ref: "#/schemas/DisclosureRequiredOutput" }
       - { $ref: "#/schemas/AcknowledgementSuccessOutput" }
+      - { $ref: "#/schemas/ToolErrorOutput" }
 
   AcknowledgementSuccessOutput:
     type: object
@@ -1074,6 +1105,43 @@ schemas:
       safeNextSteps: { type: array, items: { type: string } }
       rejectionReasons: { type: array, items: { type: string } }
 
+  ToolErrorCode:
+    type: string
+    enum:
+      - INVALID_INPUT
+      - INVALID_SESSION
+      - CONTRACT_UNAVAILABLE
+      - SOURCE_UNAVAILABLE
+      - SOURCE_INVALID
+      - OUTPUT_INVALID
+      - MODEL_UNAVAILABLE
+      - INTERNAL_ERROR
+
+  ToolErrorOutput:
+    type: object
+    additionalProperties: false
+    required: [status, code, message, retryable, safeNextAction, correlationId, disclaimer]
+    properties:
+      status: { type: string, const: ERROR }
+      code: { $ref: "#/schemas/ToolErrorCode" }
+      message:
+        type: string
+        minLength: 1
+        maxLength: 240
+        description: Safe model-visible summary without stack traces or upstream payloads.
+      retryable:
+        type: boolean
+        description: True only when the same validated request may safely be attempted again.
+      safeNextAction:
+        type: string
+        minLength: 1
+        maxLength: 240
+      correlationId:
+        type: string
+        pattern: "^[A-Za-z0-9_-]{16,128}$"
+        description: Opaque support identifier; never an upstream or infrastructure identifier.
+      disclaimer: { $ref: "#/schemas/Disclaimer" }
+
   DisclosureRequiredOutput:
     type: object
     additionalProperties: false
@@ -1107,6 +1175,7 @@ schemas:
     oneOf:
       - { $ref: "#/schemas/DisclosureRequiredOutput" }
       - { $ref: "#/schemas/MarketBoardSuccessOutput" }
+      - { $ref: "#/schemas/ToolErrorOutput" }
 
   MarketBoardSuccessOutput:
     type: object
@@ -1160,6 +1229,7 @@ schemas:
     oneOf:
       - { $ref: "#/schemas/DisclosureRequiredOutput" }
       - { $ref: "#/schemas/InstrumentSuccessOutput" }
+      - { $ref: "#/schemas/ToolErrorOutput" }
 
   InstrumentSuccessOutput:
     type: object
@@ -1219,6 +1289,7 @@ schemas:
     oneOf:
       - { $ref: "#/schemas/DisclosureRequiredOutput" }
       - { $ref: "#/schemas/MovementSummarySuccessOutput" }
+      - { $ref: "#/schemas/ToolErrorOutput" }
 
   MovementSummarySuccessOutput:
     type: object
@@ -1291,6 +1362,7 @@ schemas:
     oneOf:
       - { $ref: "#/schemas/DisclosureRequiredOutput" }
       - { $ref: "#/schemas/AssessmentSuccessOutput" }
+      - { $ref: "#/schemas/ToolErrorOutput" }
 
   AssessmentSuccessOutput:
     type: object
@@ -1338,6 +1410,11 @@ schemas:
           enum: [identity, purpose, use_cases, access, SLA, quality, instruments, monitoring, calculations, publication, limitations, validation]
 
   ProductProfileOutput:
+    oneOf:
+      - { $ref: "#/schemas/ProductProfileSuccessOutput" }
+      - { $ref: "#/schemas/ToolErrorOutput" }
+
+  ProductProfileSuccessOutput:
     type: object
     additionalProperties: false
     required:

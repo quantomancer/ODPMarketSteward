@@ -4,7 +4,7 @@ kind: GovernedProductBundle
 metadata:
   id: odp-market-steward-fxlive-bundle
   name: "ODP Market Steward — FXLive governed product bundle"
-  version: "1.1.0"
+  version: "1.2.0"
   status: draft
   classification: project_bundle_manifest
   constructName: ODPS-centred-market-data-product-package
@@ -131,11 +131,11 @@ artifacts:
     role: MCP tools, schemas, acknowledgement contract, responsibility boundaries, application safety, and ChatGPT delivery target
     path: application/mcp-application.yaml
     classification: project_companion
-    artifactVersion: "1.1.0"
+    artifactVersion: "1.2.0"
     mediaType: application/yaml
     normative: true
     requiredAtRuntime: true
-    sha256: 0fb476105b10e0e4104b8750fe6652a169daeda5f74fb03da0e2b2363c3b56f2
+    sha256: 3a9b5d9be3092b284869f092bbf61a2af3aefcf530892e968834503eb8aa179b
     dependsOn: [product-contract, api-contract, instrument-set, ohlc-rules, monitoring, publication-policy]
 
   - id: source-functional-requirements
@@ -179,7 +179,7 @@ artifacts:
     mediaType: text/html
     normative: false
     requiredAtRuntime: false
-    sha256: ed203329965980a461a76d3272617b26144dde21d4f9c2ab30eb5d4347bb9293
+    sha256: 6467b405d2c71520843b2b9b31239767740a2e26fda7422da9037362ead331d4
     dependsOn: [source-functional-requirements, technical-requirements, requirements-normalization, mcp-application-contract]
 
   - id: professional-documentation
@@ -281,7 +281,7 @@ validationModel:
     application/mcp-application.yaml:
       apiVersion: odp-market-steward.qmvp/v1
       kind: MCPApplicationContract
-      requiredSections: [metadata, distribution, productExperience, componentResources, serverInitialization, sessionControls, bundleConsumption, responsibilityBoundary, apiAdapter, tools, mcpDescriptorMaterialization, evidenceModeContract, marketResultStateContract, stewardBriefContract, mcpResultEnvelope, schemas, securityAndPrivacy, requirements]
+      requiredSections: [metadata, distribution, productExperience, componentResources, serverInitialization, sessionControls, bundleConsumption, responsibilityBoundary, apiAdapter, tools, mcpDescriptorMaterialization, toolErrorContract, evidenceModeContract, marketResultStateContract, stewardBriefContract, mcpResultEnvelope, schemas, securityAndPrivacy, requirements]
     requirements/bundle-requirements.yaml:
       apiVersion: odp-market-steward.qmvp/v1
       kind: RequirementsNormalization

@@ -15,6 +15,10 @@ import {
 } from "@odp-market-steward/mcp-contracts";
 import { componentHtml } from "../../../../generated/component-resource";
 import { governedBundle } from "../../../../generated/governed-bundle";
+export {
+  MCP_PROTOCOL_ERROR_POLICY,
+  mapApplicationToolError,
+} from "./safe-errors";
 
 export const COMPONENT_URI =
   "ui://odp-market-steward/product-passport-v0.1.0.html";

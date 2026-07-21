@@ -14,7 +14,7 @@ describe("two-phase governed bundle loader", () => {
     expect(registry.readiness()).toEqual({
       status: "PASS",
       verifiedArtifactCount: 7,
-      bundleVersion: "1.1.0",
+      bundleVersion: "1.2.0",
     });
     expect(registry.responsibility("productFacts")).toBe(
       "product/fxlive.odps.yaml",
