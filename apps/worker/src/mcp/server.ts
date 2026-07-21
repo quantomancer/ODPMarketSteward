@@ -149,6 +149,7 @@ export async function createStewardMcpServer(
       mimeType: RESOURCE_MIME_TYPE,
       _meta: {
         ui: {
+          domain: "odp-market-steward.qmvp.workers.dev",
           prefersBorder: true,
           csp: {
             connectDomains: [],
@@ -165,12 +166,15 @@ export async function createStewardMcpServer(
           text: componentHtml,
           _meta: {
             ui: {
+              domain: "odp-market-steward.qmvp.workers.dev",
               prefersBorder: true,
               csp: {
                 connectDomains: [],
                 resourceDomains: [],
               },
             },
+            "openai/widgetDomain":
+              "https://odp-market-steward.qmvp.workers.dev",
           },
         },
       ],
