@@ -4,6 +4,9 @@ import { defineConfig } from "vite";
 export default defineConfig({
   root: import.meta.dirname,
   plugins: [react()],
+  define: {
+    "process.env.NODE_ENV": JSON.stringify("production"),
+  },
   build: {
     cssCodeSplit: false,
     emptyOutDir: true,
