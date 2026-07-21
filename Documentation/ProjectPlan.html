@@ -105,7 +105,7 @@
       <h1>ODP Market Steward</h1>
       <p class="subtitle">Detailed project plan for delivering <strong>ODP Market Steward — Governed Live Market Data in ChatGPT</strong> from approved contracts through implementation, Cloudflare operations, ChatGPT integration, verification, publication, and competition submission.</p>
       <div class="badges">
-        <span class="badge">Version 1.2</span>
+        <span class="badge">Version 1.3</span>
         <span class="badge">Status: ACTIVE</span>
         <span class="badge">Baseline: 2026-07-21 UTC</span>
         <span class="badge">MARKET DATA DEMO</span>
@@ -417,6 +417,7 @@
     <section id="changes">
       <h2>Plan change log</h2>
       <div class="table-wrap"><table><thead><tr><th>UTC</th><th>Version</th><th>Affected IDs</th><th>Change</th><th>Validation scope</th><th>Actor</th></tr></thead><tbody>
+        <tr><td>2026-07-21T12:56:24Z</td><td>1.3</td><td>WP02-003..006; WP06-003; repository evidence</td><td>Recorded tested implementation revision <code>b8fadfb6a9b05b195bd4bf1e55ecb2090ec107d9</code> after committing and pushing the governed product-profile runtime integration and its evidence to private main. Completion booleans remain 18 true and 128 false.</td><td>The implementation commit completed; the work tree was clean immediately afterward; current <code>git ls-remote</code> returned the exact same hash for <code>refs/heads/main</code>. This synchronization evidence does not expand the exact local verification scope and no Cloudflare remote state changed.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T12:48:54Z</td><td>1.2</td><td>WP02-003..006; WP06-003; implementation evidence; summary</td><td>Integrated generated schemas into the runtime descriptor path and replaced the temporary profile spike with the normative MCP application contract 1.2.0 request/result. Exactly one profile tool is registered; five unfinished handlers remain unregistered. No completion boolean changed: WP02-003/004/006 remain false/IN_PROGRESS, WP02-005 and WP06-003 remain false/NOT_STARTED, and completion remains 18 true / 128 false. Added the <a href="development/WP02-Product-Profile-Runtime-Integration-Report.md">runtime integration report</a>.</td><td>Checksum-verified Node 24.18.0 and pnpm 11.15.1 full verification: 7 runtime artifacts, 6 declared tools, 12 schemas; Wrangler type drift, TypeScript, ESLint, Prettier and dependency checks; 7 files/25 tests; 87.63% statement and 89.31% line coverage; component/Worker builds; local Workerd persisted restart, one-tool descriptor discovery and normative profile call. Cloudflare-safe runtime validation replaced AJV code generation. No Cloudflare, ChatGPT host or source API call occurred.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T12:11:47Z</td><td>1.1</td><td>DLD-001; WP00-002; WP02-003..004; WP04-002; WP06-002; summary</td><td>Accepted ADR-002, versioned bundle and MCP application contract 1.2.0, added the common typed error/protocol boundary, and generated twelve standalone schemas in tested implementation revision <code>32089ceb4ab213d151be236079388384002eb617</code>. DLD-001 and WP06-002 changed to true/COMPLETED. WP02-003 changed from BLOCKED to IN_PROGRESS but remains false because published six-handler parity is incomplete. Completion is now 18 true and 128 false.</td><td>Checksum-verified Node 24.18.0 and pnpm 11.15.1: frozen offline install; deterministic two-run generation; Wrangler drift, TypeScript, ESLint, Prettier and dependency checks; 7 files/24 tests; 87.67% statement and 90.04% line coverage; component/Worker builds; local workerd persisted restart/profile call; production audit clean. No Cloudflare or source API access occurred.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T11:46:25Z</td><td>1.0</td><td>WP01-004; WP02-001..004; WP02-006; repository evidence</td><td>Recorded tested implementation source revision <code>1c211ce54b24d4a9925766ed4b943531e16fa8cc</code> after committing and pushing the M01–M18 skeleton and governed-bundle runtime registry increment to private main. Completion booleans remain 16 true and 130 false.</td><td>The implementation commit completed; the work tree was clean immediately afterward; current <code>git ls-remote</code> returned the exact same hash for <code>refs/heads/main</code>. This synchronization evidence does not expand the local test scope and no Cloudflare remote state changed.</td><td>Codex</td></tr>
@@ -433,7 +434,7 @@
     </section>
 
     <footer>
-      ODP Market Steward · OMS-PLAN-001 · Version 1.2 · ACTIVE · MARKET DATA DEMO · All times UTC<br>
+      ODP Market Steward · OMS-PLAN-001 · Version 1.3 · ACTIVE · MARKET DATA DEMO · All times UTC<br>
       This plan is an internal execution control and does not itself prove runtime, rights, conformance, deployment, or release readiness.
     </footer>
   </main>
