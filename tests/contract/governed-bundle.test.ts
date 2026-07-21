@@ -4,6 +4,7 @@ import {
   ContractRegistry,
 } from "../../packages/contract-runtime/src/index";
 import { governedBundle } from "../../generated/governed-bundle";
+import { OHLC_HARD_RULE_ID } from "../../packages/domain/src";
 import { describe, expect, it } from "vitest";
 
 describe("two-phase governed bundle loader", () => {
@@ -50,6 +51,20 @@ describe("two-phase governed bundle loader", () => {
       base: "AUD",
       quote: "CAD",
     });
+    const ohlcHardRule = registry.resolve(
+      "ohlc-rules",
+      `/spec/hardRules/${OHLC_HARD_RULE_ID}`,
+    ) as { passConditions?: unknown };
+    expect(ohlcHardRule.passConditions).toEqual([
+      "Currency matches ^[A-Z]{6}$ and is a member of FX-35.",
+      "Granularity equals 1m.",
+      "BarStart and BarEnd parse as RFC 3339 UTC timestamps ending in Z.",
+      "BarEnd minus BarStart equals exactly 60 seconds.",
+      "Open, High, Low, and Close are finite decimal values greater than zero.",
+      "Low is less than or equal to High.",
+      "Low is less than or equal to Open and Close.",
+      "High is greater than or equal to Open and Close.",
+    ]);
     expect(registry.productProfile()).toMatchObject({
       productName: "FXLive Market Data Demo - Standard FX-35",
       productId: "fxlive-market-data-demo-fx35",

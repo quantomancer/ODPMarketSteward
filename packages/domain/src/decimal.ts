@@ -84,6 +84,14 @@ export class DecimalValue {
     return this.#value.isZero();
   }
 
+  isPositive(): boolean {
+    return this.#value.isPositive() && !this.#value.isZero();
+  }
+
+  lessThanOrEqualTo(other: DecimalValue): boolean {
+    return this.#value.lessThanOrEqualTo(other.#value);
+  }
+
   equals(other: DecimalValue): boolean {
     return this.#value.equals(other.#value);
   }
