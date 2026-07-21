@@ -3,6 +3,12 @@ import {
   type VerifiedArtifact,
   type VerifiedBundle,
 } from "./bundle";
+import {
+  classifyContractReadiness,
+  type ContractReadiness,
+  type ContractReadinessRequest,
+  type ReadinessArtifactId,
+} from "./readiness";
 
 export interface ArtifactPointerProjection {
   readonly artifactId: string;
@@ -153,16 +159,15 @@ export class ContractRegistry {
     return policy[owner];
   }
 
-  readiness(): {
-    readonly status: "PASS";
-    readonly verifiedArtifactCount: number;
-    readonly bundleVersion: string;
-  } {
-    return {
-      status: "PASS",
-      verifiedArtifactCount: this.bundle.artifactsById.size,
+  readiness(request: ContractReadinessRequest): ContractReadiness {
+    return classifyContractReadiness({
+      ...request,
       bundleVersion: this.bundle.manifest.metadata.version,
-    };
+      verifiedArtifactIds: new Set<ReadinessArtifactId>([
+        "bundle-manifest",
+        ...this.bundle.artifactsById.keys(),
+      ] as ReadinessArtifactId[]),
+    });
   }
 
   productProfile(): ProductProfileProjection {

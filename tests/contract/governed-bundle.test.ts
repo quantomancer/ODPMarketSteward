@@ -11,10 +11,22 @@ describe("two-phase governed bundle loader", () => {
     const verified = await new BundleLoader().load(governedBundle);
     const registry = new ContractRegistry(verified);
 
-    expect(registry.readiness()).toEqual({
-      status: "PASS",
-      verifiedArtifactCount: 7,
+    expect(
+      registry.readiness({
+        operation: "get_fx_product_profile",
+        profileSections: ["identity"],
+      }),
+    ).toEqual({
+      state: "READY",
+      operation: "get_fx_product_profile",
       bundleVersion: "1.2.0",
+      requiredArtifacts: [
+        "bundle-manifest",
+        "product-contract",
+        "publication-policy",
+        "mcp-application-contract",
+      ],
+      nonBlockingFailures: [],
     });
     expect(registry.responsibility("productFacts")).toBe(
       "product/fxlive.odps.yaml",

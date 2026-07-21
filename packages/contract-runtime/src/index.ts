@@ -3,6 +3,7 @@ import addFormats from "ajv-formats";
 import { parseDocument } from "yaml";
 
 export * from "./bundle";
+export * from "./readiness";
 export * from "./registry";
 
 const instrumentSetSchema = {
