@@ -2,6 +2,7 @@ import Decimal from "decimal.js";
 
 export * from "./decimal";
 export * from "./module-ports";
+export * from "./utc-time";
 
 export interface OhlcStrings {
   readonly open: string;
