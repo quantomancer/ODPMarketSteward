@@ -1,24 +1,180 @@
+import { Validator } from "@cfworker/json-schema";
 import { z } from "zod";
-export {
+import {
   MCP_TOOL_SCHEMAS,
   type McpToolName,
   type McpToolSchemaPair,
 } from "../../../generated/standalone-tool-schemas";
 
-export const productProfileInputSchema = z.object({}).strict();
+export { MCP_TOOL_SCHEMAS, type McpToolName, type McpToolSchemaPair };
 
-export const productProfileOutputSchema = z.object({
-  product: z.string().min(1),
-  application: z.literal("ODP Market Steward"),
-  classification: z.literal("MARKET DATA DEMO"),
-  timeBasis: z.literal("UTC"),
-  instrumentCount: z.number().int().positive(),
-  standards: z.array(z.string()),
-  evidenceMode: z.literal("DECLARED_PRODUCT_PROFILE"),
-  limitations: z.array(z.string()),
-});
+export const productProfileSections = [
+  "identity",
+  "purpose",
+  "use_cases",
+  "access",
+  "SLA",
+  "quality",
+  "instruments",
+  "monitoring",
+  "calculations",
+  "publication",
+  "limitations",
+  "validation",
+] as const;
 
-export type ProductProfile = z.infer<typeof productProfileOutputSchema>;
+export type ProductProfileSection = (typeof productProfileSections)[number];
+
+export interface ProductProfileInput {
+  readonly sections: readonly ProductProfileSection[];
+}
+
+export interface ArtifactPointer {
+  readonly artifactId: string;
+  readonly artifactVersion: string;
+  readonly path: string;
+  readonly sha256: string;
+}
+
+export type ValidationLayer =
+  | "syntax"
+  | "controlling-schema"
+  | "semantic-policy"
+  | "cross-reference"
+  | "source-alignment"
+  | "sdk-compatibility";
+
+export type ValidationStatus =
+  "PASS" | "FAIL" | "WARNING" | "NOT_APPLICABLE" | "NOT_TESTED";
+
+export interface ValidationLayerResult {
+  readonly artifact: ArtifactPointer;
+  readonly layer: ValidationLayer;
+  readonly status: ValidationStatus;
+  readonly validatorName: string;
+  readonly validatorVersion: string;
+  readonly evaluatedAtUtc: string;
+  readonly schemaUri: string | null;
+  readonly schemaSha256: string | null;
+  readonly evidence: readonly string[];
+}
+
+export interface GovernanceValidation {
+  readonly evaluatedAtUtc: string;
+  readonly completeForRequiredLayers: boolean;
+  readonly summary: {
+    readonly passed: number;
+    readonly failed: number;
+    readonly warnings: number;
+    readonly notApplicable: number;
+    readonly notTested: number;
+  };
+  readonly results: readonly ValidationLayerResult[];
+}
+
+export interface GovernanceContext {
+  readonly productId: "fxlive-market-data-demo-fx35";
+  readonly productVersion: string;
+  readonly bundleVersion: string;
+  readonly odpsVersion: 4.1;
+  readonly artifacts: readonly ArtifactPointer[];
+  readonly validation: GovernanceValidation;
+}
+
+export interface Disclaimer {
+  readonly label: "MARKET DATA DEMO";
+  readonly statement: string;
+  readonly policyVersion: string;
+}
+
+export interface ProductDeclaration {
+  readonly artifact: ArtifactPointer;
+  readonly pointer: string;
+  readonly value: unknown;
+}
+
+export interface ProductProfile {
+  readonly summary: string;
+  readonly governance: GovernanceContext;
+  readonly generatedAtUtc: string;
+  readonly productId: "fxlive-market-data-demo-fx35";
+  readonly productVersion: string;
+  readonly odpsVersion: 4.1;
+  readonly artifactDigest: string;
+  readonly declarations: readonly ProductDeclaration[];
+  readonly validation: GovernanceValidation;
+  readonly disclaimer: Disclaimer;
+}
+
+interface StandardSchemaResult<Output> {
+  readonly value?: Output;
+  readonly issues?: readonly {
+    readonly message: string;
+    readonly path?: readonly PropertyKey[];
+  }[];
+}
+
+export interface StandaloneStandardSchema<Input, Output = Input> {
+  readonly "~standard": {
+    readonly version: 1;
+    readonly vendor: "odp-market-steward";
+    readonly types?: { readonly input: Input; readonly output: Output };
+    readonly validate: (value: unknown) => StandardSchemaResult<Output>;
+    readonly jsonSchema: {
+      readonly input: (options: {
+        readonly target: string;
+      }) => Record<string, unknown>;
+      readonly output: (options: {
+        readonly target: string;
+      }) => Record<string, unknown>;
+    };
+  };
+}
+
+export function createMcpToolSchema<Input = unknown, Output = Input>(
+  tool: McpToolName,
+  direction: "input" | "output",
+): StandaloneStandardSchema<Input, Output> {
+  const schema = MCP_TOOL_SCHEMAS[tool][direction] as unknown as Record<
+    string,
+    unknown
+  >;
+  const validator = new Validator(schema, "2020-12", false);
+  const convert = (options: { readonly target: string }) => {
+    if (options.target !== "draft-2020-12") {
+      throw new Error(
+        `Unsupported JSON Schema target ${options.target}; expected draft-2020-12.`,
+      );
+    }
+    return schema;
+  };
+  const zodCompatibilitySchema = z
+    .object({})
+    .passthrough()
+    .superRefine((value, context) => {
+      const validation = validator.validate(value);
+      if (validation.valid) return;
+      context.addIssue({
+        code: "custom",
+        message: validation.errors.map(formatValidationError).join("; "),
+      });
+    });
+  Object.defineProperty(zodCompatibilitySchema["~standard"], "jsonSchema", {
+    value: { input: convert, output: convert },
+  });
+  return zodCompatibilitySchema as unknown as StandaloneStandardSchema<
+    Input,
+    Output
+  >;
+}
+
+function formatValidationError(error: {
+  readonly instanceLocation: string;
+  readonly error: string;
+}): string {
+  const location = error.instanceLocation === "" ? "/" : error.instanceLocation;
+  return `${location} ${error.error}`;
+}
 
 export const toolErrorCodes = [
   "INVALID_INPUT",

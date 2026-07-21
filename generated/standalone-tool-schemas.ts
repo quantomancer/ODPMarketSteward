@@ -5,6 +5,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.2.0",
       title: "get_fx_market_board input",
+      type: "object",
       $ref: "#/$defs/MarketBoardInput",
       $defs: {
         EvidenceRequestMode: {
@@ -44,6 +45,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.2.0",
       title: "get_fx_market_board output",
+      type: "object",
       $ref: "#/$defs/MarketBoardOutput",
       $defs: {
         UtcTimestamp: {
@@ -1054,6 +1056,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:get_fx_instrument:input:v1.2.0",
       title: "get_fx_instrument input",
+      type: "object",
       $ref: "#/$defs/InstrumentInput",
       $defs: {
         Instrument: {
@@ -1119,6 +1122,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:get_fx_instrument:output:v1.2.0",
       title: "get_fx_instrument output",
+      type: "object",
       $ref: "#/$defs/InstrumentOutput",
       $defs: {
         UtcTimestamp: {
@@ -1993,6 +1997,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:summarize_fx_movements:input:v1.2.0",
       title: "summarize_fx_movements input",
+      type: "object",
       $ref: "#/$defs/MovementSummaryInput",
       $defs: {
         Instrument: {
@@ -2085,6 +2090,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:summarize_fx_movements:output:v1.2.0",
       title: "summarize_fx_movements output",
+      type: "object",
       $ref: "#/$defs/MovementSummaryOutput",
       $defs: {
         UtcTimestamp: {
@@ -2909,6 +2915,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:assess_fx_data_service:input:v1.2.0",
       title: "assess_fx_data_service input",
+      type: "object",
       $ref: "#/$defs/AssessmentInput",
       $defs: {
         Purpose: {
@@ -3010,6 +3017,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:assess_fx_data_service:output:v1.2.0",
       title: "assess_fx_data_service output",
+      type: "object",
       $ref: "#/$defs/AssessmentOutput",
       $defs: {
         UtcTimestamp: {
@@ -3902,6 +3910,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:input:v1.2.0",
       title: "acknowledge_market_data_demo input",
+      type: "object",
       $ref: "#/$defs/Acknowledgement",
       $defs: {
         Acknowledgement: {
@@ -3940,6 +3949,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:output:v1.2.0",
       title: "acknowledge_market_data_demo output",
+      type: "object",
       $ref: "#/$defs/AcknowledgementOutput",
       $defs: {
         UtcTimestamp: {
@@ -4165,6 +4175,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.2.0",
       title: "get_fx_product_profile input",
+      type: "object",
       $ref: "#/$defs/ProductProfileInput",
       $defs: {
         ProductProfileInput: {
@@ -4202,6 +4213,7 @@ export const MCP_TOOL_SCHEMAS = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.2.0",
       title: "get_fx_product_profile output",
+      type: "object",
       $ref: "#/$defs/ProductProfileOutput",
       $defs: {
         ArtifactPointer: {

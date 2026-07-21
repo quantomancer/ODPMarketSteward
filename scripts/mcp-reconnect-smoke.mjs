@@ -106,9 +106,14 @@ try {
   const toolsBody = await tools.json();
   if (
     !tools.ok ||
-    !toolsBody.result?.tools?.some(
-      (tool) => tool.name === "get_fx_product_profile",
-    )
+    toolsBody.result?.tools?.length !== 1 ||
+    toolsBody.result.tools[0]?.name !== "get_fx_product_profile" ||
+    toolsBody.result.tools[0]?.inputSchema?.$id !==
+      "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.2.0" ||
+    toolsBody.result.tools[0]?.outputSchema?.$id !==
+      "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.2.0" ||
+    toolsBody.result.tools[0]?.securitySchemes?.[0]?.type !== "noauth" ||
+    toolsBody.result.tools[0]?._meta?.securitySchemes?.[0]?.type !== "noauth"
   ) {
     throw new Error(
       `Persisted tools/list failed (${tools.status}): ${JSON.stringify(toolsBody)}`,
@@ -120,14 +125,20 @@ try {
       jsonrpc: "2.0",
       id: 3,
       method: "tools/call",
-      params: { name: "get_fx_product_profile", arguments: {} },
+      params: {
+        name: "get_fx_product_profile",
+        arguments: { sections: ["identity"] },
+      },
     },
     sessionId,
   );
   const toolBody = await toolResult.json();
   if (
     !toolResult.ok ||
-    toolBody.result?.structuredContent?.classification !== "MARKET DATA DEMO"
+    toolBody.result?.isError === true ||
+    toolBody.result?.structuredContent?.productId !==
+      "fxlive-market-data-demo-fx35" ||
+    toolBody.result?.structuredContent?.disclaimer?.label !== "MARKET DATA DEMO"
   ) {
     throw new Error(
       `Persisted tools/call failed (${toolResult.status}): ${JSON.stringify(toolBody)}`,

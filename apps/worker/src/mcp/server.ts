@@ -4,14 +4,17 @@ import {
   RESOURCE_MIME_TYPE,
 } from "@modelcontextprotocol/ext-apps/server";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { getProductProfile } from "@odp-market-steward/application";
 import {
   BundleLoader,
   ContractRegistry,
 } from "@odp-market-steward/contract-runtime";
 import {
-  productProfileInputSchema,
-  productProfileOutputSchema,
+  MCP_TOOL_SCHEMAS,
+  createMcpToolSchema,
+  type ProductProfile,
+  type ProductProfileInput,
 } from "@odp-market-steward/mcp-contracts";
 import { componentHtml } from "../../../../generated/component-resource";
 import { governedBundle } from "../../../../generated/governed-bundle";
@@ -35,6 +38,17 @@ async function loadRegistry(): Promise<ContractRegistry> {
 export async function createStewardMcpServer(): Promise<McpServer> {
   const registry = await loadRegistry();
   const profileSource = registry.productProfile();
+  const profileTool = registry.mcpTool("get_fx_product_profile");
+  assertDescriptorSchemaParity(profileTool.inputSchemaRef, "input");
+  assertDescriptorSchemaParity(profileTool.outputSchemaRef, "output");
+  const profileInputSchema = createMcpToolSchema<ProductProfileInput>(
+    "get_fx_product_profile",
+    "input",
+  );
+  const profileOutputSchema = createMcpToolSchema<ProductProfile>(
+    "get_fx_product_profile",
+    "output",
+  );
   const server = new McpServer(
     {
       name: "odp-market-steward",
@@ -86,38 +100,64 @@ export async function createStewardMcpServer(): Promise<McpServer> {
 
   registerAppTool(
     server,
-    "get_fx_product_profile",
+    profileTool.name,
     {
-      title: "Get governed FX product profile",
-      description:
-        "Returns the declared ODPS-centred profile for the 35-instrument MARKET DATA DEMO without making a market-data network call.",
-      inputSchema: productProfileInputSchema,
-      outputSchema: productProfileOutputSchema,
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false,
-      },
-      _meta: {
-        ui: {
-          resourceUri: COMPONENT_URI,
-        },
-      },
+      title: profileTool.title,
+      description: profileTool.description,
+      inputSchema: profileInputSchema,
+      outputSchema: profileOutputSchema,
+      annotations: profileTool.annotations,
+      _meta: profileTool.meta,
     },
-    () => {
-      const profile = getProductProfile(profileSource);
+    (input: ProductProfileInput) => {
+      const profile = getProductProfile(
+        input,
+        profileSource,
+        new Date().toISOString(),
+      );
       return {
         content: [
           {
-            type: "text",
-            text: `${profile.product}: ${profile.instrumentCount} instruments, ${profile.timeBasis}, ${profile.classification}.`,
+            type: "text" as const,
+            text: profile.summary,
           },
         ],
-        structuredContent: profile,
+        structuredContent: profile as unknown as Record<string, unknown>,
       };
     },
   );
 
+  server.server.setRequestHandler(ListToolsRequestSchema, () => ({
+    tools: [
+      {
+        name: profileTool.name,
+        title: profileTool.title,
+        description: profileTool.description,
+        inputSchema: MCP_TOOL_SCHEMAS.get_fx_product_profile.input,
+        outputSchema: MCP_TOOL_SCHEMAS.get_fx_product_profile.output,
+        annotations: profileTool.annotations,
+        securitySchemes: profileTool.securitySchemes,
+        _meta: profileTool.meta,
+      },
+    ],
+  }));
+
   return server;
+}
+
+function assertDescriptorSchemaParity(
+  declaredReference: string,
+  direction: "input" | "output",
+): void {
+  const generatedReference =
+    MCP_TOOL_SCHEMAS.get_fx_product_profile[direction].$ref;
+  const expectedReference = generatedReference.replace(
+    "#/$defs/",
+    "#/schemas/",
+  );
+  if (declaredReference !== expectedReference) {
+    throw new Error(
+      `Generated ${direction} schema root ${generatedReference} does not match governed reference ${declaredReference}.`,
+    );
+  }
 }

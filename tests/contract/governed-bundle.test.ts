@@ -26,10 +26,32 @@ describe("two-phase governed bundle loader", () => {
       "AUDCAD",
     );
     expect(registry.productProfile()).toMatchObject({
-      application: "ODP Market Steward",
-      classification: "MARKET DATA DEMO",
-      instrumentCount: 35,
-      timeBasis: "UTC",
+      productName: "FXLive Market Data Demo - Standard FX-35",
+      productId: "fxlive-market-data-demo-fx35",
+      productVersion: "1.1.0",
+      odpsVersion: 4.1,
+      disclaimer: { label: "MARKET DATA DEMO", policyVersion: "1.1.0" },
+    });
+    const instruments = registry.productProfile().declaration("instruments");
+    expect(instruments.artifact.artifactId).toBe("instrument-set");
+    expect(instruments.pointer).toBe("/spec/members");
+    expect(Array.isArray(instruments.value)).toBe(true);
+    if (!Array.isArray(instruments.value)) {
+      throw new Error(
+        "Expected the instrument declaration value to be an array.",
+      );
+    }
+    expect(instruments.value[0]).toEqual({
+      symbol: "AUDCAD",
+      base: "AUD",
+      quote: "CAD",
+    });
+    expect(registry.mcpTool("get_fx_product_profile")).toMatchObject({
+      name: "get_fx_product_profile",
+      inputSchemaRef: "#/schemas/ProductProfileInput",
+      outputSchemaRef: "#/schemas/ProductProfileOutput",
+      annotations: { readOnlyHint: true, openWorldHint: false },
+      meta: { ui: { visibility: ["model"] } },
     });
   });
 

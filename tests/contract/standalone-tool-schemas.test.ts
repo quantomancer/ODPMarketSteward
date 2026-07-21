@@ -29,6 +29,7 @@ describe("standalone MCP tool schemas", () => {
     let count = 0;
     for (const pair of Object.values(MCP_TOOL_SCHEMAS)) {
       for (const schema of [pair.input, pair.output]) {
+        expect(schema.type).toBe("object");
         expect(JSON.stringify(schema)).not.toContain("#/schemas/");
         expect(() => ajv.compile(schema)).not.toThrow();
         identifiers.add(schema.$id);

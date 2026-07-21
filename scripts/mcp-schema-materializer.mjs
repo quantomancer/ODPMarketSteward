@@ -83,6 +83,7 @@ function materializeSchema(schemas, root, toolName, direction, version) {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id: `urn:odp-market-steward:mcp:${toolName}:${direction}:v${String(version)}`,
     title: `${toolName} ${direction}`,
+    type: "object",
     $ref: `#/$defs/${rootName}`,
     $defs: definitions,
   };
