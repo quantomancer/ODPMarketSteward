@@ -5,7 +5,7 @@ metadata:
   id: odp-market-steward
   name: ODP Market Steward
   competitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
-  version: "1.5.2"
+  version: "1.5.3"
   status: planned
   classification: project_mcp_application_contract
   description: >-
@@ -122,13 +122,13 @@ sessionControls:
       - >-
         The server verifies signature, expiry, session binding, policy version,
         disclaimer digest, and affirmation, records the server's current UTC
-        acknowledgement time in bounded session state, and returns ACKNOWLEDGED.
+        acknowledgement time in bounded session state, and atomically retrieves and
+        returns the governed market board in the same component tool interaction.
         Invalid, expired, replayed, fabricated, or model-only values return
         DISCLOSURE_REQUIRED and never trigger retrieval.
       - >-
-        After ACKNOWLEDGED, the component reissues the previously validated pending
-        market-data request for continuity. The server validates that call normally;
-        no security decision relies on the component preserving it unchanged.
+        The component renders the board returned by that acknowledgement interaction
+        and must not issue a second transport-dependent request to complete the flow.
       - >-
         Subsequent gated tools in the same MCP app session rely on the verified
         acknowledgement state and do not require the model to carry a
@@ -376,8 +376,8 @@ tools:
   - name: acknowledge_market_data_demo
     title: Acknowledge Market Data Demo disclosure
     description: >-
-      Record the explicit component-mediated Market Data Demo acknowledgement for
-      this MCP app session after validating the server-issued challenge.
+      Validate and record the explicit component-mediated Market Data Demo
+      acknowledgement, then return the governed live board in the same interaction.
     annotations:
       readOnlyHint: false
       destructiveHint: false
@@ -394,7 +394,7 @@ tools:
     inputSchema:
       $ref: "#/schemas/Acknowledgement"
     outputSchema:
-      $ref: "#/schemas/AcknowledgementOutput"
+      $ref: "#/schemas/MarketBoardOutput"
     consumes:
       - publication-policy
 
@@ -701,26 +701,6 @@ schemas:
         description: >-
           Opaque server-issued component challenge. Possession alone is insufficient;
           the server also verifies signature, expiry, session, and policy binding.
-
-  AcknowledgementOutput:
-    oneOf:
-      - { $ref: "#/schemas/DisclosureRequiredOutput" }
-      - { $ref: "#/schemas/AcknowledgementSuccessOutput" }
-      - { $ref: "#/schemas/ToolErrorOutput" }
-
-  AcknowledgementSuccessOutput:
-    type: object
-    additionalProperties: false
-    required: [status, policyVersion, disclaimerDigest, acknowledgedAtUtc, disclaimer, nextAction]
-    properties:
-      status: { type: string, const: ACKNOWLEDGED }
-      policyVersion: { type: string, const: "1.2.0" }
-      disclaimerDigest: { type: string, pattern: "^[a-f0-9]{64}$" }
-      acknowledgedAtUtc: { $ref: "#/schemas/UtcTimestamp" }
-      disclaimer: { $ref: "#/schemas/Disclaimer" }
-      nextAction:
-        type: string
-        const: Reissue the previously validated pending market-data request.
 
   ArtifactPointer:
     type: object

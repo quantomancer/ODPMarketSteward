@@ -27,7 +27,6 @@ import {
   MCP_TOOL_SCHEMAS,
   createMcpToolSchema,
   type AcknowledgementInput,
-  type AcknowledgementSuccessOutput,
   type MarketBoardInput,
   type MarketBoardSuccessOutput,
   type ProductProfile,
@@ -124,7 +123,7 @@ export async function createStewardMcpServer(
     "input",
   );
   const acknowledgementOutputSchema =
-    createMcpToolSchema<AcknowledgementSuccessOutput>(
+    createMcpToolSchema<MarketBoardSuccessOutput>(
       "acknowledge_market_data_demo",
       "output",
     );
@@ -138,6 +137,64 @@ export async function createStewardMcpServer(
         "ODP Market Steward is a read-only MARKET DATA DEMO. Clearly distinguish declared product facts from observed runtime evidence and never present output as investment advice.",
     },
   );
+
+  async function loadMarketBoard(input: MarketBoardInput) {
+    const requestedAtUtc = dependencies.nowUtc?.() ?? new Date().toISOString();
+    const validation = profileSource.validation(requestedAtUtc);
+    const readiness = registry.readiness({
+      operation: "get_fx_market_board",
+      observations: [
+        ...readinessObservations(validation.results),
+        ...(dependencies.additionalReadinessObservations ?? []),
+      ],
+    });
+    if (readiness.state === "BLOCKED") {
+      return mapApplicationToolError(
+        contractUnavailableError(
+          profileSource.disclaimer,
+          dependencies.correlationId?.() ?? opaqueCorrelationId(),
+        ),
+      );
+    }
+    const source =
+      dependencies.snapshotSource ??
+      new FxLiveClient({
+        timeoutMilliseconds: 8_000,
+        maximumResponseBytes: 65_536,
+      });
+    const acquirer = new GovernedSnapshotAcquirer(
+      source,
+      dependencies.snapshotConfig ?? {
+        maximumConcurrency: 6,
+        maximumCallsPerInvocation: 74,
+        allowOneFullRolloverReread: true,
+      },
+    );
+    const instrumentSet = registry.instrumentSet();
+    const ohlcRulesArtifact = profileSource.artifacts.find(
+      (artifact) => artifact.artifactId === "ohlc-rules",
+    );
+    if (ohlcRulesArtifact === undefined) {
+      return mapApplicationToolError(
+        contractUnavailableError(
+          profileSource.disclaimer,
+          dependencies.correlationId?.() ?? opaqueCorrelationId(),
+        ),
+      );
+    }
+    const board = await getMarketBoard(input, {
+      profile: profileSource,
+      instruments: instrumentSet.members.map((member) => member.symbol),
+      ohlcRulesArtifact,
+      acquirer,
+      requestedAtUtc,
+      completedAtUtc: () => dependencies.nowUtc?.() ?? new Date().toISOString(),
+    });
+    return {
+      content: [{ type: "text" as const, text: board.summary }],
+      structuredContent: board as unknown as Record<string, unknown>,
+    };
+  }
 
   registerAppResource(
     server,
@@ -273,61 +330,7 @@ export async function createStewardMcpServer(
               }),
         };
       }
-      const validation = profileSource.validation(requestedAtUtc);
-      const readiness = registry.readiness({
-        operation: "get_fx_market_board",
-        observations: [
-          ...readinessObservations(validation.results),
-          ...(dependencies.additionalReadinessObservations ?? []),
-        ],
-      });
-      if (readiness.state === "BLOCKED") {
-        return mapApplicationToolError(
-          contractUnavailableError(
-            profileSource.disclaimer,
-            dependencies.correlationId?.() ?? opaqueCorrelationId(),
-          ),
-        );
-      }
-      const source =
-        dependencies.snapshotSource ??
-        new FxLiveClient({
-          timeoutMilliseconds: 8_000,
-          maximumResponseBytes: 65_536,
-        });
-      const acquirer = new GovernedSnapshotAcquirer(
-        source,
-        dependencies.snapshotConfig ?? {
-          maximumConcurrency: 6,
-          maximumCallsPerInvocation: 74,
-          allowOneFullRolloverReread: true,
-        },
-      );
-      const instrumentSet = registry.instrumentSet();
-      const ohlcRulesArtifact = profileSource.artifacts.find(
-        (artifact) => artifact.artifactId === "ohlc-rules",
-      );
-      if (ohlcRulesArtifact === undefined) {
-        return mapApplicationToolError(
-          contractUnavailableError(
-            profileSource.disclaimer,
-            dependencies.correlationId?.() ?? opaqueCorrelationId(),
-          ),
-        );
-      }
-      const board = await getMarketBoard(input, {
-        profile: profileSource,
-        instruments: instrumentSet.members.map((member) => member.symbol),
-        ohlcRulesArtifact,
-        acquirer,
-        requestedAtUtc,
-        completedAtUtc: () =>
-          dependencies.nowUtc?.() ?? new Date().toISOString(),
-      });
-      return {
-        content: [{ type: "text" as const, text: board.summary }],
-        structuredContent: board as unknown as Record<string, unknown>,
-      };
+      return await loadMarketBoard(input);
     },
   );
 
@@ -371,24 +374,7 @@ export async function createStewardMcpServer(
           structuredContent: rejected as unknown as Record<string, unknown>,
         };
       }
-      const output: AcknowledgementSuccessOutput = {
-        status: "ACKNOWLEDGED",
-        policyVersion: "1.2.0",
-        disclaimerDigest: committed.disclaimerDigest,
-        acknowledgedAtUtc: committed.acknowledgedAtUtc,
-        disclaimer: profileSource.disclaimer,
-        nextAction:
-          "Reissue the previously validated pending market-data request.",
-      };
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: "Market Data Demo acknowledgement recorded for this MCP session.",
-          },
-        ],
-        structuredContent: output as unknown as Record<string, unknown>,
-      };
+      return await loadMarketBoard({ evidenceMode: "LIVE_ONLY" });
     },
   );
 

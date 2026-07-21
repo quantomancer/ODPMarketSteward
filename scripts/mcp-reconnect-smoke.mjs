@@ -118,21 +118,21 @@ try {
     !tools.ok ||
     listedTools?.length !== 3 ||
     acknowledgementTool?.inputSchema?.$id !==
-      "urn:odp-market-steward:mcp:acknowledge_market_data_demo:input:v1.5.2" ||
+      "urn:odp-market-steward:mcp:acknowledge_market_data_demo:input:v1.5.3" ||
     acknowledgementTool?.outputSchema?.$id !==
-      "urn:odp-market-steward:mcp:acknowledge_market_data_demo:output:v1.5.2" ||
+      "urn:odp-market-steward:mcp:acknowledge_market_data_demo:output:v1.5.3" ||
     acknowledgementTool?.securitySchemes?.[0]?.type !== "noauth" ||
     acknowledgementTool?._meta?.securitySchemes?.[0]?.type !== "noauth" ||
     marketBoardTool?.inputSchema?.$id !==
-      "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.2" ||
+      "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.3" ||
     marketBoardTool?.outputSchema?.$id !==
-      "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.2" ||
+      "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.3" ||
     marketBoardTool?.securitySchemes?.[0]?.type !== "noauth" ||
     marketBoardTool?._meta?.securitySchemes?.[0]?.type !== "noauth" ||
     productProfileTool?.inputSchema?.$id !==
-      "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.2" ||
+      "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.3" ||
     productProfileTool?.outputSchema?.$id !==
-      "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.2" ||
+      "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.3" ||
     productProfileTool?.securitySchemes?.[0]?.type !== "noauth" ||
     productProfileTool?._meta?.securitySchemes?.[0]?.type !== "noauth"
   ) {

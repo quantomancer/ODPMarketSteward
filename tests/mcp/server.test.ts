@@ -73,7 +73,7 @@ describe("MCP product-profile vertical slice", () => {
       productVersion: "1.1.4",
       odpsVersion: 4.1,
       governance: {
-        bundleVersion: "1.8.0",
+        bundleVersion: "1.8.1",
         validation: {
           completeForRequiredLayers: false,
           summary: { passed: 3, failed: 0, notTested: 3 },
@@ -275,7 +275,7 @@ describe("MCP governed market-board vertical slice", () => {
     expect(result.isError, JSON.stringify(result)).not.toBe(true);
     expect(result.structuredContent).toMatchObject({
       productId: "fxlive-market-data-demo-fx35",
-      bundleVersion: "1.8.0",
+      bundleVersion: "1.8.1",
       availabilityState: "AVAILABLE",
       serviceState: "UNKNOWN",
       evidence: {
@@ -344,19 +344,6 @@ describe("MCP governed market-board vertical slice", () => {
     });
     expect(acknowledgement.isError).not.toBe(true);
     expect(acknowledgement.structuredContent).toMatchObject({
-      status: "ACKNOWLEDGED",
-      policyVersion: "1.2.0",
-      disclaimerDigest: challenge.disclaimerDigest,
-      nextAction:
-        "Reissue the previously validated pending market-data request.",
-    });
-
-    const board = await client.callTool({
-      name: "get_fx_market_board",
-      arguments: { evidenceMode: "LIVE_ONLY" },
-    });
-    expect(board.isError, JSON.stringify(board)).not.toBe(true);
-    expect(board.structuredContent).toMatchObject({
       availabilityState: "AVAILABLE",
       snapshot: { returnedCount: 35 },
     });

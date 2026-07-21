@@ -3,7 +3,7 @@ export const MCP_TOOL_SCHEMAS = {
   get_fx_market_board: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.3",
       title: "get_fx_market_board input",
       type: "object",
       $ref: "#/$defs/MarketBoardInput",
@@ -43,7 +43,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.3",
       title: "get_fx_market_board output",
       type: "object",
       $ref: "#/$defs/MarketBoardOutput",
@@ -1054,7 +1054,7 @@ export const MCP_TOOL_SCHEMAS = {
   get_fx_instrument: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_instrument:input:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:get_fx_instrument:input:v1.5.3",
       title: "get_fx_instrument input",
       type: "object",
       $ref: "#/$defs/InstrumentInput",
@@ -1120,7 +1120,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_instrument:output:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:get_fx_instrument:output:v1.5.3",
       title: "get_fx_instrument output",
       type: "object",
       $ref: "#/$defs/InstrumentOutput",
@@ -1995,7 +1995,7 @@ export const MCP_TOOL_SCHEMAS = {
   summarize_fx_movements: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:input:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:input:v1.5.3",
       title: "summarize_fx_movements input",
       type: "object",
       $ref: "#/$defs/MovementSummaryInput",
@@ -2090,7 +2090,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:output:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:output:v1.5.3",
       title: "summarize_fx_movements output",
       type: "object",
       $ref: "#/$defs/MovementSummaryOutput",
@@ -2915,7 +2915,7 @@ export const MCP_TOOL_SCHEMAS = {
   assess_fx_data_service: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:input:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:input:v1.5.3",
       title: "assess_fx_data_service input",
       type: "object",
       $ref: "#/$defs/AssessmentInput",
@@ -3017,7 +3017,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:output:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:output:v1.5.3",
       title: "assess_fx_data_service output",
       type: "object",
       $ref: "#/$defs/AssessmentOutput",
@@ -3910,7 +3910,7 @@ export const MCP_TOOL_SCHEMAS = {
   acknowledge_market_data_demo: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:input:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:input:v1.5.3",
       title: "acknowledge_market_data_demo input",
       type: "object",
       $ref: "#/$defs/Acknowledgement",
@@ -3949,10 +3949,10 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:output:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:output:v1.5.3",
       title: "acknowledge_market_data_demo output",
       type: "object",
-      $ref: "#/$defs/AcknowledgementOutput",
+      $ref: "#/$defs/MarketBoardOutput",
       $defs: {
         UtcTimestamp: {
           type: "string",
@@ -4058,40 +4058,825 @@ export const MCP_TOOL_SCHEMAS = {
             },
           },
         },
-        AcknowledgementSuccessOutput: {
+        ArtifactPointer: {
+          type: "object",
+          additionalProperties: false,
+          required: ["artifactId", "artifactVersion", "path", "sha256"],
+          properties: {
+            artifactId: {
+              type: "string",
+            },
+            artifactVersion: {
+              type: "string",
+            },
+            path: {
+              type: "string",
+              description: "bundle-relative artifact path",
+            },
+            sha256: {
+              type: "string",
+              pattern: "^[a-f0-9]{64}$",
+            },
+          },
+        },
+        ValidationSummary: {
           type: "object",
           additionalProperties: false,
           required: [
-            "status",
-            "policyVersion",
-            "disclaimerDigest",
-            "acknowledgedAtUtc",
-            "disclaimer",
-            "nextAction",
+            "passed",
+            "failed",
+            "warnings",
+            "notApplicable",
+            "notTested",
           ],
           properties: {
+            passed: {
+              type: "integer",
+              minimum: 0,
+            },
+            failed: {
+              type: "integer",
+              minimum: 0,
+            },
+            warnings: {
+              type: "integer",
+              minimum: 0,
+            },
+            notApplicable: {
+              type: "integer",
+              minimum: 0,
+            },
+            notTested: {
+              type: "integer",
+              minimum: 0,
+            },
+          },
+        },
+        ValidationLayer: {
+          type: "string",
+          enum: [
+            "syntax",
+            "controlling-schema",
+            "semantic-policy",
+            "cross-reference",
+            "source-alignment",
+            "sdk-compatibility",
+          ],
+        },
+        ValidationStatus: {
+          type: "string",
+          enum: ["PASS", "FAIL", "WARNING", "NOT_APPLICABLE", "NOT_TESTED"],
+        },
+        ValidationLayerResult: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "artifact",
+            "layer",
+            "status",
+            "validatorName",
+            "validatorVersion",
+            "evaluatedAtUtc",
+            "schemaUri",
+            "schemaSha256",
+            "evidence",
+          ],
+          properties: {
+            artifact: {
+              $ref: "#/$defs/ArtifactPointer",
+            },
+            layer: {
+              $ref: "#/$defs/ValidationLayer",
+            },
             status: {
+              $ref: "#/$defs/ValidationStatus",
+            },
+            validatorName: {
               type: "string",
-              const: "ACKNOWLEDGED",
+              minLength: 1,
+            },
+            validatorVersion: {
+              type: "string",
+              minLength: 1,
+            },
+            evaluatedAtUtc: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            schemaUri: {
+              oneOf: [
+                {
+                  type: "string",
+                  format: "uri",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            schemaSha256: {
+              oneOf: [
+                {
+                  type: "string",
+                  pattern: "^[a-f0-9]{64}$",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            evidence: {
+              type: "array",
+              minItems: 1,
+              items: {
+                type: "string",
+              },
+            },
+          },
+        },
+        GovernanceValidation: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "evaluatedAtUtc",
+            "completeForRequiredLayers",
+            "summary",
+            "results",
+          ],
+          properties: {
+            evaluatedAtUtc: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            completeForRequiredLayers: {
+              type: "boolean",
+            },
+            summary: {
+              $ref: "#/$defs/ValidationSummary",
+            },
+            results: {
+              type: "array",
+              minItems: 1,
+              items: {
+                $ref: "#/$defs/ValidationLayerResult",
+              },
+            },
+          },
+        },
+        GovernanceContext: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "productId",
+            "productVersion",
+            "bundleVersion",
+            "odpsVersion",
+            "artifacts",
+            "validation",
+          ],
+          properties: {
+            productId: {
+              type: "string",
+              const: "fxlive-market-data-demo-fx35",
+            },
+            productVersion: {
+              type: "string",
+            },
+            bundleVersion: {
+              type: "string",
+            },
+            odpsVersion: {
+              type: "number",
+              const: 4.1,
+            },
+            artifacts: {
+              type: "array",
+              minItems: 1,
+              items: {
+                $ref: "#/$defs/ArtifactPointer",
+              },
+            },
+            validation: {
+              $ref: "#/$defs/GovernanceValidation",
+            },
+          },
+        },
+        LiveEvidenceContext: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "evidenceMode",
+            "fetchedAtUtc",
+            "calendarEvaluatedAtUtc",
+            "cacheAgeSeconds",
+            "displayLabel",
+            "liveBadgePermitted",
+            "sourceDescription",
+          ],
+          properties: {
+            evidenceMode: {
+              type: "string",
+              const: "LIVE",
+            },
+            fetchedAtUtc: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            calendarEvaluatedAtUtc: {
+              oneOf: [
+                {
+                  $ref: "#/$defs/UtcTimestamp",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            cacheAgeSeconds: {
+              type: "integer",
+              minimum: 0,
+            },
+            displayLabel: {
+              type: "string",
+              const: "LIVE",
+            },
+            liveBadgePermitted: {
+              type: "boolean",
+            },
+            sourceDescription: {
+              type: "string",
+              const: "retrieved_from_fixed_origin_during_current_tool_call",
+            },
+          },
+        },
+        Instrument: {
+          type: "string",
+          enum: [
+            "AUDCAD",
+            "AUDCHF",
+            "AUDJPY",
+            "AUDNZD",
+            "AUDUSD",
+            "CADCHF",
+            "CADJPY",
+            "CHFHUF",
+            "CHFJPY",
+            "EURAUD",
+            "EURCAD",
+            "EURCHF",
+            "EURGBP",
+            "EURHUF",
+            "EURJPY",
+            "EURNZD",
+            "EURPLN",
+            "EURUSD",
+            "GBPAUD",
+            "GBPCAD",
+            "GBPCHF",
+            "GBPJPY",
+            "GBPNZD",
+            "GBPUSD",
+            "NZDCAD",
+            "NZDCHF",
+            "NZDJPY",
+            "NZDUSD",
+            "USDCAD",
+            "USDCHF",
+            "USDHUF",
+            "USDJPY",
+            "USDMXN",
+            "USDPLN",
+            "USDZAR",
+          ],
+        },
+        RecordedBarInterval: {
+          type: "object",
+          additionalProperties: false,
+          required: ["instrument", "barStartUtc", "barEndUtc"],
+          properties: {
+            instrument: {
+              $ref: "#/$defs/Instrument",
+            },
+            barStartUtc: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            barEndUtc: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+          },
+        },
+        ResponseHash: {
+          type: "object",
+          additionalProperties: false,
+          required: ["resourceId", "sha256"],
+          properties: {
+            resourceId: {
+              type: "string",
+              minLength: 1,
+            },
+            sha256: {
+              type: "string",
+              pattern: "^[a-f0-9]{64}$",
+            },
+          },
+        },
+        RecordedEvidenceManifest: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "capturedAtUtc",
+            "originalBarIntervals",
+            "productVersion",
+            "bundleVersion",
+            "policyVersion",
+            "artifactVersions",
+            "productArtifactDigest",
+            "contentSha256",
+            "responseHashes",
+            "validationResult",
+            "retentionClass",
+            "writeProtection",
+            "immutableManifestDigest",
+          ],
+          properties: {
+            capturedAtUtc: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            originalBarIntervals: {
+              type: "array",
+              minItems: 1,
+              maxItems: 35,
+              items: {
+                $ref: "#/$defs/RecordedBarInterval",
+              },
+            },
+            productVersion: {
+              type: "string",
+              minLength: 1,
+            },
+            bundleVersion: {
+              type: "string",
+              minLength: 1,
             },
             policyVersion: {
               type: "string",
               const: "1.2.0",
             },
-            disclaimerDigest: {
+            artifactVersions: {
+              type: "array",
+              minItems: 1,
+              uniqueItems: true,
+              items: {
+                $ref: "#/$defs/ArtifactPointer",
+              },
+            },
+            productArtifactDigest: {
               type: "string",
               pattern: "^[a-f0-9]{64}$",
             },
-            acknowledgedAtUtc: {
+            contentSha256: {
+              type: "string",
+              pattern: "^[a-f0-9]{64}$",
+            },
+            responseHashes: {
+              type: "array",
+              minItems: 1,
+              items: {
+                $ref: "#/$defs/ResponseHash",
+              },
+            },
+            validationResult: {
+              $ref: "#/$defs/GovernanceValidation",
+            },
+            retentionClass: {
+              type: "string",
+              minLength: 1,
+            },
+            writeProtection: {
+              type: "string",
+              const: "CREATE_ONLY_IF_ABSENT",
+            },
+            immutableManifestDigest: {
+              type: "string",
+              pattern: "^[a-f0-9]{64}$",
+              description:
+                "SHA-256 of the canonical manifest representation with this digest field omitted.",
+            },
+          },
+        },
+        RecordedEvidenceContext: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "evidenceMode",
+            "fetchedAtUtc",
+            "calendarEvaluatedAtUtc",
+            "cacheAgeSeconds",
+            "displayLabel",
+            "liveBadgePermitted",
+            "manifest",
+          ],
+          properties: {
+            evidenceMode: {
+              type: "string",
+              const: "RECORDED",
+            },
+            fetchedAtUtc: {
               $ref: "#/$defs/UtcTimestamp",
+            },
+            calendarEvaluatedAtUtc: {
+              oneOf: [
+                {
+                  $ref: "#/$defs/UtcTimestamp",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            cacheAgeSeconds: {
+              type: "integer",
+              minimum: 0,
+            },
+            displayLabel: {
+              type: "string",
+              pattern:
+                "^Recorded demo snapshot — captured .+Z — not current market data\\.$",
+            },
+            liveBadgePermitted: {
+              type: "boolean",
+              const: false,
+            },
+            manifest: {
+              $ref: "#/$defs/RecordedEvidenceManifest",
+            },
+          },
+        },
+        EvidenceContext: {
+          oneOf: [
+            {
+              $ref: "#/$defs/LiveEvidenceContext",
+            },
+            {
+              $ref: "#/$defs/RecordedEvidenceContext",
+            },
+            {
+              $ref: "#/$defs/NoEvidenceContext",
+            },
+          ],
+        },
+        AvailabilityState: {
+          type: "string",
+          enum: ["AVAILABLE", "PARTIAL", "UNAVAILABLE", "INCOHERENT"],
+        },
+        ServiceState: {
+          type: "string",
+          enum: ["OPEN", "MARKET_CLOSED", "DEGRADED", "UNAVAILABLE", "UNKNOWN"],
+        },
+        SnapshotEvidence: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "createdAtUtc",
+            "barStartUtc",
+            "barEndUtc",
+            "granularity",
+            "expectedCount",
+            "returnedCount",
+          ],
+          properties: {
+            createdAtUtc: {
+              oneOf: [
+                {
+                  $ref: "#/$defs/UtcTimestamp",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            barStartUtc: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            barEndUtc: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            granularity: {
+              type: "string",
+              const: "1m",
+            },
+            expectedCount: {
+              type: "integer",
+              const: 35,
+            },
+            returnedCount: {
+              type: "integer",
+              minimum: 0,
+              maximum: 35,
+            },
+          },
+        },
+        Bar: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "Currency",
+            "Epoch",
+            "BarStart",
+            "BarEnd",
+            "Granularity",
+            "Open",
+            "High",
+            "Low",
+            "Close",
+          ],
+          properties: {
+            Currency: {
+              $ref: "#/$defs/Instrument",
+            },
+            Epoch: {
+              type: "string",
+              pattern: "^[0-9]+$",
+              description:
+                "Original non-negative epoch integer rendered losslessly as a decimal string; BarStart and BarEnd, not Epoch, control temporal correctness.",
+            },
+            BarStart: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            BarEnd: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            Granularity: {
+              type: "string",
+              const: "1m",
+            },
+            Open: {
+              type: "string",
+              description: "canonical decimal string",
+            },
+            High: {
+              type: "string",
+              description: "canonical decimal string",
+            },
+            Low: {
+              type: "string",
+              description: "canonical decimal string",
+            },
+            Close: {
+              type: "string",
+              description: "canonical decimal string",
+            },
+          },
+        },
+        RuleState: {
+          type: "string",
+          enum: [
+            "PASS",
+            "FAIL",
+            "WARNING",
+            "NOT_APPLICABLE",
+            "UNKNOWN",
+            "NOT_EVALUATED",
+          ],
+        },
+        RuleResult: {
+          type: "object",
+          additionalProperties: false,
+          required: ["ruleId", "state", "artifact", "pointer", "evidence"],
+          properties: {
+            ruleId: {
+              type: "string",
+            },
+            state: {
+              $ref: "#/$defs/RuleState",
+            },
+            artifact: {
+              $ref: "#/$defs/ArtifactPointer",
+            },
+            pointer: {
+              type: "string",
+              description: "stable JSON Pointer within the artifact",
+            },
+            evidence: {
+              type: "object",
+              additionalProperties: true,
+            },
+          },
+        },
+        QualitySummary: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "passed",
+            "failed",
+            "warnings",
+            "notApplicable",
+            "unknown",
+            "notEvaluated",
+            "results",
+          ],
+          properties: {
+            passed: {
+              type: "integer",
+              minimum: 0,
+            },
+            failed: {
+              type: "integer",
+              minimum: 0,
+            },
+            warnings: {
+              type: "integer",
+              minimum: 0,
+            },
+            notApplicable: {
+              type: "integer",
+              minimum: 0,
+            },
+            unknown: {
+              type: "integer",
+              minimum: 0,
+            },
+            notEvaluated: {
+              type: "integer",
+              minimum: 0,
+            },
+            results: {
+              type: "array",
+              items: {
+                $ref: "#/$defs/RuleResult",
+              },
+            },
+          },
+        },
+        PlausibilityState: {
+          type: "string",
+          enum: ["NORMAL", "UNUSUAL", "NOT_EVALUATED"],
+        },
+        PlausibilityResult: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "state",
+            "method",
+            "configurationStatus",
+            "artifact",
+            "pointer",
+            "evidence",
+            "limitations",
+          ],
+          properties: {
+            state: {
+              $ref: "#/$defs/PlausibilityState",
+            },
+            method: {
+              type: "string",
+              const: "rolling_median_and_median_absolute_deviation",
+            },
+            configurationStatus: {
+              type: "string",
+              enum: ["CONFIGURED", "UNCONFIGURED"],
+            },
+            artifact: {
+              $ref: "#/$defs/ArtifactPointer",
+            },
+            pointer: {
+              type: "string",
+              const: "/spec/contextualRules/contextual-ohlc-plausibility",
+            },
+            evidence: {
+              type: "object",
+              additionalProperties: true,
+            },
+            limitations: {
+              type: "array",
+              minItems: 1,
+              items: {
+                type: "string",
+              },
+            },
+          },
+        },
+        RefreshResult: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "outcome",
+            "requestedAtUtc",
+            "completedAtUtc",
+            "previousBarEndUtc",
+            "currentBarEndUtc",
+            "message",
+          ],
+          properties: {
+            outcome: {
+              type: "string",
+              enum: ["INITIAL", "SAME_BAR", "NEW_BAR", "NOT_EVALUATED"],
+            },
+            requestedAtUtc: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            completedAtUtc: {
+              $ref: "#/$defs/UtcTimestamp",
+            },
+            previousBarEndUtc: {
+              oneOf: [
+                {
+                  $ref: "#/$defs/UtcTimestamp",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            currentBarEndUtc: {
+              oneOf: [
+                {
+                  $ref: "#/$defs/UtcTimestamp",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            message: {
+              type: "string",
+              minLength: 1,
+            },
+          },
+        },
+        MarketBoardSuccessOutput: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "productId",
+            "bundleVersion",
+            "summary",
+            "governance",
+            "evidence",
+            "availabilityState",
+            "serviceState",
+            "snapshot",
+            "bars",
+            "quality",
+            "plausibility",
+            "refresh",
+            "limitations",
+            "disclaimer",
+          ],
+          properties: {
+            productId: {
+              type: "string",
+              const: "fxlive-market-data-demo-fx35",
+            },
+            bundleVersion: {
+              type: "string",
+            },
+            summary: {
+              type: "string",
+            },
+            governance: {
+              $ref: "#/$defs/GovernanceContext",
+            },
+            evidence: {
+              $ref: "#/$defs/EvidenceContext",
+            },
+            availabilityState: {
+              $ref: "#/$defs/AvailabilityState",
+            },
+            serviceState: {
+              $ref: "#/$defs/ServiceState",
+            },
+            snapshot: {
+              oneOf: [
+                {
+                  $ref: "#/$defs/SnapshotEvidence",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            bars: {
+              type: "array",
+              maxItems: 35,
+              items: {
+                $ref: "#/$defs/Bar",
+              },
+            },
+            quality: {
+              $ref: "#/$defs/QualitySummary",
+            },
+            plausibility: {
+              $ref: "#/$defs/PlausibilityResult",
+            },
+            refresh: {
+              $ref: "#/$defs/RefreshResult",
+            },
+            limitations: {
+              type: "array",
+              items: {
+                type: "string",
+              },
             },
             disclaimer: {
               $ref: "#/$defs/Disclaimer",
-            },
-            nextAction: {
-              type: "string",
-              const:
-                "Reissue the previously validated pending market-data request.",
             },
           },
         },
@@ -4156,13 +4941,13 @@ export const MCP_TOOL_SCHEMAS = {
             },
           },
         },
-        AcknowledgementOutput: {
+        MarketBoardOutput: {
           oneOf: [
             {
               $ref: "#/$defs/DisclosureRequiredOutput",
             },
             {
-              $ref: "#/$defs/AcknowledgementSuccessOutput",
+              $ref: "#/$defs/MarketBoardSuccessOutput",
             },
             {
               $ref: "#/$defs/ToolErrorOutput",
@@ -4175,7 +4960,7 @@ export const MCP_TOOL_SCHEMAS = {
   get_fx_product_profile: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.3",
       title: "get_fx_product_profile input",
       type: "object",
       $ref: "#/$defs/ProductProfileInput",
@@ -4213,7 +4998,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.2",
+      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.3",
       title: "get_fx_product_profile output",
       type: "object",
       $ref: "#/$defs/ProductProfileOutput",

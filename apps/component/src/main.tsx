@@ -148,19 +148,10 @@ function MarketBoardComponent() {
       });
       if (acknowledgement.isError === true)
         throw new Error("Acknowledgement rejected");
-      setNotice("Loading current governed board…");
-      const board = await app.callServerTool({
-        name: "get_fx_market_board",
-        arguments: { evidenceMode: "LIVE_ONLY" },
-      });
-      const structured = asObject(board.structuredContent);
+      const structured = asObject(acknowledgement.structuredContent);
       if (structured !== undefined) setResult(structured as BoardResult);
-      setChallenge(challengeFrom(board));
-      setNotice(
-        board.isError === true
-          ? "Market board unavailable."
-          : "Current board loaded.",
-      );
+      setChallenge(challengeFrom(acknowledgement));
+      setNotice("Current board loaded.");
     } catch {
       setNotice(
         "Acknowledgement flow could not complete. Ask ChatGPT to retry the board.",
