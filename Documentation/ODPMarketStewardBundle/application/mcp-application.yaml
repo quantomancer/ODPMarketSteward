@@ -5,13 +5,13 @@ metadata:
   id: odp-market-steward
   name: ODP Market Steward
   competitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
-  version: "1.5.3"
+  version: "1.5.4"
   status: planned
   classification: project_mcp_application_contract
   description: >-
     Contract for an MCP-backed ChatGPT application whose market-data and catalog
-    domain tools are read-only and whose component-only policy action records only
-    bounded session acknowledgement state. It presents latest stored FXLive market
+    domain tools are read-only and whose component-only policy action validates a
+    short-lived signed acknowledgement challenge without storing user state. It presents latest stored FXLive market
     data and augments it with governed product discovery, deterministic quality
     evidence, descriptive calculations, and professional natural-language explanation.
 
@@ -93,16 +93,9 @@ sessionControls:
     deliveryMechanism: signed_component_challenge
     retrievalBeforeValidAcknowledgementPermitted: false
     persistentUserTrackingInV1: false
-    boundedSessionStateInV1: required
-    stateBackend: cloudflare_durable_object
-    storedFields:
-      - policyVersion
-      - disclaimerDigest
-      - challengeNonceOrHash
-      - issuedAtUtc
-      - expiresAtUtc
-      - acknowledgedAtUtc
-      - replayState
+    boundedSessionStateInV1: not_used_for_demo_acknowledgement
+    stateBackend: stateless_signed_challenge
+    storedFields: []
     prohibitedStoredFields: [promptText, conversationTranscript, userProfile, marketResponse]
     flow:
       - >-
@@ -121,9 +114,8 @@ sessionControls:
         matching policy version and disclaimer digest.
       - >-
         The server verifies signature, expiry, session binding, policy version,
-        disclaimer digest, and affirmation, records the server's current UTC
-        acknowledgement time in bounded session state, and atomically retrieves and
-        returns the governed market board in the same component tool interaction.
+        disclaimer digest, and affirmation, then atomically retrieves and returns the
+        governed market board in the same read-style component tool interaction.
         Invalid, expired, replayed, fabricated, or model-only values return
         DISCLOSURE_REQUIRED and never trigger retrieval.
       - >-
@@ -135,7 +127,7 @@ sessionControls:
         hidden token. Session loss or policy-version change requires acknowledgement again.
     challenge:
       signatureAlgorithm: HMAC-SHA-256
-      maximumLifetimeSeconds: 600
+      maximumLifetimeSeconds: 60
       resultMetaKey: odpMarketSteward/acknowledgementChallenge
       tokenVisibleToModel: false
       tokenMayContainSecretMaterial: false
@@ -143,15 +135,15 @@ sessionControls:
     sessionMapping:
       technicalRequirement: TR-ACK-002
       serverIssuedOpaqueSessionIdentifierRequired: true
-      deterministicDurableObjectMappingRequired: true
-      sameValidSessionReconnectsToSameObject: true
+      deterministicDurableObjectMappingRequired: false
+      sameValidSessionReconnectsToSameObject: false
       newExpiredOrLostSessionRequiresNewAcknowledgement: true
-      cleanupAndCrossSessionReplayTestsRequired: true
+      cleanupAndCrossSessionReplayTestsRequired: false
     securityProperty: >-
       The model can request the gate but cannot satisfy it without a server-issued
-      token and the component-mediated user action. A strongly consistent Durable
-      Object retains only bounded expiring session state; no user profile, prompt,
-      transcript, or market response is stored.
+      token and the component-mediated user action. The demo accepts replay of a valid
+      token only within its 60-second lifetime and stores no acknowledgement, user
+      profile, prompt, transcript, or market response.
 
 bundleConsumption:
   manifest: ../bundle.yaml
@@ -376,14 +368,14 @@ tools:
   - name: acknowledge_market_data_demo
     title: Acknowledge Market Data Demo disclosure
     description: >-
-      Validate and record the explicit component-mediated Market Data Demo
-      acknowledgement, then return the governed live board in the same interaction.
+      Validate the explicit component-mediated signed Market Data Demo acknowledgement,
+      then return the governed live board in the same interaction without stored state.
     annotations:
-      readOnlyHint: false
+      readOnlyHint: true
       destructiveHint: false
-      openWorldHint: false
-      idempotentHint: false
-      x-externalSystemInteraction: false
+      openWorldHint: true
+      idempotentHint: true
+      x-externalSystemInteraction: true
     securitySchemes:
       - { type: noauth }
     _meta:
@@ -701,6 +693,11 @@ schemas:
         description: >-
           Opaque server-issued component challenge. Possession alone is insufficient;
           the server also verifies signature, expiry, session, and policy binding.
+      previousBarEndUtc:
+        oneOf:
+          - { $ref: "#/schemas/UtcTimestamp" }
+          - { type: "null" }
+        description: Optional prior bar identity for a component refresh.
 
   ArtifactPointer:
     type: object
@@ -1444,9 +1441,9 @@ schemas:
       disclaimer: { $ref: "#/schemas/Disclaimer" }
 
 securityAndPrivacy:
-  allToolsReadOnly: false
+  allToolsReadOnly: true
   modelVisibleDomainToolsReadOnly: true
-  acknowledgementMutationBoundary: bounded_per_session_policy_state_only
+  acknowledgementMutationBoundary: none_stateless_signed_demo_challenge
   authentication: none_for_public_first_release
   arbitraryUrlsOrPathsAccepted: false
   instrumentInputBoundedToValueSet: true

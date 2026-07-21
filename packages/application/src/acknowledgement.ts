@@ -79,6 +79,14 @@ export type AcknowledgementCommitResult =
         | "ALREADY_ACKNOWLEDGED";
     };
 
+export type AcknowledgementValidationResult =
+  | {
+      readonly status: "VALID";
+      readonly policyVersion: string;
+      readonly disclaimerDigest: string;
+    }
+  | Exclude<AcknowledgementCommitResult, { readonly status: "ACKNOWLEDGED" }>;
+
 interface ChallengeClaims {
   readonly v: 1;
   readonly kid: string;
@@ -261,6 +269,21 @@ export class SessionAcknowledgementService {
         };
       },
     );
+  }
+
+  async validate(
+    input: AcknowledgementCommitInput,
+    policy: AcknowledgementPolicyIdentity,
+  ): Promise<AcknowledgementValidationResult> {
+    const verified = await this.#verify(input, policy);
+    if (!verified.valid) {
+      return Object.freeze({ status: "REJECTED", reason: verified.reason });
+    }
+    return Object.freeze({
+      status: "VALID",
+      policyVersion: verified.claims.policyVersion,
+      disclaimerDigest: verified.claims.disclaimerDigest,
+    });
   }
 
   async clear(): Promise<void> {

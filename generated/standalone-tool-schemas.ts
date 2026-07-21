@@ -3,7 +3,7 @@ export const MCP_TOOL_SCHEMAS = {
   get_fx_market_board: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.4",
       title: "get_fx_market_board input",
       type: "object",
       $ref: "#/$defs/MarketBoardInput",
@@ -43,7 +43,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.4",
       title: "get_fx_market_board output",
       type: "object",
       $ref: "#/$defs/MarketBoardOutput",
@@ -1054,7 +1054,7 @@ export const MCP_TOOL_SCHEMAS = {
   get_fx_instrument: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_instrument:input:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:get_fx_instrument:input:v1.5.4",
       title: "get_fx_instrument input",
       type: "object",
       $ref: "#/$defs/InstrumentInput",
@@ -1120,7 +1120,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_instrument:output:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:get_fx_instrument:output:v1.5.4",
       title: "get_fx_instrument output",
       type: "object",
       $ref: "#/$defs/InstrumentOutput",
@@ -1995,7 +1995,7 @@ export const MCP_TOOL_SCHEMAS = {
   summarize_fx_movements: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:input:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:input:v1.5.4",
       title: "summarize_fx_movements input",
       type: "object",
       $ref: "#/$defs/MovementSummaryInput",
@@ -2090,7 +2090,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:output:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:output:v1.5.4",
       title: "summarize_fx_movements output",
       type: "object",
       $ref: "#/$defs/MovementSummaryOutput",
@@ -2915,7 +2915,7 @@ export const MCP_TOOL_SCHEMAS = {
   assess_fx_data_service: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:input:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:input:v1.5.4",
       title: "assess_fx_data_service input",
       type: "object",
       $ref: "#/$defs/AssessmentInput",
@@ -3017,7 +3017,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:output:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:output:v1.5.4",
       title: "assess_fx_data_service output",
       type: "object",
       $ref: "#/$defs/AssessmentOutput",
@@ -3910,11 +3910,16 @@ export const MCP_TOOL_SCHEMAS = {
   acknowledge_market_data_demo: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:input:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:input:v1.5.4",
       title: "acknowledge_market_data_demo input",
       type: "object",
       $ref: "#/$defs/Acknowledgement",
       $defs: {
+        UtcTimestamp: {
+          type: "string",
+          format: "date-time",
+          pattern: "Z$",
+        },
         Acknowledgement: {
           type: "object",
           additionalProperties: false,
@@ -3943,13 +3948,25 @@ export const MCP_TOOL_SCHEMAS = {
               description:
                 "Opaque server-issued component challenge. Possession alone is insufficient; the server also verifies signature, expiry, session, and policy binding.",
             },
+            previousBarEndUtc: {
+              oneOf: [
+                {
+                  $ref: "#/$defs/UtcTimestamp",
+                },
+                {
+                  type: "null",
+                },
+              ],
+              description:
+                "Optional prior bar identity for a component refresh.",
+            },
           },
         },
       },
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:output:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:output:v1.5.4",
       title: "acknowledge_market_data_demo output",
       type: "object",
       $ref: "#/$defs/MarketBoardOutput",
@@ -4960,7 +4977,7 @@ export const MCP_TOOL_SCHEMAS = {
   get_fx_product_profile: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.4",
       title: "get_fx_product_profile input",
       type: "object",
       $ref: "#/$defs/ProductProfileInput",
@@ -4998,7 +5015,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.3",
+      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.4",
       title: "get_fx_product_profile output",
       type: "object",
       $ref: "#/$defs/ProductProfileOutput",

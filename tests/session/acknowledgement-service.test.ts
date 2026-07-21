@@ -51,6 +51,26 @@ function fixture(options: {
 }
 
 describe("server-owned acknowledgement service", () => {
+  it("validates a signed challenge without storing acknowledgement state", async () => {
+    const { service, state } = fixture({});
+    const challenge = await service.issue(policy);
+    const result = await service.validate(
+      {
+        affirmed: true,
+        policyVersion: challenge.policyVersion,
+        disclaimerDigest: challenge.disclaimerDigest,
+        challengeToken: challenge.challengeToken,
+      },
+      policy,
+    );
+    expect(result).toMatchObject({
+      status: "VALID",
+      policyVersion: "1.2.0",
+      disclaimerDigest: challenge.disclaimerDigest,
+    });
+    expect(await state.read()).toBeNull();
+  });
+
   it("issues a policy/session-bound challenge and commits bounded state", async () => {
     const { service, state } = fixture({});
     expect(await service.isAcknowledged(policy)).toBe(false);

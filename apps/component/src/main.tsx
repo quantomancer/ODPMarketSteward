@@ -135,7 +135,7 @@ function MarketBoardComponent() {
     const app = appRef.current;
     if (app === undefined || challenge === undefined) return;
     setBusy(true);
-    setNotice("Recording acknowledgement…");
+    setNotice("Loading current governed board…");
     try {
       const acknowledgement = await app.callServerTool({
         name: "acknowledge_market_data_demo",
@@ -171,9 +171,19 @@ function MarketBoardComponent() {
         typeof result.snapshot?.barEndUtc === "string"
           ? result.snapshot.barEndUtc
           : null;
+      if (challenge === undefined) {
+        setNotice("Please acknowledge the demo conditions again.");
+        return;
+      }
       const refreshed = await app.callServerTool({
-        name: "get_fx_market_board",
-        arguments: { evidenceMode: "LIVE_ONLY", previousBarEndUtc },
+        name: "acknowledge_market_data_demo",
+        arguments: {
+          affirmed: true,
+          policyVersion: challenge.policyVersion,
+          disclaimerDigest: challenge.disclaimerDigest,
+          challengeToken: challenge.challengeToken,
+          previousBarEndUtc,
+        },
       });
       const structured = asObject(refreshed.structuredContent);
       if (structured !== undefined) setResult(structured as BoardResult);

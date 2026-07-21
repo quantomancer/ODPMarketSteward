@@ -73,7 +73,7 @@ describe("MCP product-profile vertical slice", () => {
       productVersion: "1.1.4",
       odpsVersion: 4.1,
       governance: {
-        bundleVersion: "1.8.1",
+        bundleVersion: "1.8.2",
         validation: {
           completeForRequiredLayers: false,
           summary: { passed: 3, failed: 0, notTested: 3 },
@@ -275,7 +275,7 @@ describe("MCP governed market-board vertical slice", () => {
     expect(result.isError, JSON.stringify(result)).not.toBe(true);
     expect(result.structuredContent).toMatchObject({
       productId: "fxlive-market-data-demo-fx35",
-      bundleVersion: "1.8.1",
+      bundleVersion: "1.8.2",
       availabilityState: "AVAILABLE",
       serviceState: "UNKNOWN",
       evidence: {
@@ -359,9 +359,10 @@ describe("MCP governed market-board vertical slice", () => {
       },
     });
     expect(replay.structuredContent).toMatchObject({
-      status: "DISCLOSURE_REQUIRED",
-      evidence: { reason: "ACKNOWLEDGEMENT_ALREADY_ACKNOWLEDGED" },
+      availabilityState: "AVAILABLE",
+      snapshot: { returnedCount: 35 },
     });
+    expect(source.getSnapshotMetadata.mock.calls).toHaveLength(4);
   });
 
   it("rejects a modified component challenge and keeps source-call count zero", async () => {

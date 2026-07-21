@@ -39,6 +39,7 @@ export interface AcknowledgementInput {
   readonly policyVersion: "1.2.0";
   readonly disclaimerDigest: string;
   readonly challengeToken: string;
+  readonly previousBarEndUtc?: string | null;
 }
 
 export interface ArtifactPointer {

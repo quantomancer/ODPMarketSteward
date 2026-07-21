@@ -356,8 +356,8 @@ export async function createStewardMcpServer(
         );
       }
       const policy = acknowledgementPolicy(profileSource.disclaimer);
-      const committed = await service.commit(input, policy);
-      if (committed.status === "REJECTED") {
+      const validated = await service.validate(input, policy);
+      if (validated.status === "REJECTED") {
         const required = disclosureRequired(
           profileSource.disclaimer,
           dependencies.nowUtc?.() ?? new Date().toISOString(),
@@ -366,7 +366,7 @@ export async function createStewardMcpServer(
           ...required,
           evidence: {
             ...required.evidence,
-            reason: `ACKNOWLEDGEMENT_${committed.reason}`,
+            reason: `ACKNOWLEDGEMENT_${validated.reason}`,
           },
         };
         return {
@@ -374,7 +374,19 @@ export async function createStewardMcpServer(
           structuredContent: rejected as unknown as Record<string, unknown>,
         };
       }
-      return await loadMarketBoard({ evidenceMode: "LIVE_ONLY" });
+      const board = await loadMarketBoard({
+        evidenceMode: "LIVE_ONLY",
+        ...(input.previousBarEndUtc === undefined
+          ? {}
+          : { previousBarEndUtc: input.previousBarEndUtc }),
+      });
+      return {
+        ...board,
+        _meta: {
+          "odpMarketSteward/acknowledgementChallenge":
+            await service.issue(policy),
+        },
+      };
     },
   );
 
