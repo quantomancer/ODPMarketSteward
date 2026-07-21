@@ -5,13 +5,13 @@ metadata:
   id: odp-market-steward
   name: ODP Market Steward
   competitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
-  version: "1.5.5"
+  version: "1.5.6"
   status: planned
   classification: project_mcp_application_contract
   description: >-
     Contract for an MCP-backed ChatGPT application whose market-data and catalog
-    domain tools are read-only and whose component-only policy action validates a
-    short-lived signed acknowledgement challenge without storing user state. It presents latest stored FXLive market
+    domain tools are read-only. The MARKET DATA DEMO disclaimer is always displayed
+    without an acknowledgement gate. It presents latest stored FXLive market
     data and augments it with governed product discovery, deterministic quality
     evidence, descriptive calculations, and professional natural-language explanation.
 
@@ -82,69 +82,28 @@ serverInitialization:
   instructions: >-
     Use ODP Market Steward only for FXLive Market Data Demo retrieval, deterministic
     data-quality evidence, descriptive OHLC calculations, and governed product
-    discovery. Obtain the required demo acknowledgement before a market-data tool.
+    discovery. Display the MARKET DATA DEMO disclaimer without requesting acknowledgement.
     Never provide forecasts, recommendations, signals, orders, or execution guidance.
     Treat missing calendar or governance evidence as UNKNOWN or INDETERMINATE.
 
 sessionControls:
   acknowledgement:
     policyRef: ../policies/publication-policy.yaml#/disclaimer/acknowledgement
-    enforcementOwner: mcp-server
-    deliveryMechanism: signed_component_challenge
-    retrievalBeforeValidAcknowledgementPermitted: false
+    enabled: false
+    enforcementOwner: none
+    deliveryMechanism: disclaimer_only
+    retrievalBeforeValidAcknowledgementPermitted: true
     persistentUserTrackingInV1: false
-    boundedSessionStateInV1: not_used_for_demo_acknowledgement
-    stateBackend: stateless_signed_challenge
+    boundedSessionStateInV1: not_used
+    stateBackend: none
     storedFields: []
     prohibitedStoredFields: [promptText, conversationTranscript, userProfile, marketResponse]
     flow:
       - >-
-        A market-data tool call without a valid acknowledgement performs no upstream
-        retrieval and returns a model-visible DISCLOSURE_REQUIRED result plus a
-        component-only validated pending request.
-      - >-
-        The same result carries an opaque, HMAC-signed, short-lived challenge token
-        only in component-visible _meta; the demo token binds policy version,
-        disclaimer digest, issued time, expiry, and a random nonce. The pending request
-        is component continuity state and is not part of the authorization decision.
-      - >-
-        The component renders the exact disclaimer and an explicit acknowledgement
-        control. A user action invokes the component-only
-        acknowledge_market_data_demo tool with the token, affirmed=true, and the
-        matching policy version and disclaimer digest.
-      - >-
-        The server verifies signature, expiry, policy version,
-        disclaimer digest, and affirmation, then atomically retrieves and returns the
-        governed market board in the same read-style component tool interaction.
-        Invalid, expired, replayed, fabricated, or model-only values return
-        DISCLOSURE_REQUIRED and never trigger retrieval.
-      - >-
-        The component renders the board returned by that acknowledgement interaction
-        and must not issue a second transport-dependent request to complete the flow.
-      - >-
-        Subsequent gated tools in the same MCP app session rely on the verified
-        acknowledgement state and do not require the model to carry a
-        hidden token. Session loss or policy-version change requires acknowledgement again.
-    challenge:
-      signatureAlgorithm: HMAC-SHA-256
-      maximumLifetimeSeconds: 60
-      resultMetaKey: odpMarketSteward/acknowledgementChallenge
-      tokenVisibleToModel: false
-      tokenMayContainSecretMaterial: false
-      serverSecretMayAppearInResult: false
-    sessionMapping:
-      technicalRequirement: TR-ACK-002
-      serverIssuedOpaqueSessionIdentifierRequired: false
-      deterministicDurableObjectMappingRequired: false
-      sameValidSessionReconnectsToSameObject: false
-      newExpiredOrLostSessionRequiresNewAcknowledgement: true
-      cleanupAndCrossSessionReplayTestsRequired: false
+        Market-data tools retrieve immediately. The component and model-visible result
+        always display the exact MARKET DATA DEMO disclaimer.
     securityProperty: >-
-      The model can request the gate but cannot satisfy it without a server-issued
-      token and the component-mediated user action across ChatGPT transport sessions.
-      The demo accepts replay of a valid
-      token only within its 60-second lifetime and stores no acknowledgement, user
-      profile, prompt, transcript, or market response.
+      No acknowledgement token, user state, prompt, transcript, or market response is stored.
 
 bundleConsumption:
   manifest: ../bundle.yaml
@@ -178,7 +137,7 @@ responsibilityBoundary:
     - availability, service-state, plausibility, and fitness classification
     - artifact validation and evidence pointers
     - source-mode labelling and disclaimer enforcement
-    - signed acknowledgement challenge issuance and verification
+    - permanent MARKET DATA DEMO disclaimer presentation
     - versioned validation-layer evidence in governed results
     - optional bounded GPT-5.6 Steward Brief generation through the OpenAI Responses API
     - Cloudflare Durable Object session coordination and replay protection
@@ -364,31 +323,6 @@ tools:
       - instrument-set
       - ohlc-rules
       - monitoring
-      - publication-policy
-
-  - name: acknowledge_market_data_demo
-    title: Acknowledge Market Data Demo disclosure
-    description: >-
-      Validate the explicit component-mediated signed Market Data Demo acknowledgement,
-      then return the governed live board in the same interaction without stored state.
-    annotations:
-      readOnlyHint: true
-      destructiveHint: false
-      openWorldHint: true
-      idempotentHint: true
-      x-externalSystemInteraction: true
-    securitySchemes:
-      - { type: noauth }
-    _meta:
-      securitySchemes:
-        - { type: noauth }
-      ui:
-        visibility: [app]
-    inputSchema:
-      $ref: "#/schemas/Acknowledgement"
-    outputSchema:
-      $ref: "#/schemas/MarketBoardOutput"
-    consumes:
       - publication-policy
 
   - name: get_fx_product_profile
@@ -601,7 +535,7 @@ mcpResultEnvelope:
   widgetInput: latest_structuredContent_delivered_over_the_MCP_Apps_bridge
   retrySafety:
     domainTools: idempotent
-    acknowledgementTool: single_use_challenge_non_idempotent_bounded_session_state_mutation
+    acknowledgementTool: disabled_not_registered
 
 schemas:
   Instrument:
@@ -1444,7 +1378,7 @@ schemas:
 securityAndPrivacy:
   allToolsReadOnly: true
   modelVisibleDomainToolsReadOnly: true
-  acknowledgementMutationBoundary: none_stateless_signed_demo_challenge
+  acknowledgementMutationBoundary: none_acknowledgement_disabled
   authentication: none_for_public_first_release
   arbitraryUrlsOrPathsAccepted: false
   instrumentInputBoundedToValueSet: true
@@ -1457,7 +1391,7 @@ securityAndPrivacy:
   stewardBriefOutboundPayloadBoundedBy: responsibilityBoundary.stewardBriefGenerator.allowedInput
   componentContentSecurityPolicy: exact_domains_required_before_deployment
   secretsInToolResultsOrComponentMetadata: prohibited
-  opaqueSignedAcknowledgementChallengesAreSecrets: false
+  opaqueSignedAcknowledgementChallengesAreSecrets: not_applicable
 
 requirements:
   source: ../requirements/FuncitionalRequirements.html

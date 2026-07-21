@@ -2,8 +2,10 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 
 export function materializeToolSchemas(contract) {
-  if (!Array.isArray(contract.tools) || contract.tools.length !== 6) {
-    throw new Error("MCP application contract must declare exactly six tools.");
+  if (!Array.isArray(contract.tools) || contract.tools.length !== 5) {
+    throw new Error(
+      "MCP application contract must declare exactly five read-only tools.",
+    );
   }
   if (!isRecord(contract.schemas)) {
     throw new Error("MCP application contract has no schemas object.");

@@ -9,7 +9,6 @@ const expectedTools = [
   "get_fx_instrument",
   "summarize_fx_movements",
   "assess_fx_data_service",
-  "acknowledge_market_data_demo",
   "get_fx_product_profile",
 ] as const;
 
@@ -17,11 +16,11 @@ const disclaimer = {
   label: "MARKET DATA DEMO",
   statement:
     "MARKET DATA DEMO. This API and application are provided solely to demonstrate app functionality for the competition. Use at your own risk. Data may be delayed, incomplete, unavailable, inaccurate, or contain errors. The provider accepts no responsibility for use of the API, application, or data and gives no guarantee regarding data accuracy or service availability. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The API, application, and data must not be used for live trading or order execution.",
-  policyVersion: "1.2.0",
+  policyVersion: "1.3.0",
 };
 
 describe("standalone MCP tool schemas", () => {
-  it("materializes exactly twelve independently compilable schemas", () => {
+  it("materializes exactly ten independently compilable schemas", () => {
     expect(Object.keys(MCP_TOOL_SCHEMAS)).toEqual(expectedTools);
     const ajv = new Ajv2020({ allErrors: true, strict: true });
     addFormats(ajv);
@@ -36,8 +35,8 @@ describe("standalone MCP tool schemas", () => {
         count += 1;
       }
     }
-    expect(count).toBe(12);
-    expect(identifiers.size).toBe(12);
+    expect(count).toBe(10);
+    expect(identifiers.size).toBe(10);
   });
 
   it("admits the same typed safe error result for every tool output", () => {
@@ -113,7 +112,7 @@ function contractFixture(
 ) {
   return {
     metadata: { version: "test" },
-    tools: Array.from({ length: 6 }, (_, index) => ({
+    tools: Array.from({ length: 5 }, (_, index) => ({
       name: `tool_${index}`,
       inputSchema: { $ref: "#/schemas/Input" },
       outputSchema: { $ref: "#/schemas/Output" },

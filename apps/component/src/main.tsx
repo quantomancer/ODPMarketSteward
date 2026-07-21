@@ -34,12 +34,6 @@ interface BoardResult extends JsonObject {
   readonly disclaimer?: Disclaimer;
 }
 
-interface Challenge {
-  readonly challengeToken: string;
-  readonly policyVersion: "1.2.0";
-  readonly disclaimerDigest: string;
-}
-
 const fallback: BoardResult = {
   status: "AWAITING_TOOL_RESULT",
   summary: "Ask ChatGPT to show the governed FX market board.",
@@ -59,21 +53,6 @@ function asObject(value: unknown): JsonObject | undefined {
     : undefined;
 }
 
-function challengeFrom(result: unknown): Challenge | undefined {
-  const meta = asObject(asObject(result)?._meta);
-  const candidate = asObject(
-    meta?.["odpMarketSteward/acknowledgementChallenge"],
-  );
-  if (
-    typeof candidate?.challengeToken === "string" &&
-    candidate.policyVersion === "1.2.0" &&
-    typeof candidate.disclaimerDigest === "string"
-  ) {
-    return candidate as unknown as Challenge;
-  }
-  return undefined;
-}
-
 function text(value: unknown, fallbackValue = "—"): string {
   return typeof value === "string" || typeof value === "number"
     ? String(value)
@@ -83,7 +62,6 @@ function text(value: unknown, fallbackValue = "—"): string {
 function MarketBoardComponent() {
   const appRef = useRef<McpApp | undefined>(undefined);
   const [result, setResult] = useState<BoardResult>(fallback);
-  const [challenge, setChallenge] = useState<Challenge>();
   const [connected, setConnected] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("Connecting to ChatGPT…");
@@ -96,7 +74,6 @@ function MarketBoardComponent() {
       ),
     [bars],
   );
-  const disclosureRequired = result.status === "DISCLOSURE_REQUIRED";
 
   useEffect(() => {
     const app = new McpApp(
@@ -109,7 +86,6 @@ function MarketBoardComponent() {
     app.ontoolresult = (toolResult) => {
       const structured = asObject(toolResult.structuredContent);
       if (structured !== undefined) setResult(structured as BoardResult);
-      setChallenge(challengeFrom(toolResult));
       setNotice(
         toolResult.isError === true
           ? "Request could not be completed."
@@ -131,36 +107,6 @@ function MarketBoardComponent() {
     };
   }, []);
 
-  async function acknowledgeAndContinue() {
-    const app = appRef.current;
-    if (app === undefined || challenge === undefined) return;
-    setBusy(true);
-    setNotice("Loading current governed board…");
-    try {
-      const acknowledgement = await app.callServerTool({
-        name: "acknowledge_market_data_demo",
-        arguments: {
-          affirmed: true,
-          policyVersion: challenge.policyVersion,
-          disclaimerDigest: challenge.disclaimerDigest,
-          challengeToken: challenge.challengeToken,
-        },
-      });
-      if (acknowledgement.isError === true)
-        throw new Error("Acknowledgement rejected");
-      const structured = asObject(acknowledgement.structuredContent);
-      if (structured !== undefined) setResult(structured as BoardResult);
-      setChallenge(challengeFrom(acknowledgement));
-      setNotice("Current board loaded.");
-    } catch {
-      setNotice(
-        "Acknowledgement flow could not complete. Ask ChatGPT to retry the board.",
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function refresh() {
     const app = appRef.current;
     if (app === undefined) return;
@@ -171,23 +117,12 @@ function MarketBoardComponent() {
         typeof result.snapshot?.barEndUtc === "string"
           ? result.snapshot.barEndUtc
           : null;
-      if (challenge === undefined) {
-        setNotice("Please acknowledge the demo conditions again.");
-        return;
-      }
       const refreshed = await app.callServerTool({
-        name: "acknowledge_market_data_demo",
-        arguments: {
-          affirmed: true,
-          policyVersion: challenge.policyVersion,
-          disclaimerDigest: challenge.disclaimerDigest,
-          challengeToken: challenge.challengeToken,
-          previousBarEndUtc,
-        },
+        name: "get_fx_market_board",
+        arguments: { evidenceMode: "LIVE_ONLY", previousBarEndUtc },
       });
       const structured = asObject(refreshed.structuredContent);
       if (structured !== undefined) setResult(structured as BoardResult);
-      setChallenge(challengeFrom(refreshed));
       setNotice(
         refreshed.isError === true
           ? "Refresh unavailable."
@@ -226,7 +161,7 @@ function MarketBoardComponent() {
           className="refresh"
           type="button"
           onClick={() => void refresh()}
-          disabled={!connected || busy || disclosureRequired}
+          disabled={!connected || busy}
         >
           {busy ? "Working…" : "Refresh"}
         </button>
@@ -254,26 +189,7 @@ function MarketBoardComponent() {
         </article>
       </section>
 
-      {disclosureRequired ? (
-        <section className="consent" aria-labelledby="consent-title">
-          <p className="consent-kicker">Before retrieving market data</p>
-          <h2 id="consent-title">Acknowledge the demo conditions</h2>
-          <p>{disclaimer?.statement}</p>
-          <button
-            type="button"
-            onClick={() => void acknowledgeAndContinue()}
-            disabled={!connected || busy || challenge === undefined}
-          >
-            {busy ? "Loading…" : "Acknowledge and show market board"}
-          </button>
-          {challenge === undefined && (
-            <small>
-              Ask ChatGPT to retry if the acknowledgement control is
-              unavailable.
-            </small>
-          )}
-        </section>
-      ) : sortedBars.length > 0 ? (
+      {sortedBars.length > 0 ? (
         <section className="table-card" aria-labelledby="rates-title">
           <div className="section-heading">
             <div>

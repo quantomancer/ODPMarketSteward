@@ -105,9 +105,6 @@ try {
   );
   const toolsBody = await tools.json();
   const listedTools = toolsBody.result?.tools;
-  const acknowledgementTool = listedTools?.find(
-    (tool) => tool.name === "acknowledge_market_data_demo",
-  );
   const marketBoardTool = listedTools?.find(
     (tool) => tool.name === "get_fx_market_board",
   );
@@ -116,23 +113,17 @@ try {
   );
   if (
     !tools.ok ||
-    listedTools?.length !== 3 ||
-    acknowledgementTool?.inputSchema?.$id !==
-      "urn:odp-market-steward:mcp:acknowledge_market_data_demo:input:v1.5.5" ||
-    acknowledgementTool?.outputSchema?.$id !==
-      "urn:odp-market-steward:mcp:acknowledge_market_data_demo:output:v1.5.5" ||
-    acknowledgementTool?.securitySchemes?.[0]?.type !== "noauth" ||
-    acknowledgementTool?._meta?.securitySchemes?.[0]?.type !== "noauth" ||
+    listedTools?.length !== 2 ||
     marketBoardTool?.inputSchema?.$id !==
-      "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.5" ||
+      "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.6" ||
     marketBoardTool?.outputSchema?.$id !==
-      "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.5" ||
+      "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.6" ||
     marketBoardTool?.securitySchemes?.[0]?.type !== "noauth" ||
     marketBoardTool?._meta?.securitySchemes?.[0]?.type !== "noauth" ||
     productProfileTool?.inputSchema?.$id !==
-      "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.5" ||
+      "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.6" ||
     productProfileTool?.outputSchema?.$id !==
-      "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.5" ||
+      "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.6" ||
     productProfileTool?.securitySchemes?.[0]?.type !== "noauth" ||
     productProfileTool?._meta?.securitySchemes?.[0]?.type !== "noauth"
   ) {
@@ -173,11 +164,7 @@ try {
         runtime: "local workerd",
         restartPersistence: true,
         sessionIdReturned: true,
-        toolsDiscovered: [
-          "acknowledge_market_data_demo",
-          "get_fx_market_board",
-          "get_fx_product_profile",
-        ],
+        toolsDiscovered: ["get_fx_market_board", "get_fx_product_profile"],
         classification: "MARKET DATA DEMO",
       },
       null,

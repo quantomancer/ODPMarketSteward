@@ -4,7 +4,7 @@ kind: PublicationPolicy
 metadata:
   id: odp-market-steward-publication-policy
   name: "ODP Market Steward public presentation and safety policy"
-  version: "1.2.0"
+  version: "1.3.0"
   status: testing
   classification: project_publication_policy
 
@@ -41,23 +41,16 @@ disclaimer:
     - demo video
     - submission description
   acknowledgement:
-    required: true
-    scope: once_per_app_session_before_first_interactive_market_data_retrieval
+    required: false
+    scope: disabled_for_market_data_demo
     acknowledgementMayBeImplied: false
-    acknowledgementRecordContains:
-      - policyVersion
-      - disclaimerDigest
-      - challengeNonceOrHash
-      - issuedAtUtc
-      - expiresAtUtc
-      - acknowledgedAtUtc
-      - replayState
-    explicitUserActionRequired: true
-    verifiableSessionBindingRequired: true
-    replayProtectionRequired: true
+    acknowledgementRecordContains: []
+    explicitUserActionRequired: false
+    verifiableSessionBindingRequired: false
+    replayProtectionRequired: false
     modelGeneratedAffirmationAloneIsValid: false
-    recordTimestampAuthority: mcp_server_UTC_clock
-    boundedExpiringSessionStateRequired: true
+    recordTimestampAuthority: not_applicable
+    boundedExpiringSessionStateRequired: false
     promptsProfilesTranscriptsOrMarketResponsesMayBeStored: false
     implementationMechanismOwner: mcp_application_contract_and_technical_requirements
     implementationMechanismSpecifiedByThisPolicy: false

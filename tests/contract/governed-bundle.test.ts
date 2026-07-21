@@ -20,7 +20,7 @@ describe("two-phase governed bundle loader", () => {
     ).toEqual({
       state: "READY",
       operation: "get_fx_product_profile",
-      bundleVersion: "1.8.3",
+      bundleVersion: "1.9.0",
       requiredArtifacts: [
         "bundle-manifest",
         "product-contract",
@@ -131,7 +131,7 @@ describe("two-phase governed bundle loader", () => {
       productId: "fxlive-market-data-demo-fx35",
       productVersion: "1.1.4",
       odpsVersion: 4.1,
-      disclaimer: { label: "MARKET DATA DEMO", policyVersion: "1.2.0" },
+      disclaimer: { label: "MARKET DATA DEMO", policyVersion: "1.3.0" },
     });
     const instruments = registry.productProfile().declaration("instruments");
     expect(instruments.artifact.artifactId).toBe("instrument-set");

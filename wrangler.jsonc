@@ -4,11 +4,6 @@
   "main": "apps/worker/src/index.ts",
   "compatibility_date": "2026-07-21",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-  "vars": {
-    "ACK_CHALLENGE_CURRENT_KEY_ID": "poc-2026-07",
-    "ACK_CHALLENGE_LIFETIME_SECONDS": "60",
-    "ACK_MAX_CLOCK_SKEW_SECONDS": "30",
-  },
   "services": [
     {
       "binding": "FXLIVE_SERVICE",

@@ -49,7 +49,6 @@ describe("MCP product-profile vertical slice", () => {
     );
 
     expect(tools.tools.map((candidate) => candidate.name)).toEqual([
-      "acknowledge_market_data_demo",
       "get_fx_market_board",
       "get_fx_product_profile",
     ]);
@@ -73,13 +72,13 @@ describe("MCP product-profile vertical slice", () => {
       productVersion: "1.1.4",
       odpsVersion: 4.1,
       governance: {
-        bundleVersion: "1.8.3",
+        bundleVersion: "1.9.0",
         validation: {
           completeForRequiredLayers: false,
           summary: { passed: 3, failed: 0, notTested: 3 },
         },
       },
-      disclaimer: { label: "MARKET DATA DEMO", policyVersion: "1.2.0" },
+      disclaimer: { label: "MARKET DATA DEMO", policyVersion: "1.3.0" },
     });
     const summary = (
       result.structuredContent as Record<string, unknown> | undefined
@@ -236,7 +235,7 @@ describe("MCP governed market-board vertical slice", () => {
     );
   });
 
-  it("returns DISCLOSURE_REQUIRED and makes zero source calls by default", async () => {
+  it.skip("legacy acknowledgement gate is removed", async () => {
     const source = boardSource();
     const client = await connectInMemory({
       snapshotSource: source,
@@ -261,7 +260,7 @@ describe("MCP governed market-board vertical slice", () => {
     expect(source.getHealth.mock.calls).toHaveLength(0);
   });
 
-  it("returns a schema-valid complete governed FX-35 board after acknowledgement", async () => {
+  it("returns a schema-valid complete governed FX-35 board immediately", async () => {
     const source = boardSource();
     const client = await connectInMemory({
       snapshotSource: source,
@@ -275,7 +274,7 @@ describe("MCP governed market-board vertical slice", () => {
     expect(result.isError, JSON.stringify(result)).not.toBe(true);
     expect(result.structuredContent).toMatchObject({
       productId: "fxlive-market-data-demo-fx35",
-      bundleVersion: "1.8.3",
+      bundleVersion: "1.9.0",
       availabilityState: "AVAILABLE",
       serviceState: "UNKNOWN",
       evidence: {
@@ -301,7 +300,7 @@ describe("MCP governed market-board vertical slice", () => {
     expect(source.getHealth.mock.calls).toHaveLength(0);
   });
 
-  it("issues a component-only challenge, commits once, and then permits retrieval", async () => {
+  it.skip("legacy component challenge is removed", async () => {
     const source = boardSource();
     const acknowledgementService = acknowledgementFixture();
     const client = await connectInMemory({
@@ -365,7 +364,7 @@ describe("MCP governed market-board vertical slice", () => {
     expect(source.getSnapshotMetadata.mock.calls).toHaveLength(4);
   });
 
-  it("rejects a modified component challenge and keeps source-call count zero", async () => {
+  it.skip("legacy modified-challenge path is removed", async () => {
     const source = boardSource();
     const client = await connectInMemory({
       snapshotSource: source,
