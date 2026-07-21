@@ -105,7 +105,7 @@
       <h1>ODP Market Steward</h1>
       <p class="subtitle">Detailed project plan for delivering <strong>ODP Market Steward — Governed Live Market Data in ChatGPT</strong> from approved contracts through implementation, Cloudflare operations, ChatGPT integration, verification, publication, and competition submission.</p>
       <div class="badges">
-        <span class="badge">Version 1.4</span>
+        <span class="badge">Version 1.5</span>
         <span class="badge">Status: ACTIVE</span>
         <span class="badge">Baseline: 2026-07-21 UTC</span>
         <span class="badge">MARKET DATA DEMO</span>
@@ -417,6 +417,7 @@
     <section id="changes">
       <h2>Plan change log</h2>
       <div class="table-wrap"><table><thead><tr><th>UTC</th><th>Version</th><th>Affected IDs</th><th>Change</th><th>Validation scope</th><th>Actor</th></tr></thead><tbody>
+        <tr><td>2026-07-21T13:17:21Z</td><td>1.5</td><td>WP02-005; repository evidence</td><td>Recorded tested implementation revision <code>1094387a603d3593cbdb543b04f97451765eaee4</code> after committing and pushing the operation-specific readiness classifier, fixture matrix, evidence report and plan status to private main. Completion remains 19 true and 127 false.</td><td>The implementation commit completed; the work tree was clean immediately afterward; current <code>git ls-remote</code> returned the exact same hash for <code>refs/heads/main</code>. This synchronization evidence does not expand the exact local verification scope and no Cloudflare remote state changed.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T13:10:52Z</td><td>1.4</td><td>WP02-005..006; implementation evidence; summary</td><td>Implemented the operation-specific runtime readiness and criticality classifier and integrated it with the verified ContractRegistry. WP02-005 changed to true/COMPLETED after the safe-continuation/fail-closed fixture matrix passed. WP02-006 remains false/IN_PROGRESS because complete WP02-004 projections and production handler gating remain open. Completion is now 19 true and 127 false. Added the <a href="development/WP02-Readiness-Criticality-Classifier-Report.md">classifier report</a>.</td><td>Checksum-verified Node 24.18.0 and pnpm 11.15.1 full verification: bundle/compiler and twelve schemas; Wrangler drift, TypeScript, ESLint, Prettier and dependency checks; 8 files/37 tests; 89.47% statement and 90.87% line coverage; component/Worker builds; local Workerd persisted restart and profile discovery. Classifier coverage was 100% statements/functions/lines and 92.30% branches. Loader-level partial recovery, Cloudflare, source API and ChatGPT host were not exercised.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T12:56:24Z</td><td>1.3</td><td>WP02-003..006; WP06-003; repository evidence</td><td>Recorded tested implementation revision <code>b8fadfb6a9b05b195bd4bf1e55ecb2090ec107d9</code> after committing and pushing the governed product-profile runtime integration and its evidence to private main. Completion booleans remain 18 true and 128 false.</td><td>The implementation commit completed; the work tree was clean immediately afterward; current <code>git ls-remote</code> returned the exact same hash for <code>refs/heads/main</code>. This synchronization evidence does not expand the exact local verification scope and no Cloudflare remote state changed.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T12:48:54Z</td><td>1.2</td><td>WP02-003..006; WP06-003; implementation evidence; summary</td><td>Integrated generated schemas into the runtime descriptor path and replaced the temporary profile spike with the normative MCP application contract 1.2.0 request/result. Exactly one profile tool is registered; five unfinished handlers remain unregistered. No completion boolean changed: WP02-003/004/006 remain false/IN_PROGRESS, WP02-005 and WP06-003 remain false/NOT_STARTED, and completion remains 18 true / 128 false. Added the <a href="development/WP02-Product-Profile-Runtime-Integration-Report.md">runtime integration report</a>.</td><td>Checksum-verified Node 24.18.0 and pnpm 11.15.1 full verification: 7 runtime artifacts, 6 declared tools, 12 schemas; Wrangler type drift, TypeScript, ESLint, Prettier and dependency checks; 7 files/25 tests; 87.63% statement and 89.31% line coverage; component/Worker builds; local Workerd persisted restart, one-tool descriptor discovery and normative profile call. Cloudflare-safe runtime validation replaced AJV code generation. No Cloudflare, ChatGPT host or source API call occurred.</td><td>Codex</td></tr>
@@ -435,7 +436,7 @@
     </section>
 
     <footer>
-      ODP Market Steward · OMS-PLAN-001 · Version 1.4 · ACTIVE · MARKET DATA DEMO · All times UTC<br>
+      ODP Market Steward · OMS-PLAN-001 · Version 1.5 · ACTIVE · MARKET DATA DEMO · All times UTC<br>
       This plan is an internal execution control and does not itself prove runtime, rights, conformance, deployment, or release readiness.
     </footer>
   </main>
