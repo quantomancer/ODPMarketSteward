@@ -1,6 +1,6 @@
 import { getAgentByName } from "agents";
 
-const COMPETITION_DEMO_SESSION = "odp-market-steward-build-week-demo";
+const COMPETITION_DEMO_SESSION = "odp-market-steward-build-week-demo-v2";
 
 function json(payload: unknown, status = 200): Response {
   return Response.json(payload, {
