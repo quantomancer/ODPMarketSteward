@@ -102,6 +102,21 @@ export interface McpToolProjection {
   readonly consumes: readonly string[];
 }
 
+export interface InstrumentSetMemberProjection {
+  readonly symbol: string;
+  readonly base: string;
+  readonly quote: string;
+}
+
+export interface InstrumentSetProjection {
+  readonly artifact: ArtifactPointerProjection;
+  readonly expectedCount: 35;
+  readonly ordering: "alphabetical";
+  readonly membershipPolicy: "exact";
+  readonly symbolPattern: "^[A-Z]{6}$";
+  readonly members: readonly InstrumentSetMemberProjection[];
+}
+
 export class ContractRegistry {
   constructor(private readonly bundle: VerifiedBundle) {}
 
@@ -286,6 +301,55 @@ export class ContractRegistry {
       inputSchemaRef: requiredString(inputSchema, "$ref"),
       outputSchemaRef: requiredString(outputSchema, "$ref"),
       consumes,
+    };
+  }
+
+  instrumentSet(): InstrumentSetProjection {
+    const artifact = this.artifact("instrument-set");
+    const spec = asRecord(this.resolve("instrument-set", "/spec"));
+    const expectedCount = requiredNumber(spec, "expectedCount", 35);
+    const ordering = requiredLiteral(spec, "ordering", "alphabetical");
+    const membershipPolicy = requiredLiteral(spec, "membershipPolicy", "exact");
+    const symbolPattern = requiredLiteral(spec, "symbolPattern", "^[A-Z]{6}$");
+    const rawMembers = spec.members;
+    if (!Array.isArray(rawMembers)) {
+      throw pointerFailure("instrument-set", "/spec/members");
+    }
+    const members = rawMembers.map((candidate) => {
+      const member = asRecord(candidate);
+      return {
+        symbol: requiredString(member, "symbol"),
+        base: requiredString(member, "base"),
+        quote: requiredString(member, "quote"),
+      };
+    });
+    const symbols = members.map((member) => member.symbol);
+    const sorted = [...symbols].sort();
+    if (
+      members.length !== expectedCount ||
+      new Set(symbols).size !== expectedCount ||
+      symbols.some((symbol, index) => symbol !== sorted[index]) ||
+      members.some(
+        (member) =>
+          !/^[A-Z]{6}$/.test(member.symbol) ||
+          !/^[A-Z]{3}$/.test(member.base) ||
+          !/^[A-Z]{3}$/.test(member.quote) ||
+          member.symbol !== `${member.base}${member.quote}`,
+      )
+    ) {
+      throw new BundleValidationError(
+        "POINTER_INVALID",
+        "Verified instrument-set projection violates exact count, uniqueness, alphabetical order, symbol syntax, or base-plus-quote decomposition.",
+        artifact.declaration.path,
+      );
+    }
+    return {
+      artifact: artifactPointer(artifact),
+      expectedCount,
+      ordering,
+      membershipPolicy,
+      symbolPattern,
+      members,
     };
   }
 

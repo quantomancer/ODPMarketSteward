@@ -1,6 +1,7 @@
 import Decimal from "decimal.js";
 
 export * from "./decimal";
+export * from "./instrument-set";
 export * from "./module-ports";
 export * from "./utc-time";
 

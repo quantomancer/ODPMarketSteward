@@ -37,6 +37,19 @@ describe("two-phase governed bundle loader", () => {
     expect(registry.resolve("instrument-set", "/spec/members/0/symbol")).toBe(
       "AUDCAD",
     );
+    const instrumentSet = registry.instrumentSet();
+    expect(instrumentSet).toMatchObject({
+      expectedCount: 35,
+      ordering: "alphabetical",
+      membershipPolicy: "exact",
+      symbolPattern: "^[A-Z]{6}$",
+    });
+    expect(instrumentSet.members).toHaveLength(35);
+    expect(instrumentSet.members[0]).toEqual({
+      symbol: "AUDCAD",
+      base: "AUD",
+      quote: "CAD",
+    });
     expect(registry.productProfile()).toMatchObject({
       productName: "FXLive Market Data Demo - Standard FX-35",
       productId: "fxlive-market-data-demo-fx35",
