@@ -43,8 +43,7 @@ export {
   mapApplicationToolError,
 } from "./safe-errors";
 
-export const COMPONENT_URI =
-  "ui://odp-market-steward/product-passport-v0.1.0.html";
+export const COMPONENT_URI = "ui://odp-market-steward/market-board-v1.html";
 
 let registryPromise: Promise<ContractRegistry> | undefined;
 
@@ -142,11 +141,11 @@ export async function createStewardMcpServer(
 
   registerAppResource(
     server,
-    "ODP Market Steward product passport",
+    "ODP Market Steward governed FX-35 market board",
     COMPONENT_URI,
     {
       description:
-        "Professional governed-data passport for the FXLive Standard FX-35 MARKET DATA DEMO.",
+        "Professional governed live FX-35 market board with disclosure, quality and contract evidence for the MARKET DATA DEMO.",
       mimeType: RESOURCE_MIME_TYPE,
       _meta: {
         ui: {
@@ -289,7 +288,7 @@ export async function createStewardMcpServer(
       const source =
         dependencies.snapshotSource ??
         new FxLiveClient({
-          timeoutMilliseconds: 3_500,
+          timeoutMilliseconds: 8_000,
           maximumResponseBytes: 65_536,
         });
       const acquirer = new GovernedSnapshotAcquirer(

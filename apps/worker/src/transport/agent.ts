@@ -5,6 +5,7 @@ import {
   WorkerTransport,
 } from "agents/mcp";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { FxLiveClient } from "@odp-market-steward/adapter-source-api";
 import {
   SessionAcknowledgementService,
   type AcknowledgementState,
@@ -21,9 +22,26 @@ export class OdpMarketStewardAgent extends Agent<Env> {
 
   override async onRequest(request: Request): Promise<Response> {
     const acknowledgementService = this.#acknowledgementService();
-    this.mcpServer ??= await createStewardMcpServer(
-      acknowledgementService === undefined ? {} : { acknowledgementService },
-    );
+    const sourceService = this.env.FXLIVE_SERVICE;
+    this.mcpServer ??= await createStewardMcpServer({
+      ...(acknowledgementService === undefined
+        ? {}
+        : { acknowledgementService }),
+      snapshotSource: new FxLiveClient({
+        timeoutMilliseconds: 8_000,
+        maximumResponseBytes: 65_536,
+        fetcher: async (input, init) => {
+          const {
+            cache: _cache,
+            redirect: _redirect,
+            signal: _signal,
+            ...serviceInit
+          } = init ?? {};
+          const response = await sourceService.fetch(input, serviceInit);
+          return new Response(response.body, response);
+        },
+      }),
+    });
     this.mcpTransport ??= new WorkerTransport({
       enableJsonResponse: true,
       sessionIdGenerator: () => this.name,
