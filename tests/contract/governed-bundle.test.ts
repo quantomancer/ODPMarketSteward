@@ -20,7 +20,7 @@ describe("two-phase governed bundle loader", () => {
     ).toEqual({
       state: "READY",
       operation: "get_fx_product_profile",
-      bundleVersion: "1.3.0",
+      bundleVersion: "1.4.0",
       requiredArtifacts: [
         "bundle-manifest",
         "product-contract",
@@ -100,6 +100,24 @@ describe("two-phase governed bundle loader", () => {
     expect(
       registry.resolve("ohlc-rules", "/spec/calculations/absoluteBody/formula"),
     ).toBe("abs(Close - Open)");
+    expect(
+      registry.resolve(
+        "ohlc-rules",
+        "/spec/calculations/crossBarGap/continuityCondition",
+      ),
+    ).toBe("Previous.BarEnd equals Current.BarStart");
+    expect(
+      registry.resolve(
+        "ohlc-rules",
+        "/spec/calculations/crossBarGap/provenanceCondition",
+      ),
+    ).toBe("Previous bar evidence provenance is AUTHORIZED");
+    expect(
+      registry.resolve(
+        "ohlc-rules",
+        "/spec/calculations/crossBarGap/missingOrNonConsecutiveResult",
+      ),
+    ).toBe("NOT_EVALUATED");
     expect(registry.productProfile()).toMatchObject({
       productName: "FXLive Market Data Demo - Standard FX-35",
       productId: "fxlive-market-data-demo-fx35",

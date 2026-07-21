@@ -26,7 +26,7 @@ function classify(
   },
 ) {
   return classifyContractReadiness({
-    bundleVersion: "1.3.0",
+    bundleVersion: "1.4.0",
     verifiedArtifactIds: input.verifiedArtifactIds ?? verifiedArtifactIds,
     ...input,
   });

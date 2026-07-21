@@ -31,7 +31,7 @@
   <div class="shell">
     <aside class="side">
       <div class="brand">ODP Market Steward</div>
-      <div class="small">Bundle Documentation · v1.2.0</div>
+      <div class="small">Bundle Documentation · v1.3.0</div>
       <nav aria-label="Document sections">
         <a href="#executive">Executive summary</a>
         <a href="#scope">Scope and terminology</a>
@@ -55,7 +55,7 @@
         <p class="eyebrow">Professional architecture and governance documentation</p>
         <h1>ODP Market Steward Bundle</h1>
         <p>A responsibility-separated specification package for the FXLive Market Data Demo and the planned ChatGPT MCP App and Cloudflare service.</p>
-        <div class="badges"><span class="badge">MARKET DATA DEMO</span><span class="badge">UTC</span><span class="badge">ODPS 4.1</span><span class="badge">OpenAPI 3.1.2</span><span class="badge">Draft bundle v1.3.0</span></div>
+        <div class="badges"><span class="badge">MARKET DATA DEMO</span><span class="badge">UTC</span><span class="badge">ODPS 4.1</span><span class="badge">OpenAPI 3.1.2</span><span class="badge">Draft bundle v1.4.0</span></div>
       </header>
 
       <section id="executive">
@@ -151,7 +151,7 @@
           <article class="artifact"><span class="pill ok">ODP standard</span><h3>ODPS product contract</h3><p>Contains the mandatory schema/version/product envelope, product identity, testing lifecycle, value proposition, use cases, conditional declarative SLA, declarative quality objectives, compact external-rule references, and API access metadata. It omits a product-strategy claim because the required higher-level KPI contribution was not supplied and must not be invented. Numeric <code>version: 4.1</code> follows the published schema.</p></article>
           <article class="artifact"><span class="pill info">Companion standard</span><h3>OpenAPI interface contract</h3><p>Documents the exact Worker paths, both mutually exclusive <code>/latest</code> query modes, optional debug behavior, JSON/HTML outputs, errors, CORS, anonymous access, and <code>Cache-Control: no-store</code>. It says “latest stored,” not “live.” Raw stored timestamps are explicitly untrusted because the Worker forwards rather than enforces them; the governed wrapper rejects non-UTC-Z values.</p></article>
           <article class="artifact"><span class="pill info">Project companion</span><h3>FX-35 controlled value set</h3><p>Defines 35 unique alphabetically ordered symbols, base/quote decomposition, exact membership, count, notation, and ISO 4217 alignment. “FX-35” is explicitly product-defined, not claimed as an external industry standard.</p></article>
-          <article class="artifact"><span class="pill info">Project companion</span><h3>OHLC rules</h3><p>Defines coherent snapshot assembly, required fields, projected FX-35 symbols, mathematical integrity, descriptive formulas, cross-bar continuity, freshness linkage, and purpose-specific fitness. Rule <code>FAIL</code> and availability <code>INCOHERENT</code> are separate. Closed-market, recorded, synthetic, and missing-evidence cases have explicit outcomes. Statistical plausibility remains <code>NOT_EVALUATED</code> while unconfigured.</p></article>
+          <article class="artifact"><span class="pill info">Project companion</span><h3>OHLC rules</h3><p>Defines coherent snapshot assembly, required fields, projected FX-35 symbols, mathematical integrity, descriptive formulas, provenance-gated cross-bar continuity, freshness linkage, and purpose-specific fitness. A cross-bar gap is calculated only when authorized previous evidence ends exactly at the current bar start; missing, unauthorized, or non-adjacent evidence remains <code>NOT_EVALUATED</code>. Rule <code>FAIL</code> and availability <code>INCOHERENT</code> are separate. Statistical plausibility remains <code>NOT_EVALUATED</code> while unconfigured.</p></article>
           <article class="artifact"><span class="pill info">Project companion</span><h3>Monitoring profile</h3><p>Defines UTC handling, authoritative-calendar requirements, inclusive two-minute freshness, availability and service states, evidence modes, cache age, recorded/synthetic separation, source-aligned no-store constraints, and observability. <code>LIVE</code> means current retrieval provenance; only <code>LIVE + OPEN + freshness PASS</code> permits a live badge. Calendar absence produces <code>UNKNOWN</code>.</p></article>
           <article class="artifact"><span class="pill info">Project companion</span><h3>Publication policy</h3><p>Contains exact demo wording, the requirement for explicit verifiable session acknowledgement, required surfaces, permitted public identities, UTC presentation, evidence labels, semantic accessibility requirements, and prohibited financial behavior. It delegates the signing and runtime mechanism to the app and technical contracts and makes data rights a release condition rather than pretending a disclaimer grants permission.</p></article>
           <article class="artifact"><span class="pill info">Project companion</span><h3>MCP application contract</h3><p>Defines five model-visible read-only domain tools plus one component-only acknowledgement action, bounded inputs, twelve standalone-schema materializations, a signed disclosure gate backed by bounded per-session state, public result modes <code>LIVE</code>, <code>RECORDED</code>, and <code>NONE</code>, six per-artifact validation layers, separate plausibility, manual component-identified refresh outcomes, a bounded server-side <code>gpt-5.6</code> Steward Brief, the exact 35-value enum, the versioned MCP Apps resource, and an explicit reference to the separately authoritative technical delivery baseline.</p></article>
@@ -376,7 +376,7 @@ source-functional-requirements
         <div class="callout warn"><strong>MARKET DATA DEMO.</strong> For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.</div>
       </section>
 
-      <div class="footer">ODP Market Steward — Governed Live Market Data in ChatGPT · Bundle documentation v1.2.0 · Governed draft package with local partial implementation evidence, not runtime certification</div>
+      <div class="footer">ODP Market Steward — Governed Live Market Data in ChatGPT · Bundle documentation v1.3.0 · Governed draft package with local partial implementation evidence, not runtime certification</div>
     </main>
   </div>
 </body>

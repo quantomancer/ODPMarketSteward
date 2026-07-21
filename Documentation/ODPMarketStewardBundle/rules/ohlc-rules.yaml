@@ -4,7 +4,7 @@ kind: DeterministicRuleSet
 metadata:
   id: fxlive-ohlc-governance-rules
   name: "FXLive OHLC quality, calculation, and fitness rules"
-  version: "1.1.0"
+  version: "1.2.0"
   status: testing
   classification: project_executable_rule_contract
   description: >-
@@ -179,7 +179,10 @@ spec:
       formula: "Current.Open - Previous.Close"
       requiredInputs: [Current.Open, Previous.Close]
       continuityCondition: "Previous.BarEnd equals Current.BarStart"
+      provenanceCondition: "Previous bar evidence provenance is AUTHORIZED"
       missingOrNonConsecutiveResult: NOT_EVALUATED
+      unauthorizedProvenanceResult: NOT_EVALUATED
+      invalidNumericOrTemporalEvidenceResult: SUPPRESSED
       classification: descriptive
 
   contextualRules:

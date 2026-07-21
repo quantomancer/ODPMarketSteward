@@ -65,7 +65,7 @@ describe("MCP product-profile vertical slice", () => {
       productVersion: "1.1.1",
       odpsVersion: 4.1,
       governance: {
-        bundleVersion: "1.3.0",
+        bundleVersion: "1.4.0",
         validation: {
           completeForRequiredLayers: false,
           summary: { passed: 3, failed: 0, notTested: 3 },

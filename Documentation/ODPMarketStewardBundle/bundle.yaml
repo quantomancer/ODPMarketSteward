@@ -4,7 +4,7 @@ kind: GovernedProductBundle
 metadata:
   id: odp-market-steward-fxlive-bundle
   name: "ODP Market Steward — FXLive governed product bundle"
-  version: "1.3.0"
+  version: "1.4.0"
   status: draft
   classification: project_bundle_manifest
   constructName: ODPS-centred-market-data-product-package
@@ -98,11 +98,11 @@ artifacts:
     role: deterministic quality, calculation, plausibility, and fitness contract
     path: rules/ohlc-rules.yaml
     classification: project_companion
-    artifactVersion: "1.1.0"
+    artifactVersion: "1.2.0"
     mediaType: application/yaml
     normative: true
     requiredAtRuntime: true
-    sha256: bbad7e107b07b966d54be528302fb573346d29f64b7512b656c0fdcceabbdc00
+    sha256: 9f932be749b53fd0d42b7bd36a5203021e146dc3c9673e6e84401cc313a147b7
     dependsOn: [product-contract, api-contract, instrument-set]
 
   - id: monitoring
@@ -186,22 +186,22 @@ artifacts:
     role: human-readable architecture, compliance, artifact, validation, and implementation guide
     path: ODPMarketStewardBundleDocumentation.html
     classification: project_documentation
-    artifactVersion: "1.2.0"
+    artifactVersion: "1.3.0"
     mediaType: text/html
     normative: false
     requiredAtRuntime: false
-    sha256: 736c3d841701d4f49c525caeb9255c34d87730807b4dac53890fab1079726970
+    sha256: c959546701ef05f984fd8dfbc0ee44ba75fdb23d2bba24135bc9becf281decd3
     dependsOn: [source-functional-requirements, technical-requirements, requirements-normalization, detailed-level-design]
 
   - id: readme
     role: package entry point
     path: README.html
     classification: project_documentation
-    artifactVersion: "1.2.0"
+    artifactVersion: "1.3.0"
     mediaType: text/html
     normative: false
     requiredAtRuntime: false
-    sha256: aa2be381a04a0e7a5dde306b1314ff34a41190969c4faf33e9757ec28d19507b
+    sha256: 05959095b6d3ddce7a6eb88ad07f911980f97fa1ce2366576553e40948aecaec
     dependsOn: [professional-documentation]
 
 runtimePolicy:
