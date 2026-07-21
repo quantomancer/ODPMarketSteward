@@ -5,7 +5,9 @@ import {
   createStewardMcpServer,
 } from "../../apps/worker/src/mcp/server";
 import { MCP_TOOL_SCHEMAS } from "../../generated/standalone-tool-schemas";
-import { afterEach, describe, expect, it } from "vitest";
+import type { GovernedSnapshotSourcePort } from "../../packages/application/src";
+import type { CompletedBarLexemes } from "../../packages/domain/src";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const closeCallbacks: Array<() => Promise<void>> = [];
 
@@ -43,6 +45,7 @@ describe("MCP product-profile vertical slice", () => {
     );
 
     expect(tools.tools.map((candidate) => candidate.name)).toEqual([
+      "get_fx_market_board",
       "get_fx_product_profile",
     ]);
     expect(tool?.annotations?.readOnlyHint).toBe(true);
@@ -205,3 +208,193 @@ describe("MCP product-profile vertical slice", () => {
     expect(item.text).toContain("MARKET DATA DEMO");
   });
 });
+
+describe("MCP governed market-board vertical slice", () => {
+  it("advertises the exact governed board schemas and annotations", async () => {
+    const client = await connectInMemory();
+    const tool = (await client.listTools()).tools.find(
+      (candidate) => candidate.name === "get_fx_market_board",
+    );
+    expect(tool).toMatchObject({
+      name: "get_fx_market_board",
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
+    });
+    expect(tool?.inputSchema).toEqual(
+      MCP_TOOL_SCHEMAS.get_fx_market_board.input,
+    );
+    expect(tool?.outputSchema).toEqual(
+      MCP_TOOL_SCHEMAS.get_fx_market_board.output,
+    );
+  });
+
+  it("returns DISCLOSURE_REQUIRED and makes zero source calls by default", async () => {
+    const source = boardSource();
+    const client = await connectInMemory({
+      snapshotSource: source,
+      nowUtc: () => "2026-07-21T18:30:00Z",
+    });
+    const result = await client.callTool({
+      name: "get_fx_market_board",
+      arguments: { evidenceMode: "LIVE_ONLY" },
+    });
+    expect(result.isError).not.toBe(true);
+    expect(result.structuredContent).toMatchObject({
+      status: "DISCLOSURE_REQUIRED",
+      evidence: {
+        evidenceMode: "NONE",
+        liveBadgePermitted: false,
+        reason: "MARKET_DATA_DEMO_ACKNOWLEDGEMENT_REQUIRED",
+      },
+      disclaimer: { label: "MARKET DATA DEMO" },
+    });
+    expect(source.getSnapshotMetadata.mock.calls).toHaveLength(0);
+    expect(source.getLatestObservation.mock.calls).toHaveLength(0);
+    expect(source.getHealth.mock.calls).toHaveLength(0);
+  });
+
+  it("returns a schema-valid complete governed FX-35 board after acknowledgement", async () => {
+    const source = boardSource();
+    const client = await connectInMemory({
+      snapshotSource: source,
+      marketDataAcknowledged: () => true,
+      nowUtc: () => "2026-07-21T18:30:00Z",
+    });
+    const result = await client.callTool({
+      name: "get_fx_market_board",
+      arguments: { evidenceMode: "LIVE_ONLY", previousBarEndUtc: null },
+    });
+    expect(result.isError, JSON.stringify(result)).not.toBe(true);
+    expect(result.structuredContent).toMatchObject({
+      productId: "fxlive-market-data-demo-fx35",
+      bundleVersion: "1.7.0",
+      availabilityState: "AVAILABLE",
+      serviceState: "UNKNOWN",
+      evidence: {
+        evidenceMode: "LIVE",
+        liveBadgePermitted: false,
+      },
+      snapshot: {
+        expectedCount: 35,
+        returnedCount: 35,
+        barStartUtc: "2026-07-21T18:29:00Z",
+        barEndUtc: "2026-07-21T18:30:00Z",
+      },
+      refresh: { outcome: "INITIAL" },
+      quality: { passed: 35, failed: 0 },
+      plausibility: { state: "NOT_EVALUATED" },
+      disclaimer: { label: "MARKET DATA DEMO" },
+    });
+    expect(
+      (result.structuredContent as { bars?: readonly unknown[] }).bars,
+    ).toHaveLength(35);
+    expect(source.getSnapshotMetadata.mock.calls).toHaveLength(2);
+    expect(source.getLatestObservation.mock.calls).toHaveLength(35);
+    expect(source.getHealth.mock.calls).toHaveLength(0);
+  });
+
+  it("preserves honest partial live evidence without recorded substitution", async () => {
+    const source = boardSource("AUDCAD");
+    const client = await connectInMemory({
+      snapshotSource: source,
+      marketDataAcknowledged: () => true,
+      nowUtc: () => "2026-07-21T18:30:00Z",
+    });
+    const result = await client.callTool({
+      name: "get_fx_market_board",
+      arguments: { evidenceMode: "ALLOW_RECORDED_FALLBACK" },
+    });
+    expect(result.isError, JSON.stringify(result)).not.toBe(true);
+    expect(result.structuredContent).toMatchObject({
+      availabilityState: "PARTIAL",
+      serviceState: "DEGRADED",
+      evidence: { evidenceMode: "LIVE" },
+      snapshot: { returnedCount: 34 },
+    });
+    expect(
+      (result.structuredContent as { bars?: readonly unknown[] }).bars,
+    ).toHaveLength(34);
+    expect(
+      (result.structuredContent as { limitations?: readonly string[] })
+        .limitations,
+    ).toContain(
+      "Recorded fallback is not enabled; honest live partial or unavailable evidence is returned.",
+    );
+  });
+
+  it("blocks failed required contract readiness before any source call", async () => {
+    const source = boardSource();
+    const client = await connectInMemory({
+      snapshotSource: source,
+      marketDataAcknowledged: () => true,
+      correlationId: () => "oms_contract_board_0001",
+      additionalReadinessObservations: [
+        {
+          artifactId: "api-contract",
+          layer: "controlling-schema",
+          status: "FAIL",
+        },
+      ],
+    });
+    const result = await client.callTool({
+      name: "get_fx_market_board",
+      arguments: { evidenceMode: "LIVE_ONLY" },
+    });
+    expect(result).toMatchObject({
+      isError: true,
+      structuredContent: {
+        code: "CONTRACT_UNAVAILABLE",
+        correlationId: "oms_contract_board_0001",
+      },
+    });
+    expect(source.getSnapshotMetadata.mock.calls).toHaveLength(0);
+    expect(source.getLatestObservation.mock.calls).toHaveLength(0);
+  });
+});
+
+function boardSource(failedInstrument?: string): GovernedSnapshotSourcePort & {
+  readonly getHealth: ReturnType<
+    typeof vi.fn<GovernedSnapshotSourcePort["getHealth"]>
+  >;
+  readonly getSnapshotMetadata: ReturnType<
+    typeof vi.fn<GovernedSnapshotSourcePort["getSnapshotMetadata"]>
+  >;
+  readonly getLatestObservation: ReturnType<
+    typeof vi.fn<GovernedSnapshotSourcePort["getLatestObservation"]>
+  >;
+} {
+  return {
+    getHealth: vi.fn(() => Promise.resolve({ ok: true, service: "FXLive" })),
+    getSnapshotMetadata: vi.fn(() =>
+      Promise.resolve({
+        epoch: "1784658600000000000",
+        createdAtUtc: "2026-07-21T18:30:01Z",
+        granularity: "1m" as const,
+        instrumentCount: 35,
+        barStartUtc: "2026-07-21T18:29:00Z",
+        barEndUtc: "2026-07-21T18:30:00Z",
+        available: [],
+      }),
+    ),
+    getLatestObservation: vi.fn((instrument: string) => {
+      if (instrument === failedInstrument) {
+        return Promise.reject(new Error("fixture source failure"));
+      }
+      const value: CompletedBarLexemes = {
+        currency: instrument,
+        epoch: "1784658540000000000",
+        barStartUtc: "2026-07-21T18:29:00Z",
+        barEndUtc: "2026-07-21T18:30:00Z",
+        granularity: "1m",
+        open: "1.1",
+        high: "1.2",
+        low: "1.0",
+        close: "1.15",
+      };
+      return Promise.resolve(value);
+    }),
+  };
+}

@@ -104,16 +104,28 @@ try {
     sessionId,
   );
   const toolsBody = await tools.json();
+  const listedTools = toolsBody.result?.tools;
+  const marketBoardTool = listedTools?.find(
+    (tool) => tool.name === "get_fx_market_board",
+  );
+  const productProfileTool = listedTools?.find(
+    (tool) => tool.name === "get_fx_product_profile",
+  );
   if (
     !tools.ok ||
-    toolsBody.result?.tools?.length !== 1 ||
-    toolsBody.result.tools[0]?.name !== "get_fx_product_profile" ||
-    toolsBody.result.tools[0]?.inputSchema?.$id !==
+    listedTools?.length !== 2 ||
+    marketBoardTool?.inputSchema?.$id !==
+      "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.1" ||
+    marketBoardTool?.outputSchema?.$id !==
+      "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.1" ||
+    marketBoardTool?.securitySchemes?.[0]?.type !== "noauth" ||
+    marketBoardTool?._meta?.securitySchemes?.[0]?.type !== "noauth" ||
+    productProfileTool?.inputSchema?.$id !==
       "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.1" ||
-    toolsBody.result.tools[0]?.outputSchema?.$id !==
+    productProfileTool?.outputSchema?.$id !==
       "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.1" ||
-    toolsBody.result.tools[0]?.securitySchemes?.[0]?.type !== "noauth" ||
-    toolsBody.result.tools[0]?._meta?.securitySchemes?.[0]?.type !== "noauth"
+    productProfileTool?.securitySchemes?.[0]?.type !== "noauth" ||
+    productProfileTool?._meta?.securitySchemes?.[0]?.type !== "noauth"
   ) {
     throw new Error(
       `Persisted tools/list failed (${tools.status}): ${JSON.stringify(toolsBody)}`,
@@ -152,7 +164,7 @@ try {
         runtime: "local workerd",
         restartPersistence: true,
         sessionIdReturned: true,
-        toolDiscovered: "get_fx_product_profile",
+        toolsDiscovered: ["get_fx_market_board", "get_fx_product_profile"],
         classification: "MARKET DATA DEMO",
       },
       null,

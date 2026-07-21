@@ -6,6 +6,7 @@
   "dependencies": {
     "@modelcontextprotocol/ext-apps": "1.7.4",
     "@modelcontextprotocol/sdk": "1.29.0",
+    "@odp-market-steward/adapter-source-api": "workspace:*",
     "@odp-market-steward/application": "workspace:*",
     "@odp-market-steward/contract-runtime": "workspace:*",
     "@odp-market-steward/domain": "workspace:*",

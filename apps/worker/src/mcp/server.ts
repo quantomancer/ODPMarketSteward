@@ -5,7 +5,15 @@ import {
 } from "@modelcontextprotocol/ext-apps/server";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
-import { getProductProfile } from "@odp-market-steward/application";
+import { FxLiveClient } from "@odp-market-steward/adapter-source-api";
+import {
+  GovernedSnapshotAcquirer,
+  disclosureRequired,
+  getMarketBoard,
+  getProductProfile,
+  type GovernedSnapshotAcquirerConfig,
+  type GovernedSnapshotSourcePort,
+} from "@odp-market-steward/application";
 import {
   BundleLoader,
   ContractRegistry,
@@ -16,6 +24,8 @@ import {
 import {
   MCP_TOOL_SCHEMAS,
   createMcpToolSchema,
+  type MarketBoardInput,
+  type MarketBoardSuccessOutput,
   type ProductProfile,
   type ProductProfileInput,
   type ToolErrorOutput,
@@ -46,6 +56,9 @@ export interface StewardMcpServerDependencies {
   readonly nowUtc?: () => string;
   readonly correlationId?: () => string;
   readonly additionalReadinessObservations?: readonly ReadinessObservation[];
+  readonly marketDataAcknowledged?: () => boolean | Promise<boolean>;
+  readonly snapshotSource?: GovernedSnapshotSourcePort;
+  readonly snapshotConfig?: GovernedSnapshotAcquirerConfig;
 }
 
 export async function createStewardMcpServer(
@@ -54,14 +67,41 @@ export async function createStewardMcpServer(
   const registry = dependencies.registry ?? (await loadRegistry());
   const profileSource = registry.productProfile();
   const profileTool = registry.mcpTool("get_fx_product_profile");
-  assertDescriptorSchemaParity(profileTool.inputSchemaRef, "input");
-  assertDescriptorSchemaParity(profileTool.outputSchemaRef, "output");
+  const boardTool = registry.mcpTool("get_fx_market_board");
+  assertDescriptorSchemaParity(
+    "get_fx_product_profile",
+    profileTool.inputSchemaRef,
+    "input",
+  );
+  assertDescriptorSchemaParity(
+    "get_fx_product_profile",
+    profileTool.outputSchemaRef,
+    "output",
+  );
+  assertDescriptorSchemaParity(
+    "get_fx_market_board",
+    boardTool.inputSchemaRef,
+    "input",
+  );
+  assertDescriptorSchemaParity(
+    "get_fx_market_board",
+    boardTool.outputSchemaRef,
+    "output",
+  );
   const profileInputSchema = createMcpToolSchema<ProductProfileInput>(
     "get_fx_product_profile",
     "input",
   );
   const profileOutputSchema = createMcpToolSchema<ProductProfile>(
     "get_fx_product_profile",
+    "output",
+  );
+  const boardInputSchema = createMcpToolSchema<MarketBoardInput>(
+    "get_fx_market_board",
+    "input",
+  );
+  const boardOutputSchema = createMcpToolSchema<MarketBoardSuccessOutput>(
+    "get_fx_market_board",
     "output",
   );
   const server = new McpServer(
@@ -162,8 +202,100 @@ export async function createStewardMcpServer(
     },
   );
 
+  registerAppTool(
+    server,
+    boardTool.name,
+    {
+      title: boardTool.title,
+      description: boardTool.description,
+      inputSchema: boardInputSchema,
+      outputSchema: boardOutputSchema,
+      annotations: boardTool.annotations,
+      _meta: boardTool.meta,
+    },
+    async (input: MarketBoardInput) => {
+      const requestedAtUtc =
+        dependencies.nowUtc?.() ?? new Date().toISOString();
+      if (!(await dependencies.marketDataAcknowledged?.())) {
+        const required = disclosureRequired(
+          profileSource.disclaimer,
+          requestedAtUtc,
+        );
+        return {
+          content: [{ type: "text" as const, text: required.summary }],
+          structuredContent: required as unknown as Record<string, unknown>,
+        };
+      }
+      const validation = profileSource.validation(requestedAtUtc);
+      const readiness = registry.readiness({
+        operation: "get_fx_market_board",
+        observations: [
+          ...readinessObservations(validation.results),
+          ...(dependencies.additionalReadinessObservations ?? []),
+        ],
+      });
+      if (readiness.state === "BLOCKED") {
+        return mapApplicationToolError(
+          contractUnavailableError(
+            profileSource.disclaimer,
+            dependencies.correlationId?.() ?? opaqueCorrelationId(),
+          ),
+        );
+      }
+      const source =
+        dependencies.snapshotSource ??
+        new FxLiveClient({
+          timeoutMilliseconds: 3_500,
+          maximumResponseBytes: 65_536,
+        });
+      const acquirer = new GovernedSnapshotAcquirer(
+        source,
+        dependencies.snapshotConfig ?? {
+          maximumConcurrency: 6,
+          maximumCallsPerInvocation: 74,
+          allowOneFullRolloverReread: true,
+        },
+      );
+      const instrumentSet = registry.instrumentSet();
+      const ohlcRulesArtifact = profileSource.artifacts.find(
+        (artifact) => artifact.artifactId === "ohlc-rules",
+      );
+      if (ohlcRulesArtifact === undefined) {
+        return mapApplicationToolError(
+          contractUnavailableError(
+            profileSource.disclaimer,
+            dependencies.correlationId?.() ?? opaqueCorrelationId(),
+          ),
+        );
+      }
+      const board = await getMarketBoard(input, {
+        profile: profileSource,
+        instruments: instrumentSet.members.map((member) => member.symbol),
+        ohlcRulesArtifact,
+        acquirer,
+        requestedAtUtc,
+        completedAtUtc: () =>
+          dependencies.nowUtc?.() ?? new Date().toISOString(),
+      });
+      return {
+        content: [{ type: "text" as const, text: board.summary }],
+        structuredContent: board as unknown as Record<string, unknown>,
+      };
+    },
+  );
+
   server.server.setRequestHandler(ListToolsRequestSchema, () => ({
     tools: [
+      {
+        name: boardTool.name,
+        title: boardTool.title,
+        description: boardTool.description,
+        inputSchema: MCP_TOOL_SCHEMAS.get_fx_market_board.input,
+        outputSchema: MCP_TOOL_SCHEMAS.get_fx_market_board.output,
+        annotations: boardTool.annotations,
+        securitySchemes: boardTool.securitySchemes,
+        _meta: boardTool.meta,
+      },
       {
         name: profileTool.name,
         title: profileTool.title,
@@ -232,11 +364,11 @@ function opaqueCorrelationId(): string {
 }
 
 function assertDescriptorSchemaParity(
+  tool: "get_fx_market_board" | "get_fx_product_profile",
   declaredReference: string,
   direction: "input" | "output",
 ): void {
-  const generatedReference =
-    MCP_TOOL_SCHEMAS.get_fx_product_profile[direction].$ref;
+  const generatedReference = MCP_TOOL_SCHEMAS[tool][direction].$ref;
   const expectedReference = generatedReference.replace(
     "#/$defs/",
     "#/schemas/",

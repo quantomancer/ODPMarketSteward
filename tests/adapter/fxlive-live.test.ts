@@ -1,10 +1,13 @@
 import { FxLiveClient } from "../../packages/adapter-source-api/src";
 import { GovernedSnapshotAcquirer } from "../../packages/application/src";
+import { createStewardMcpServer } from "../../apps/worker/src/mcp/server";
 import {
   BundleLoader,
   ContractRegistry,
 } from "../../packages/contract-runtime/src";
 import { governedBundle } from "../../generated/governed-bundle";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { expect, it } from "vitest";
 
 const liveCompatibilityEnabled = process.env.ODPMS_LIVE_COMPAT === "1";
@@ -32,6 +35,56 @@ it.runIf(liveCompatibilityEnabled)(
     expect(metadata.available.length).toBeGreaterThan(0);
   },
   25_000,
+);
+
+it.runIf(liveCompatibilityEnabled)(
+  "returns a schema-valid governed FX-35 board through the acknowledged MCP tool",
+  async () => {
+    const startedAt = performance.now();
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    const server = await createStewardMcpServer({
+      marketDataAcknowledged: () => true,
+    });
+    const client = new Client({
+      name: "odp-market-steward-live-compatibility",
+      version: "0.1.0",
+    });
+    try {
+      await server.connect(serverTransport);
+      await client.connect(clientTransport);
+      const result = await client.callTool({
+        name: "get_fx_market_board",
+        arguments: { evidenceMode: "LIVE_ONLY" },
+      });
+      expect(result.isError, JSON.stringify(result)).not.toBe(true);
+      expect(result.structuredContent).toMatchObject({
+        productId: "fxlive-market-data-demo-fx35",
+        availabilityState: "AVAILABLE",
+        evidence: { evidenceMode: "LIVE", liveBadgePermitted: false },
+        snapshot: { expectedCount: 35, returnedCount: 35 },
+        quality: { passed: 35, failed: 0 },
+        plausibility: { state: "NOT_EVALUATED" },
+        disclaimer: { label: "MARKET DATA DEMO" },
+      });
+      expect(
+        (result.structuredContent as { bars?: readonly unknown[] }).bars,
+      ).toHaveLength(35);
+      console.info(
+        JSON.stringify({
+          status: "PASS_FOCUSED_LIVE_MCP_MARKET_BOARD",
+          returnedCount: 35,
+          availabilityState: "AVAILABLE",
+          elapsedMilliseconds: Math.round(performance.now() - startedAt),
+          marketValuesLogged: false,
+        }),
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  },
+  60_000,
 );
 
 it.runIf(liveCompatibilityEnabled)(

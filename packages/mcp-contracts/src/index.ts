@@ -29,6 +29,11 @@ export interface ProductProfileInput {
   readonly sections: readonly ProductProfileSection[];
 }
 
+export interface MarketBoardInput {
+  readonly evidenceMode: "LIVE_ONLY" | "ALLOW_RECORDED_FALLBACK";
+  readonly previousBarEndUtc?: string | null;
+}
+
 export interface ArtifactPointer {
   readonly artifactId: string;
   readonly artifactVersion: string;
@@ -85,6 +90,41 @@ export interface Disclaimer {
   readonly label: "MARKET DATA DEMO";
   readonly statement: string;
   readonly policyVersion: string;
+}
+
+export interface DisclosureRequiredOutput {
+  readonly status: "DISCLOSURE_REQUIRED";
+  readonly summary: "Explicit acknowledgement is required before market-data retrieval.";
+  readonly nextAction: "Review the disclaimer in the component and activate Acknowledge and continue.";
+  readonly evidence: {
+    readonly evidenceMode: "NONE";
+    readonly attemptedAtUtc: string;
+    readonly calendarEvaluatedAtUtc: null;
+    readonly cacheAgeSeconds: null;
+    readonly displayLabel: "No market evidence available.";
+    readonly liveBadgePermitted: false;
+    readonly reason: string;
+  };
+  readonly disclaimer: Disclaimer;
+}
+
+export interface MarketBoardSuccessOutput {
+  readonly productId: "fxlive-market-data-demo-fx35";
+  readonly bundleVersion: string;
+  readonly summary: string;
+  readonly governance: GovernanceContext;
+  readonly evidence: Readonly<Record<string, unknown>>;
+  readonly availabilityState:
+    "AVAILABLE" | "PARTIAL" | "UNAVAILABLE" | "INCOHERENT";
+  readonly serviceState:
+    "OPEN" | "MARKET_CLOSED" | "DEGRADED" | "UNAVAILABLE" | "UNKNOWN";
+  readonly snapshot: Readonly<Record<string, unknown>> | null;
+  readonly bars: readonly Readonly<Record<string, unknown>>[];
+  readonly quality: Readonly<Record<string, unknown>>;
+  readonly plausibility: Readonly<Record<string, unknown>>;
+  readonly refresh: Readonly<Record<string, unknown>>;
+  readonly limitations: readonly string[];
+  readonly disclaimer: Disclaimer;
 }
 
 export interface ProductDeclaration {
