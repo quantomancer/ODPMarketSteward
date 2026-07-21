@@ -108,6 +108,14 @@ export interface InstrumentSetMemberProjection {
   readonly quote: string;
 }
 
+export interface PlausibilityConfigurationProjection {
+  readonly status: "CONFIGURED";
+  readonly utcLookbackWindowSeconds: 3600;
+  readonly minimumSampleSize: 30;
+  readonly alertThresholdMAD: "6";
+  readonly thresholdComparison: "GREATER_THAN_OR_EQUAL";
+}
+
 export interface InstrumentSetProjection {
   readonly artifact: ArtifactPointerProjection;
   readonly expectedCount: 35;
@@ -432,6 +440,34 @@ export class ContractRegistry {
           "0",
         ),
       },
+    };
+  }
+
+  plausibilityConfiguration(): PlausibilityConfigurationProjection {
+    const configuration = asRecord(
+      this.resolve(
+        "ohlc-rules",
+        "/spec/contextualRules/contextual-ohlc-plausibility/configuration",
+      ),
+    );
+    return {
+      status: requiredLiteral(configuration, "status", "CONFIGURED"),
+      utcLookbackWindowSeconds: requiredNumber(
+        configuration,
+        "utcLookbackWindowSeconds",
+        3600,
+      ),
+      minimumSampleSize: requiredNumber(configuration, "minimumSampleSize", 30),
+      alertThresholdMAD: requiredLiteral(
+        configuration,
+        "alertThresholdMAD",
+        "6",
+      ),
+      thresholdComparison: requiredLiteral(
+        configuration,
+        "thresholdComparison",
+        "GREATER_THAN_OR_EQUAL",
+      ),
     };
   }
 

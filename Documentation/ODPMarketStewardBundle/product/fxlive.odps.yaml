@@ -29,7 +29,7 @@ product:
       visibility: public
       status: testing
       type: derived data
-      productVersion: "1.1.1"
+      productVersion: "1.1.2"
       portfolioPriority: high
       governanceProfile: structured
       standards:
@@ -182,11 +182,11 @@ product:
       path: "../application/mcp-application.yaml"
     functionalRequirements:
       classification: project_requirements_document
-      version: "Draft 0.4"
+      version: "Draft 0.5"
       path: "../requirements/FuncitionalRequirements.html"
     technicalRequirements:
       classification: project_requirements_document
-      version: "Draft 0.2"
+      version: "Draft 0.3"
       path: "../requirements/TechnicalRequirements.html"
     requirementsNormalization:
       classification: project_requirements_mapping

@@ -62,10 +62,10 @@ describe("MCP product-profile vertical slice", () => {
     expect(result.isError, JSON.stringify(result)).not.toBe(true);
     expect(result.structuredContent).toMatchObject({
       productId: "fxlive-market-data-demo-fx35",
-      productVersion: "1.1.1",
+      productVersion: "1.1.2",
       odpsVersion: 4.1,
       governance: {
-        bundleVersion: "1.4.0",
+        bundleVersion: "1.5.0",
         validation: {
           completeForRequiredLayers: false,
           summary: { passed: 3, failed: 0, notTested: 3 },

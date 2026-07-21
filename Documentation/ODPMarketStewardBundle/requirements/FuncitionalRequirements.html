@@ -721,7 +721,7 @@
           </tr>
           <tr>
             <th>Document version</th>
-            <td>Draft 0.4</td>
+            <td>Draft 0.5</td>
           </tr>
           <tr>
             <th>Product and plugin name</th>
@@ -743,7 +743,7 @@
             <th>Controlling product artifact</th>
             <td>
               <a href="../product/fxlive.odps.yaml"><code>../product/fxlive.odps.yaml</code></a>,
-              product <code>fxlive-market-data-demo-fx35</code>, version <code>1.1.1</code>
+              product <code>fxlive-market-data-demo-fx35</code>, version <code>1.1.2</code>
             </td>
           </tr>
           <tr>
@@ -754,7 +754,7 @@
           </tr>
           <tr>
             <th>Requirement status</th>
-            <td>Draft 0.4 remains the requirements baseline; implementation and verification status is controlled item-by-item in <a href="../../ProjectPlan.html"><code>ProjectPlan.html</code></a>.</td>
+            <td>Draft 0.5 remains the requirements baseline; implementation and verification status is controlled item-by-item in <a href="../../ProjectPlan.html"><code>ProjectPlan.html</code></a>.</td>
           </tr>
           <tr>
             <th>Purpose</th>
@@ -1384,7 +1384,8 @@
                 <p class="shall">The system shall treat statistical unusualness as contextual review evidence, not as a hard-invalid bar or trading signal.</p>
                 <ul class="criteria">
                   <li>Plausibility states are <code>NORMAL</code>, <code>UNUSUAL</code>, and <code>NOT_EVALUATED</code>.</li>
-                  <li>No result is produced until a UTC lookback window, minimum sample size, and alert threshold are configured.</li>
+                  <li>The configured baseline uses an inclusive 3,600-second UTC lookback, at least 30 eligible completed hard-valid one-minute bars for the same instrument and granularity strictly before and excluding the target, and classifies a MAD score greater than or equal to 6 as <code>UNUSUAL</code>.</li>
+                  <li>Insufficient eligible samples and zero MAD produce <code>NOT_EVALUATED</code>.</li>
                   <li>An unusual result preserves the hard-validity result.</li>
                 </ul>
               </div>
@@ -2479,11 +2480,13 @@
           </p>
         </details>
 
-        <details>
-          <summary>OD-009 · Plausibility baseline</summary>
+        <details open>
+          <summary>OD-009 · RESOLVED · Plausibility baseline</summary>
           <p>
-            Approve lookback window, minimum sample size, and warning threshold. Until then,
-            plausibility remains NOT_EVALUATED.
+            ADR-004 and OHLC rules 1.3.0 approve an inclusive 3,600-second UTC lookback,
+            at least 30 eligible completed hard-valid one-minute bars for the same instrument
+            and granularity strictly before and excluding the target, and an inclusive MAD
+            warning threshold of 6. Insufficient samples and zero MAD remain NOT_EVALUATED.
           </p>
         </details>
 
@@ -2566,7 +2569,7 @@
         </div>
 
         <p class="footer-note">
-          Draft 0.4 requirements baseline · Implementation evidence is controlled by ProjectPlan.html; no deployment is claimed by this document.
+          Draft 0.5 requirements baseline · Implementation evidence is controlled by ProjectPlan.html; no deployment is claimed by this document.
         </p>
       </section>
     </main>

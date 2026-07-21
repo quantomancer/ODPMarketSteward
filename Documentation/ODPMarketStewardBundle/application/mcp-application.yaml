@@ -5,7 +5,7 @@ metadata:
   id: odp-market-steward
   name: ODP Market Steward
   competitionTitle: "ODP Market Steward — Governed Live Market Data in ChatGPT"
-  version: "1.3.0"
+  version: "1.4.0"
   status: planned
   classification: project_mcp_application_contract
   description: >-
@@ -521,8 +521,16 @@ marketResultStateContract:
     fitnessAssessmentResult: INDETERMINATE
   plausibility:
     separateFromHardValidity: true
-    unconfiguredRequiredState: NOT_EVALUATED
+    governedConfigurationPointer: /spec/contextualRules/contextual-ohlc-plausibility/configuration
+    configuredPolicy:
+      utcLookbackWindowSeconds: 3600
+      minimumSampleSize: 30
+      alertThresholdMAD: "6"
+      thresholdComparison: GREATER_THAN_OR_EQUAL
+    insufficientSampleRequiredState: NOT_EVALUATED
+    zeroMedianAbsoluteDeviationRequiredState: NOT_EVALUATED
     mayChangeHardRuleResult: false
+    mayProduceTradingSignal: false
   validation:
     requiredInEveryGovernanceContext: true
     requiredLayers:

@@ -3,20 +3,20 @@ kind: RequirementsNormalization
 
 metadata:
   id: odp-market-steward-bundle-requirements
-  version: "1.2.0"
+  version: "1.3.0"
   status: incorporated
   classification: project_requirements_mapping
   sourceDocument: FuncitionalRequirements.html
   sourceDraft: "0.4"
   priorSourceDraft: "0.2"
   technicalDocument: TechnicalRequirements.html
-  technicalDraft: "0.2"
+  technicalDraft: "0.3"
   sourceRequirementStatus: tracked_item_by_item_in_project_plan
 
 purpose: >-
   Record how the responsibility issues found in Draft 0.2 were incorporated into
   Functional Requirements Draft 0.3, retain that migration history, and map current
-  Functional Requirements Draft 0.4 and Technical Requirements Draft 0.2 to the
+  Functional Requirements Draft 0.5 and Technical Requirements Draft 0.3 to the
   responsibility-correct governed bundle. This file is a migration and traceability
   record; it does not override current requirements or the evidence status controlled
   by ProjectPlan.html.
@@ -26,7 +26,7 @@ authority:
   technicalDocumentStatus: normative_project_requirements_draft
   normalizationStatus: migration_and_traceability_record
   precedence: >-
-    Functional Requirements Draft 0.4 and Technical Requirements Draft 0.2 contain
+    Functional Requirements Draft 0.5 and Technical Requirements Draft 0.3 contain
     the current requirements. The normalizations below describe the completed wording
     migration from Draft 0.2 through Draft 0.3 and must not be used as a hidden runtime
     or implementation-status override.
@@ -183,7 +183,7 @@ coverage:
 
 technicalRequirementsCoverage:
   sourceDocument: TechnicalRequirements.html
-  sourceDraft: "0.1"
+  sourceDraft: "0.3"
   interpretation: proposed_technical_requirements_not_runtime_verification
   expectedRequirementIDs:
     - TR-ACK-001
@@ -250,6 +250,13 @@ resolvedDecisions:
       prices and deltas at 3 decimals and other governed instruments at 5;
       percentage and basis points at 2; ratios at 4; trailing zeros retained except
       every rounded signed zero displays as 0; presentation-boundary rounding only.
+  - decisionID: OD-009
+    resolution: >-
+      Rolling median and median absolute deviation over an inclusive 3600-second UTC
+      lookback; minimum 30 eligible completed hard-valid 1m bars from the same
+      instrument and granularity, strictly before and excluding the target; MAD score
+      greater than or equal to 6 is UNUSUAL; insufficient sample and zero MAD remain
+      NOT_EVALUATED; hard validity is unchanged and trading signals are prohibited.
 
 unresolvedRequirements:
   - decisionID: OD-002
@@ -268,10 +275,6 @@ unresolvedRequirements:
     topic: remaining GPT-5.6 structured output, prompting, latency, retry, and evaluation contract
     affectedRequirements: [FR-AI-001, FR-AI-004]
     safeDefault: steward_brief_not_implemented
-  - decisionID: OD-009
-    topic: plausibility lookback, minimum sample size, and threshold
-    affectedRequirement: FR-QUAL-004
-    safeDefault: NOT_EVALUATED
   - decisionID: OD-010
     topic: runtime performance and availability targets
     affectedRequirements: [NFR-PERF-001, NFR-REL-001]
