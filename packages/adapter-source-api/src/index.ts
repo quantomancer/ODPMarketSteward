@@ -1,4 +1,4 @@
-import type { OhlcStrings } from "@odp-market-steward/domain";
+import { DecimalValue, type OhlcStrings } from "@odp-market-steward/domain";
 import { isLosslessNumber, parse } from "lossless-json";
 
 export * from "./module-port";
@@ -11,13 +11,16 @@ interface SourceBarShape {
 }
 
 function exactNumberText(value: unknown, field: keyof SourceBarShape): string {
+  let lexeme: string;
   if (isLosslessNumber(value)) {
-    return value.toString();
+    lexeme = value.toString();
+  } else if (typeof value === "string") {
+    lexeme = value;
+  } else {
+    throw new TypeError(`Expected a lossless numeric token for ${field}.`);
   }
-  if (typeof value === "string" && value.trim() !== "") {
-    return value;
-  }
-  throw new TypeError(`Expected a lossless numeric token for ${field}.`);
+  DecimalValue.fromJsonNumberLexeme(lexeme);
+  return lexeme;
 }
 
 export function parseOhlcLosslessly(json: string): OhlcStrings {

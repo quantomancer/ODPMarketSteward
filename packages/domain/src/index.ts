@@ -1,5 +1,6 @@
 import Decimal from "decimal.js";
 
+export * from "./decimal";
 export * from "./module-ports";
 
 export interface OhlcStrings {
