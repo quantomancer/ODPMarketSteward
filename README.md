@@ -1,5 +1,18 @@
 # ODP Market Steward
 
+## Built with Codex and GPT-5.6
+
+This submission uses both **Codex** and **GPT-5.6** in distinct, material roles:
+
+| Contributor | How it was used |
+| --- | --- |
+| **Codex** | Principal engineering collaborator for ODPI/OpenAPI research, requirements, architecture, governed-contract generation, TypeScript MCP server and component implementation, deterministic validation, tests, Cloudflare deployment diagnostics, live acknowledgement-loop debugging, documentation and demo preparation. |
+| **GPT-5.6 in ChatGPT** | The live conversational stewardship layer. It selects the read-only MCP tools, interprets their typed governed results, and produces audience-appropriate analyst and governance summaries such as the no-investment-advice analysis shown in the video. |
+| **Deterministic application code** | Owns every numerical and governance fact: source retrieval, UTC/coherence checks, FX-35 coverage, decimal handling, OHLC validation, evidence state and product declarations. GPT-5.6 explains these results; it does not invent or recalculate them. |
+| **Human product owner** | Chose the product scope, public identity, rights authorization, disclaimer language, UX priorities and deployment approvals, and performed final acceptance. |
+
+Codex therefore helped build and ship the product, while GPT-5.6 is part of the experience a judge uses inside ChatGPT. The [2:53 public demo](https://youtu.be/26mSDmXEA6c) shows both contributions in the working application.
+
 > **Governed Live Market Data in ChatGPT**<br>
 > An OpenAI Build Week submission that turns a live FX market-data feed into an inspectable, standards-led data product inside ChatGPT.
 
@@ -131,12 +144,6 @@ The verification pipeline regenerates governed artifacts, checks Worker types, T
 **Pre-existing input:** FXLive was an independently deployed, public, read-only market-data API before Build Week. It supplies the raw latest-snapshot and completed-bar endpoints consumed by this project. Its implementation is not presented as new competition work.
 
 **Built for this project:** the ODPS-centred governed bundle; OpenAPI contract; FX-35 value set; deterministic decimal, UTC, coherence and OHLC evaluation; evidence and availability classification; Cloudflare MCP Worker; typed tool contracts; ChatGPT component; professional documentation; tests; deployment; and competition demo were created and integrated as ODP Market Steward.
-
-## How Codex and GPT-5.6 were used
-
-Codex was the principal engineering collaborator across requirements analysis, standards research, architecture, contract generation, TypeScript implementation, tests, Cloudflare deployment diagnostics, MCP/App integration, documentation and demo preparation. The human product owner made the consequential decisions: product scope, public identity, rights authorization, disclaimer language, UX priorities, deployment approvals and final acceptance.
-
-GPT-5.6 in ChatGPT provides the conversational stewardship layer demonstrated in the video: it selects the read-only MCP tools, interprets their typed governed results and produces user-directed summaries. Numerical validation, coverage and governance status remain deterministic tool outputs rather than model-generated facts.
 
 ## Current POC boundaries
 
