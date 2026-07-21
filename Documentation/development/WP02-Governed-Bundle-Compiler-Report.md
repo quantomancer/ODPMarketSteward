@@ -1,6 +1,7 @@
 # Governed bundle compiler and runtime registry report
 
 - **Evidence timestamp:** 2026-07-21T11:41:22Z
+- **Implementation source revision:** `1c211ce54b24d4a9925766ed4b943531e16fa8cc`
 - **Scope:** WP01-004, WP02-001 and WP02-002 local acceptance evidence; focused progress on WP02-004 and WP02-006
 - **Runtime:** Node.js 24.18.0, pnpm 11.15.1
 - **Cloud boundary:** no Cloudflare deployment, account mutation, secret access, source API call, or remote resource write occurred
@@ -11,6 +12,8 @@
 The repository now has a buildable source boundary for every DLD module M01–M18. Modules that are not yet governed for full behavior expose explicit ports rather than invented implementations. The runtime contract foundation uses a deterministic generator to embed `bundle.yaml` and its seven `requiredAtRuntime` artifacts, followed by a fail-closed two-phase parse-then-link loader and a responsibility-aware registry.
 
 WP01-004, WP02-001 and WP02-002 meet their stated local acceptance evidence. WP02-003 remains blocked by DLD-001. WP02-004 and WP02-006 have focused implementation progress but remain incomplete because the full typed registry/tool contract chain and all twelve standalone schemas do not yet exist.
+
+The implementation source revision was committed and verified against the private repository's `main` branch. A later documentation-only project-control commit does not alter the tested implementation source.
 
 ## Implemented controls
 

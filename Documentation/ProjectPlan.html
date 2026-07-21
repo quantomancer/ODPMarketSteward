@@ -105,7 +105,7 @@
       <h1>ODP Market Steward</h1>
       <p class="subtitle">Detailed project plan for delivering <strong>ODP Market Steward — Governed Live Market Data in ChatGPT</strong> from approved contracts through implementation, Cloudflare operations, ChatGPT integration, verification, publication, and competition submission.</p>
       <div class="badges">
-        <span class="badge">Version 0.9</span>
+        <span class="badge">Version 1.0</span>
         <span class="badge">Status: ACTIVE</span>
         <span class="badge">Baseline: 2026-07-21 UTC</span>
         <span class="badge">MARKET DATA DEMO</span>
@@ -417,6 +417,7 @@
     <section id="changes">
       <h2>Plan change log</h2>
       <div class="table-wrap"><table><thead><tr><th>UTC</th><th>Version</th><th>Affected IDs</th><th>Change</th><th>Validation scope</th><th>Actor</th></tr></thead><tbody>
+        <tr><td>2026-07-21T11:46:25Z</td><td>1.0</td><td>WP01-004; WP02-001..004; WP02-006; repository evidence</td><td>Recorded tested implementation source revision <code>1c211ce54b24d4a9925766ed4b943531e16fa8cc</code> after committing and pushing the M01–M18 skeleton and governed-bundle runtime registry increment to private main. Completion booleans remain 16 true and 130 false.</td><td>The implementation commit completed; the work tree was clean immediately afterward; current <code>git ls-remote</code> returned the exact same hash for <code>refs/heads/main</code>. This synchronization evidence does not expand the local test scope and no Cloudflare remote state changed.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T11:42:23Z</td><td>0.9</td><td>WP01-004; WP02-001..004; WP02-006; summary</td><td>Completed the buildable M01–M18 module skeleton and the fail-closed two-phase governed-bundle loader with exact version, digest and dependency verification. WP01-004, WP02-001 and WP02-002 changed to true/COMPLETED. WP02-003 changed to false/BLOCKED; WP02-004 and WP02-006 changed to false/IN_PROGRESS with exact limitations.</td><td>Exact Node 24.18.0 generation and checks; deterministic generated digest across two runs; Wrangler type drift, TypeScript, ESLint and Prettier pass; dependency-cruiser 34 modules/29 dependencies with zero violations; 5 files/17 tests; 87.50% statement and 89.89% line coverage; component/Worker builds; local workerd persisted restart and registry-backed profile call; production advisory check found no known vulnerabilities. No source API or Cloudflare remote write occurred; T0/T1, full twelve-schema materialization, complete profile contract and immutable ledger remain open.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T11:24:01Z</td><td>0.8</td><td>WP01-002; WP01-003; DLD-002; repository evidence</td><td>Recorded implementation source revision <code>58cf496dfc7072575d96e06c79478570b7ce999c</code> after committing and pushing the accepted ADR-001 compatibility spike to the private main branch. Completion booleans remain 13 true and 133 false.</td><td>Commit creation completed; the work tree was clean immediately afterward; current <code>git ls-remote</code> returned the exact same hash for <code>refs/heads/main</code>. This repository synchronization evidence does not expand the local runtime validation scope and no Cloudflare remote state changed.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T11:15:31Z</td><td>0.7</td><td>WP01-002; WP01-003; WP01-004; DLD-002; R-004</td><td>Recorded product-owner acceptance of ADR-001 and the completed local compatibility spike. WP01-002, WP01-003 and DLD-002 changed to true/COMPLETED. WP01-004 remains false/IN_PROGRESS because the buildable vertical slice does not yet materialize every M01–M18 boundary. R-004 was reduced from HIGH to MEDIUM after persistent local-workerd restart evidence.</td><td>Exact Node 24.18.0 and pnpm 11.15.1 frozen install; generated Worker type drift check; TypeScript, ESLint, Prettier and dependency-direction checks; 3 files/6 focused tests; 81.66% statement and 85.71% line coverage bootstrap; component and Worker production builds; local workerd initialize/restart/tools-list/tools-call pass; production advisory and licence inventory; lock and bundle digests inspected. No Cloudflare deployment or remote write occurred. ChatGPT host, live source, staging and clean second-environment evidence remain unproven.</td><td>Codex</td></tr>
@@ -430,7 +431,7 @@
     </section>
 
     <footer>
-      ODP Market Steward · OMS-PLAN-001 · Version 0.9 · ACTIVE · MARKET DATA DEMO · All times UTC<br>
+      ODP Market Steward · OMS-PLAN-001 · Version 1.0 · ACTIVE · MARKET DATA DEMO · All times UTC<br>
       This plan is an internal execution control and does not itself prove runtime, rights, conformance, deployment, or release readiness.
     </footer>
   </main>
