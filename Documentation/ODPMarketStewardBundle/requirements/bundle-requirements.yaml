@@ -3,7 +3,7 @@ kind: RequirementsNormalization
 
 metadata:
   id: odp-market-steward-bundle-requirements
-  version: "1.4.0"
+  version: "1.5.0"
   status: incorporated
   classification: project_requirements_mapping
   sourceDocument: FuncitionalRequirements.html
@@ -258,16 +258,21 @@ resolvedDecisions:
       greater than or equal to 6 is UNUSUAL; insufficient sample and zero MAD remain
       NOT_EVALUATED; the MVP series is CLOSE-only with series mixing prohibited;
       hard validity is unchanged and trading signals are prohibited.
+  - decisionID: OD-003
+    resolution: >-
+      The FXLive API and product owner authorizes ODP Market Steward public competition-demo
+      retrieval, display, judge access, screenshots, demo video, and governed deterministic
+      calculations under ADR-006. Public attribution is limited to the permitted project
+      identities. The exact MARKET DATA DEMO notice requires use at own risk, excludes provider
+      responsibility, gives no accuracy or availability guarantee, and preserves the no-advice
+      and no-trading boundary. This is an internal owner authorization, not an independent legal
+      opinion. Optional recorded capture, storage, and replay remain separately rights-gated.
 
 unresolvedRequirements:
   - decisionID: OD-002
     topic: authoritative UTC market calendar
     affectedResults: [serviceState, freshness]
     safeDefault: UNKNOWN
-  - decisionID: OD-003
-    topic: market-data rights and public attribution treatment
-    affectedRequirements: [FR-PUB-002, FR-STATE-003, FR-DEP-004, NFR-PUB-001]
-    safeDefault: publication_and_recorded_fallback_blocked
   - decisionID: OD-004
     topic: pinned ODP SDK compatibility approach
     affectedRequirement: FR-ODP-004

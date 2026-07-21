@@ -3,7 +3,7 @@ export const MCP_TOOL_SCHEMAS = {
   get_fx_market_board: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:get_fx_market_board:input:v1.5.1",
       title: "get_fx_market_board input",
       type: "object",
       $ref: "#/$defs/MarketBoardInput",
@@ -43,7 +43,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:get_fx_market_board:output:v1.5.1",
       title: "get_fx_market_board output",
       type: "object",
       $ref: "#/$defs/MarketBoardOutput",
@@ -112,7 +112,7 @@ export const MCP_TOOL_SCHEMAS = {
             statement: {
               type: "string",
               const:
-                "MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.",
+                "MARKET DATA DEMO. This API and application are provided solely to demonstrate app functionality for the competition. Use at your own risk. Data may be delayed, incomplete, unavailable, inaccurate, or contain errors. The provider accepts no responsibility for use of the API, application, or data and gives no guarantee regarding data accuracy or service availability. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The API, application, and data must not be used for live trading or order execution.",
             },
             policyVersion: {
               type: "string",
@@ -1054,7 +1054,7 @@ export const MCP_TOOL_SCHEMAS = {
   get_fx_instrument: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_instrument:input:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:get_fx_instrument:input:v1.5.1",
       title: "get_fx_instrument input",
       type: "object",
       $ref: "#/$defs/InstrumentInput",
@@ -1120,7 +1120,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_instrument:output:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:get_fx_instrument:output:v1.5.1",
       title: "get_fx_instrument output",
       type: "object",
       $ref: "#/$defs/InstrumentOutput",
@@ -1189,7 +1189,7 @@ export const MCP_TOOL_SCHEMAS = {
             statement: {
               type: "string",
               const:
-                "MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.",
+                "MARKET DATA DEMO. This API and application are provided solely to demonstrate app functionality for the competition. Use at your own risk. Data may be delayed, incomplete, unavailable, inaccurate, or contain errors. The provider accepts no responsibility for use of the API, application, or data and gives no guarantee regarding data accuracy or service availability. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The API, application, and data must not be used for live trading or order execution.",
             },
             policyVersion: {
               type: "string",
@@ -1995,7 +1995,7 @@ export const MCP_TOOL_SCHEMAS = {
   summarize_fx_movements: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:input:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:input:v1.5.1",
       title: "summarize_fx_movements input",
       type: "object",
       $ref: "#/$defs/MovementSummaryInput",
@@ -2090,7 +2090,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:output:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:summarize_fx_movements:output:v1.5.1",
       title: "summarize_fx_movements output",
       type: "object",
       $ref: "#/$defs/MovementSummaryOutput",
@@ -2159,7 +2159,7 @@ export const MCP_TOOL_SCHEMAS = {
             statement: {
               type: "string",
               const:
-                "MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.",
+                "MARKET DATA DEMO. This API and application are provided solely to demonstrate app functionality for the competition. Use at your own risk. Data may be delayed, incomplete, unavailable, inaccurate, or contain errors. The provider accepts no responsibility for use of the API, application, or data and gives no guarantee regarding data accuracy or service availability. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The API, application, and data must not be used for live trading or order execution.",
             },
             policyVersion: {
               type: "string",
@@ -2915,7 +2915,7 @@ export const MCP_TOOL_SCHEMAS = {
   assess_fx_data_service: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:input:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:input:v1.5.1",
       title: "assess_fx_data_service input",
       type: "object",
       $ref: "#/$defs/AssessmentInput",
@@ -3017,7 +3017,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:output:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:assess_fx_data_service:output:v1.5.1",
       title: "assess_fx_data_service output",
       type: "object",
       $ref: "#/$defs/AssessmentOutput",
@@ -3086,7 +3086,7 @@ export const MCP_TOOL_SCHEMAS = {
             statement: {
               type: "string",
               const:
-                "MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.",
+                "MARKET DATA DEMO. This API and application are provided solely to demonstrate app functionality for the competition. Use at your own risk. Data may be delayed, incomplete, unavailable, inaccurate, or contain errors. The provider accepts no responsibility for use of the API, application, or data and gives no guarantee regarding data accuracy or service availability. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The API, application, and data must not be used for live trading or order execution.",
             },
             policyVersion: {
               type: "string",
@@ -3910,7 +3910,7 @@ export const MCP_TOOL_SCHEMAS = {
   acknowledge_market_data_demo: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:input:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:input:v1.5.1",
       title: "acknowledge_market_data_demo input",
       type: "object",
       $ref: "#/$defs/Acknowledgement",
@@ -3949,7 +3949,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:output:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:acknowledge_market_data_demo:output:v1.5.1",
       title: "acknowledge_market_data_demo output",
       type: "object",
       $ref: "#/$defs/AcknowledgementOutput",
@@ -4018,7 +4018,7 @@ export const MCP_TOOL_SCHEMAS = {
             statement: {
               type: "string",
               const:
-                "MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.",
+                "MARKET DATA DEMO. This API and application are provided solely to demonstrate app functionality for the competition. Use at your own risk. Data may be delayed, incomplete, unavailable, inaccurate, or contain errors. The provider accepts no responsibility for use of the API, application, or data and gives no guarantee regarding data accuracy or service availability. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The API, application, and data must not be used for live trading or order execution.",
             },
             policyVersion: {
               type: "string",
@@ -4175,7 +4175,7 @@ export const MCP_TOOL_SCHEMAS = {
   get_fx_product_profile: {
     input: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:input:v1.5.1",
       title: "get_fx_product_profile input",
       type: "object",
       $ref: "#/$defs/ProductProfileInput",
@@ -4213,7 +4213,7 @@ export const MCP_TOOL_SCHEMAS = {
     },
     output: {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.0",
+      $id: "urn:odp-market-steward:mcp:get_fx_product_profile:output:v1.5.1",
       title: "get_fx_product_profile output",
       type: "object",
       $ref: "#/$defs/ProductProfileOutput",
@@ -4436,7 +4436,7 @@ export const MCP_TOOL_SCHEMAS = {
             statement: {
               type: "string",
               const:
-                "MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.",
+                "MARKET DATA DEMO. This API and application are provided solely to demonstrate app functionality for the competition. Use at your own risk. Data may be delayed, incomplete, unavailable, inaccurate, or contain errors. The provider accepts no responsibility for use of the API, application, or data and gives no guarantee regarding data accuracy or service availability. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The API, application, and data must not be used for live trading or order execution.",
             },
             policyVersion: {
               type: "string",

@@ -16,8 +16,8 @@ const expectedTools = [
 const disclaimer = {
   label: "MARKET DATA DEMO",
   statement:
-    "MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed, incomplete, unavailable, or contain errors. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The product must not be used for live trading or order execution.",
-  policyVersion: "1.1.0",
+    "MARKET DATA DEMO. This API and application are provided solely to demonstrate app functionality for the competition. Use at your own risk. Data may be delayed, incomplete, unavailable, inaccurate, or contain errors. The provider accepts no responsibility for use of the API, application, or data and gives no guarantee regarding data accuracy or service availability. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The API, application, and data must not be used for live trading or order execution.",
+  policyVersion: "1.2.0",
 };
 
 describe("standalone MCP tool schemas", () => {

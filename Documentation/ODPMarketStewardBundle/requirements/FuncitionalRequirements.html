@@ -1735,7 +1735,7 @@
                 <p class="shall">Public artifacts shall identify ODP Market Steward, FXLive, and QMVP only and shall not disclose upstream source identity.</p>
                 <ul class="criteria">
                   <li>A configured prohibited-term scan covers server responses, component bundle, screenshots, README, and video script.</li>
-                  <li>This requirement is a release gate only when the applicable data rights permit omission of attribution.</li>
+                  <li>ADR-006 authorizes the bounded public competition-demo scope and limits public attribution to the permitted project identities; it is an internal owner declaration, not independent legal review.</li>
                 </ul>
               </div>
             </article>
@@ -2427,10 +2427,12 @@
         </details>
 
         <details>
-          <summary>OD-003 · Market-data rights and attribution</summary>
+          <summary>OD-003 · Market-data rights and attribution — Resolved for competition-demo scope</summary>
           <p>
-            Confirm written rights for public display, judge access, screenshots, video, recorded storage,
-            and omission of public attribution. This is a go-or-no-go release decision.
+            ADR-006 records the API and product owner's authorization for public App display, judge access,
+            screenshots, demo video, governed calculations, and the permitted project attribution treatment.
+            It is an internal owner declaration, not an independent legal opinion. Optional recorded capture,
+            storage, retention, and replay remain separately rights-gated.
           </p>
         </details>
 
@@ -2563,10 +2565,13 @@
         <h3>Required public disclaimer</h3>
         <div class="callout warning">
           <strong>MARKET DATA DEMO</strong>
-          MARKET DATA DEMO. For technical demonstration and evaluation only. Data may be delayed,
-          incomplete, unavailable, or contain errors. Nothing presented is investment advice,
-          a recommendation, or an offer to buy or sell any financial instrument. The product
-          must not be used for live trading or order execution.
+          MARKET DATA DEMO. This API and application are provided solely to demonstrate app
+          functionality for the competition. Use at your own risk. Data may be delayed, incomplete,
+          unavailable, inaccurate, or contain errors. The provider accepts no responsibility for use
+          of the API, application, or data and gives no guarantee regarding data accuracy or service
+          availability. Nothing presented is investment advice, a recommendation, or an offer to buy
+          or sell any financial instrument. The API, application, and data must not be used for live
+          trading or order execution.
         </div>
 
         <p class="footer-note">

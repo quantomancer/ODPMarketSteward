@@ -4,7 +4,7 @@ kind: GovernedProductBundle
 metadata:
   id: odp-market-steward-fxlive-bundle
   name: "ODP Market Steward — FXLive governed product bundle"
-  version: "1.6.0"
+  version: "1.7.0"
   status: draft
   classification: project_bundle_manifest
   constructName: ODPS-centred-market-data-product-package
@@ -16,7 +16,7 @@ metadata:
 
 product:
   id: fxlive-market-data-demo-fx35
-  version: "1.1.3"
+  version: "1.1.4"
   lifecycleStatus: testing
   contract: product/fxlive.odps.yaml
 
@@ -63,11 +63,11 @@ artifacts:
     classification: ODPI_standard
     standard: ODPS
     standardVersion: "4.1"
-    artifactVersion: "1.1.3"
+    artifactVersion: "1.1.4"
     mediaType: application/yaml
     normative: true
     requiredAtRuntime: true
-    sha256: 417202d291b0cae4c0233a1961b32148f808eebea45f0aadbfd31c855634b53a
+    sha256: 19338ef443bc4e2eafb6baf59b7466f1fe83eef23b0d8fd5fec71462e89705e8
     dependsOn: []
 
   - id: api-contract
@@ -76,11 +76,11 @@ artifacts:
     classification: companion_standard
     standard: OpenAPI
     standardVersion: "3.1.2"
-    artifactVersion: "1.0.0"
+    artifactVersion: "1.0.1"
     mediaType: application/yaml
     normative: true
     requiredAtRuntime: true
-    sha256: 415a90a4fc62222dedcf1d0b99a589899bd28dfa436c5e256abc632adcf341d4
+    sha256: df857acec063980030860f922c2c4b136b1174f05e913a10ec17a0e5117f4cef
     dependsOn: [product-contract]
 
   - id: instrument-set
@@ -120,22 +120,22 @@ artifacts:
     role: public identity, disclaimer, UTC presentation, evidence labels, and financial-safety boundaries
     path: policies/publication-policy.yaml
     classification: project_companion
-    artifactVersion: "1.1.0"
+    artifactVersion: "1.2.0"
     mediaType: application/yaml
     normative: true
     requiredAtRuntime: true
-    sha256: 398878e3b48a204fd7406e74ebaab43c27303d15000eed54dd3642d7b71eaa7e
+    sha256: d367bd8f884cfbe7820ff6bd9c9721a7153d9ed3bec61298dab7f6f6f4c3f88d
     dependsOn: [product-contract]
 
   - id: mcp-application-contract
     role: MCP tools, schemas, acknowledgement contract, responsibility boundaries, application safety, and ChatGPT delivery target
     path: application/mcp-application.yaml
     classification: project_companion
-    artifactVersion: "1.5.0"
+    artifactVersion: "1.5.1"
     mediaType: application/yaml
     normative: true
     requiredAtRuntime: true
-    sha256: 4108c0c208e0c3dabf32e112d4fe160b5fe19024015652d06bcbd8f92296dbb2
+    sha256: 21f48b0bcfc170430e5081fde72decf534863f230ae296fae87c6cdd2714b0bc
     dependsOn: [product-contract, api-contract, instrument-set, ohlc-rules, monitoring, publication-policy]
 
   - id: source-functional-requirements
@@ -146,7 +146,7 @@ artifacts:
     mediaType: text/html
     normative: true
     requiredAtRuntime: false
-    sha256: bcf1225d36207409ef19885e9181bf3969d0c3fa7c83978f51082766300cfe38
+    sha256: 9c54115515c629e721ee62c5bd8d3edbb5ea5625e94b7f26ce234e4351fc22a6
     dependsOn: []
 
   - id: technical-requirements
@@ -157,18 +157,18 @@ artifacts:
     mediaType: text/html
     normative: true
     requiredAtRuntime: false
-    sha256: d8315cff1a09376b8f734b767607b387ad7bea1d6d25df0a32e00a92e0bbc1c7
+    sha256: 5571e70a1c8ef16a66842d55ea7a8410ff49fee2057597ec9a5990c016566190
     dependsOn: [source-functional-requirements]
 
   - id: requirements-normalization
     role: Draft 0.2 to Draft 0.3 migration record and responsibility traceability mapping
     path: requirements/bundle-requirements.yaml
     classification: project_requirements_mapping
-    artifactVersion: "1.4.0"
+    artifactVersion: "1.5.0"
     mediaType: application/yaml
     normative: false
     requiredAtRuntime: false
-    sha256: 0f9f729f82ee687b62d36963b00bf144cdb85fa7b03df76321c29f5e2a8c1a59
+    sha256: 7a506d2857795c5c8f157b81baf11d1d168de2e4c8bb5cb659f3bac085ae8628
     dependsOn: [source-functional-requirements, technical-requirements]
 
   - id: detailed-level-design
@@ -179,7 +179,7 @@ artifacts:
     mediaType: text/html
     normative: false
     requiredAtRuntime: false
-    sha256: 05703a2f0c408a989f30f7a7860aaf9633aea805cb601abf8853aa381e1c52c7
+    sha256: d815530bcde3a47d495abf75789011aaf80f2c113816fb0716c1d5d0560bbf60
     dependsOn: [source-functional-requirements, technical-requirements, requirements-normalization, mcp-application-contract]
 
   - id: professional-documentation
@@ -190,7 +190,7 @@ artifacts:
     mediaType: text/html
     normative: false
     requiredAtRuntime: false
-    sha256: c2621f541f1c25387f2f7e6aaadb321a778c5bf313620a9445e3b8de65af5cb1
+    sha256: 7d9a3fb4b1c9691f62863ca9dd567ea48706f87549222bf2b70fc2ad828886f1
     dependsOn: [source-functional-requirements, technical-requirements, requirements-normalization, detailed-level-design]
 
   - id: readme
@@ -201,7 +201,7 @@ artifacts:
     mediaType: text/html
     normative: false
     requiredAtRuntime: false
-    sha256: 50f1a406eba2fbaacc33bf140b17691b74f7042b751e573b807c05c9b46e3785
+    sha256: c1f2ee9668f0d7bd5b8f42b427424db2f276244a22a731ac8bc1b0740317b605
     dependsOn: [professional-documentation]
 
 runtimePolicy:
@@ -409,11 +409,14 @@ knownImplementationGaps:
       The current Worker-generated root HTML page does not display the required
       MARKET DATA DEMO label and full disclaimer.
   - id: GAP-002
-    severity: release_blocker
+    severity: resolved
     topic: data rights and attribution
     detail: >-
-      Public display, redistribution, recording, judge access, and attribution
-      treatment require written confirmation. The disclaimer is not authorization.
+      ADR-006 records the API and product owner's authorization for the bounded public
+      competition-demo scope, including App display, judge access, screenshots, demo
+      video, governed calculations, and permitted public attribution treatment. This
+      is an internal owner declaration, not an independent legal review. Optional
+      recorded capture, storage, and replay remain separately rights-gated.
   - id: GAP-003
     severity: governed_state_blocker
     topic: market calendar
@@ -423,11 +426,12 @@ knownImplementationGaps:
     topic: CreatedAt semantics
     detail: Producer-level confirmation of CreatedAt semantics remains pending.
   - id: GAP-007
-    severity: governance_gap
+    severity: resolved_for_competition_demo_scope
     topic: product license and data holder
     detail: >-
-      ODPS does not contain owner-approved license or data-holder facts. They are
-      optional for schema validity but important before professional public release.
+      The FXLive API and product owner identifies itself as the authorizing data-product
+      owner and grants the bounded competition-demo use recorded in ADR-006. No broader
+      product licence or unrelated redistribution right is claimed.
   - id: GAP-008
     severity: implementation_gap
     topic: MCP application
