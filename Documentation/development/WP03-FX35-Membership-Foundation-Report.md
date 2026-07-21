@@ -3,7 +3,7 @@
 - Work item: `WP03-003`
 - Related records: `T2`, `G2`
 - Evidence time: `2026-07-21T14:17:49Z`
-- Tested source baseline: `06daafc7de9ec0d2ab505c28c67699d941528cb5` plus the uncommitted changes described below
+- Tested implementation revision: `3575cb202819da087df24db45a701243c2446622`
 - Runtime: checksum-matched Node.js `24.18.0`
 - Package manager: pnpm `11.15.1`
 - Remote scope: no Cloudflare, source API, ChatGPT host, staging, or public endpoint was accessed
