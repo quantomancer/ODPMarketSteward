@@ -105,7 +105,7 @@
       <h1>ODP Market Steward</h1>
       <p class="subtitle">Detailed project plan for delivering <strong>ODP Market Steward — Governed Live Market Data in ChatGPT</strong> from approved contracts through implementation, Cloudflare operations, ChatGPT integration, verification, publication, and competition submission.</p>
       <div class="badges">
-        <span class="badge">Version 1.8</span>
+        <span class="badge">Version 1.9</span>
         <span class="badge">Status: ACTIVE</span>
         <span class="badge">Baseline: 2026-07-21 UTC</span>
         <span class="badge">MARKET DATA DEMO</span>
@@ -417,6 +417,7 @@
     <section id="changes">
       <h2>Plan change log</h2>
       <div class="table-wrap"><table><thead><tr><th>UTC</th><th>Version</th><th>Affected IDs</th><th>Change</th><th>Validation scope</th><th>Actor</th></tr></thead><tbody>
+        <tr><td>2026-07-21T13:53:44Z</td><td>1.9</td><td>WP03-001; repository evidence</td><td>Recorded tested implementation revision <code>fec624b484166799717df9d9f2536621454cddd8</code> after committing and pushing the lossless JSON-number capture, internal DecimalValue, golden vectors, evidence and plan status to private main. Completion remains 21 true and 125 false.</td><td>The implementation commit completed; the work tree was clean immediately afterward; current <code>git ls-remote</code> returned the exact same hash for <code>refs/heads/main</code>. This synchronization evidence does not expand the exact local verification scope and no Cloudflare remote state changed.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T13:51:10Z</td><td>1.8</td><td>WP03-001; DLD-007; T2; G2; summary</td><td>Implemented strict lossless JSON-number capture and the canonical internal DecimalValue with source lexeme, source/effective scale, negative-zero candidate, bounded fixed canonical form and exact arbitrary-precision equality. WP03-001 changed to true/COMPLETED. DLD-007, T2 and G2 changed to false/PARTIAL; public decimal presentation policy remains open. Completion is now 21 true and 125 false. Added the <a href="development/WP03-Lossless-Decimal-Foundation-Report.md">decimal foundation report</a>.</td><td>Checksum-verified Node 24.18.0 and pnpm 11.15.1 full verification: bundle/compiler and twelve schemas; Wrangler drift, TypeScript, ESLint, Prettier and dependency checks; 9 files/59 tests; 90.95% statement and 92.10% line coverage; component/Worker builds; local Workerd persisted restart and profile discovery. Focused golden vectors cover unsafe integers, exponent forms, scale, negative zero, malformed grammar and bounded expansion. No Cloudflare, source API or ChatGPT host access occurred.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T13:43:51Z</td><td>1.7</td><td>WP02-006; repository evidence</td><td>Recorded tested implementation revision <code>e844b469500bfeafc433dd9b14a02799521ab323</code> after committing and pushing product-profile readiness gating, typed blocked behavior, degraded/non-blocking disclosure, tests, evidence and plan status to private main. Completion remains 20 true and 126 false.</td><td>The implementation commit completed; the work tree was clean immediately afterward; current <code>git ls-remote</code> returned the exact same hash for <code>refs/heads/main</code>. This synchronization evidence does not expand the exact local verification scope and no Cloudflare remote state changed.</td><td>Codex</td></tr>
         <tr><td>2026-07-21T13:39:15Z</td><td>1.6</td><td>WP02-004..006; WP06-002; WP06-004; T1; T5; G4; summary</td><td>Wired the operation-specific readiness verdict into the registered network-free product-profile handler. Required failures now return the schema-valid typed CONTRACT_UNAVAILABLE result; required NOT_TESTED evidence and unrelated failures remain explicit in the successful structured summary. WP02-006 changed to true/COMPLETED. WP06-004 changed to false/IN_PROGRESS; T5 and G4 changed to false/PARTIAL. Completion is now 20 true and 126 false. Added the <a href="development/WP02-Product-Profile-Readiness-Gating-Report.md">handler report</a>.</td><td>Checksum-verified Node 24.18.0 and pnpm 11.15.1 final full verification: bundle/compiler and twelve schemas; Wrangler drift, TypeScript, ESLint, Prettier and dependency checks; 8 files/40 tests; 89.56% statement and 90.85% line coverage; component/Worker builds; local Workerd persisted restart and profile discovery. Two earlier full runs stopped at strict test-lint/type findings and are recorded in the report. No Cloudflare, source API or ChatGPT host access occurred.</td><td>Codex</td></tr>
@@ -439,7 +440,7 @@
     </section>
 
     <footer>
-      ODP Market Steward · OMS-PLAN-001 · Version 1.8 · ACTIVE · MARKET DATA DEMO · All times UTC<br>
+      ODP Market Steward · OMS-PLAN-001 · Version 1.9 · ACTIVE · MARKET DATA DEMO · All times UTC<br>
       This plan is an internal execution control and does not itself prove runtime, rights, conformance, deployment, or release readiness.
     </footer>
   </main>
