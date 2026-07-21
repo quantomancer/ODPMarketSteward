@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "odp-market-steward",
+  "main": "apps/worker/src/index.ts",
+  "compatibility_date": "2026-07-21",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "MCP_SESSION_AGENT",
+        "class_name": "OdpMarketStewardAgent",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["OdpMarketStewardAgent"],
+    },
+  ],
+  "observability": {
+    "enabled": false,
+  },
+}

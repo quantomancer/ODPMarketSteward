@@ -1,0 +1,11 @@
+{
+  "name": "@odp-market-steward/application",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@odp-market-steward/domain": "workspace:*",
+    "@odp-market-steward/mcp-contracts": "workspace:*"
+  }
+}

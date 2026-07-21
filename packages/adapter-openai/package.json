@@ -1,0 +1,11 @@
+{
+  "name": "@odp-market-steward/adapter-openai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "openai": "6.48.0",
+    "zod": "4.4.3"
+  }
+}

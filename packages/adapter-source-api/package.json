@@ -1,0 +1,12 @@
+{
+  "name": "@odp-market-steward/adapter-source-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@odp-market-steward/domain": "workspace:*",
+    "lossless-json": "4.3.0",
+    "zod": "4.4.3"
+  }
+}

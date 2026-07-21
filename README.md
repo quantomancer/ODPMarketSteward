@@ -2,11 +2,11 @@
 
 **Competition title:** ODP Market Steward — Governed Live Market Data in ChatGPT
 
-ODP Market Steward is a planned ChatGPT App and MCP service for governed discovery, validation, and professional interpretation of live market metadata and OHLC data. It is a **MARKET DATA DEMO** and does not provide investment advice or a production trading service.
+ODP Market Steward is a ChatGPT App and MCP service under active implementation for governed discovery, validation, and professional interpretation of live market metadata and OHLC data. It is a **MARKET DATA DEMO** and does not provide investment advice or a production trading service.
 
 ## Repository status
 
-The repository contains the authoritative project documentation and a structural implementation scaffold. It does not yet contain executable application code, dependency manifests, Cloudflare deployment configuration, copied credentials, or a live deployment.
+The repository contains the authoritative project documentation and an executable compatibility-spike implementation: an exact-pinned TypeScript workspace, a Cloudflare Worker with a persistent Agent/Durable Object MCP transport, one typed discovery tool, and one React MCP Apps component resource. This is a buildable foundation, not a live deployment or completed MVP. It contains no copied credentials.
 
 The implementation is planned in TypeScript, with:
 
@@ -30,7 +30,16 @@ The implementation is planned in TypeScript, with:
 
 ## Development and review
 
-WebStorm is the primary development and code-review IDE. Begin with the [documentation index](Documentation/README.md) and [living project plan](Documentation/ProjectPlan.html). Do not add dependencies or toolchain versions until their project decisions are accepted. Follow [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
+WebStorm is the primary development and code-review IDE. Begin with the [documentation index](Documentation/README.md), [living project plan](Documentation/ProjectPlan.html), [accepted toolchain ADR](Documentation/decisions/ADR-001-Toolchain-and-Dependency-Baseline.md), and [compatibility-spike report](Documentation/development/ADR-001-Compatibility-Spike-Report.md). Follow [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
+
+The exact local baseline is Node.js 24.18.0 and pnpm 11.15.1. With those versions active:
+
+```text
+corepack pnpm@11.15.1 install --frozen-lockfile
+corepack pnpm@11.15.1 run verify
+```
+
+`verify` is local: it checks generated Worker types, TypeScript, lint, formatting, dependency directions, coverage, production builds, and a persisted local-workerd MCP restart. It does not deploy or mutate Cloudflare resources.
 
 Current OpenAI references:
 

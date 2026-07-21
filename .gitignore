@@ -1,7 +1,9 @@
 node_modules/
 dist/
+apps/component/dist/
 coverage/
 .wrangler/
+.pnpm-store/
 .dev.vars
 .dev.vars.*
 .env

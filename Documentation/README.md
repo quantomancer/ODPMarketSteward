@@ -10,6 +10,7 @@ This folder is the authoritative home for ODP Market Steward specifications, req
 - [Detailed-level design](ODPMarketStewardBundle/design/DetailedLevelDesign.html) — accepted implementation design.
 - [Governed bundle manifest](ODPMarketStewardBundle/bundle.yaml) — authoritative ODPI-centred bundle inventory and dependency graph.
 - [Bundle documentation](ODPMarketStewardBundle/ODPMarketStewardBundleDocumentation.html) — professional bundle guide and responsibility model.
+- [ADR-001](decisions/ADR-001-Toolchain-and-Dependency-Baseline.md) and its [compatibility-spike report](development/ADR-001-Compatibility-Spike-Report.md) — accepted exact toolchain/dependency baseline and inspected local execution evidence.
 
 ## Supporting areas
 

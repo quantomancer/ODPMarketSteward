@@ -1,8 +1,8 @@
 # ADR-001: Toolchain and dependency baseline
 
-- **Status:** Proposed — user approval and executed compatibility spike required
+- **Status:** Accepted — approved and locally compatibility-validated
 - **Decision date:** 2026-07-21 UTC
-- **Last evidence refresh:** 2026-07-21T10:29:25Z
+- **Last evidence refresh:** 2026-07-21T11:15:31Z
 - **Owners:** Technical lead and architecture lead
 - **Approver:** Product owner / architecture approver
 - **Project records:** WP01-002, WP01-003, DLD-002; enables WP01-004 through WP01-007
@@ -12,7 +12,7 @@
 
 ODP Market Steward will use an ESM-only pnpm workspace written in strict TypeScript. One Cloudflare Worker application will contain the `/mcp` and `/healthz` service, the stateful Agent/Durable Object session implementation, and versioned React component assets. Vite with the Cloudflare Vite plugin will build the Worker and component together; Wrangler remains the configuration, runtime-type generation and deployment CLI. Vitest, ESLint, Prettier and dependency-cruiser provide the initial test, static-analysis, formatting and module-boundary controls.
 
-All direct dependencies will be exact-pinned and committed with `pnpm-lock.yaml`. The versions below are a **proposed resolution baseline**, not an installed or runtime-validated result. The baseline becomes accepted only after the user approves this ADR and the compatibility spike, exact lockfile, builds and focused tests complete successfully.
+All direct dependencies are exact-pinned with `pnpm-lock.yaml`. The product owner approved this baseline and its local compatibility spike. Exact-runtime installation, builds, focused tests, persistent workerd reconnection, static controls, advisory review and generated type drift checks passed; see the linked execution evidence. This acceptance does not imply staging, ChatGPT-host, live-source or production validation.
 
 ## Why this decision is needed
 
@@ -26,7 +26,7 @@ Current compatibility findings materially affect the selection:
 - `@cloudflare/vite-plugin` 1.45.1 requires Wrangler 4.112.0-compatible versions and supports Vite 8.
 - Cloudflare recommends generating Worker runtime and binding types with `wrangler types`, keyed to the configured compatibility date and flags. The application will not directly depend on `@cloudflare/workers-types`.
 
-## Proposed runtime and toolchain pins
+## Accepted runtime and toolchain pins
 
 | Concern | Exact pin / policy | Role and compatibility rationale |
 |---|---:|---|
@@ -42,13 +42,14 @@ Current compatibility findings materially affect the selection:
 | Test runner | `vitest@4.1.10` | Vite 8-compatible unit/integration runner with Node 24 support. |
 | Coverage | `@vitest/coverage-v8@4.1.10` | Must exactly match the Vitest version. |
 | Linter | `eslint@10.7.0` | Flat-config linter; supported by the chosen Node and `typescript-eslint` versions. |
+| ESLint core rules | `@eslint/js@10.0.1` | Published ESLint-maintained flat configuration package. It versions independently from the `eslint` CLI package. |
 | TypeScript lint integration | `typescript-eslint@8.65.0` | Supports ESLint 10 and TypeScript 6.0, but not TypeScript 7. |
 | Formatter | `prettier@3.9.6` | Deterministic source and configuration formatting. |
 | Dependency rule enforcement | `dependency-cruiser@18.1.0` | Enforces DLD M01-M18 dependency direction in CI; supports Node 24. |
 | UI runtime | `react@19.2.7`, `react-dom@19.2.7` | Matching React runtime versions supported by MCP Apps and Cloudflare Agents peers. |
 | UI type declarations | `@types/react@19.2.17`, `@types/react-dom@19.2.3` | Exact development-time declarations aligned to React 19. |
 
-## Proposed application dependency pins
+## Accepted application dependency pins
 
 | Package | Exact pin | Placement and purpose |
 |---|---:|---|
@@ -111,7 +112,11 @@ After approval, WP01-003 and DLD-002 require an executed spike, not just metadat
 8. Package advisory/licence inventory, resolved dependency graph, bundle-size report and exact tool-version transcript.
 9. `wrangler types --check` and a local workerd request test for `/healthz` and `/mcp`; no Cloudflare deployment is part of this spike.
 
-Only after this evidence is inspected may WP01-002, WP01-003 and DLD-002 be changed to `true`. Any incompatible pin returns this ADR to Proposed with the observed failure and revised candidate versions recorded.
+The required local evidence was produced and inspected, so WP01-002, WP01-003 and DLD-002 may be changed to `true`. Any future incompatible pin returns this ADR to Proposed with the observed failure and revised candidate versions recorded.
+
+## Execution evidence
+
+The product owner accepted ADR-001 and authorized dependency installation plus a local compatibility spike without Cloudflare deployment. The executed results are recorded in [ADR-001 compatibility spike report](../development/ADR-001-Compatibility-Spike-Report.md). The exact Node.js 24.18.0 and pnpm 11.15.1 pair completed a frozen lockfile install; exact-runtime type-check, tests, Vite component/Worker builds and persistent local-workerd MCP restart passed. `wrangler types --check`, lint, formatting, dependency-direction checks, coverage bootstrap and the production advisory/licence inventory also completed. No Cloudflare remote write occurred.
 
 ## Alternatives considered
 
@@ -152,7 +157,6 @@ Only after this evidence is inspected may WP01-002, WP01-003 and DLD-002 be chan
 
 ## Approval record
 
-- **Current decision:** Pending user review.
-- **If accepted:** the next authorized action is to create manifests/configuration and execute the local compatibility spike. Installation, build scaffolding and any generated files are not authorized by this Proposed ADR alone.
-- **Cloud boundary:** acceptance does not authorize creating, changing or deploying Cloudflare resources.
-
+- **Current decision:** Accepted by the product owner on 2026-07-21; local compatibility evidence inspected.
+- **Implementation consequence:** the exact pins and dependency boundaries in this ADR control subsequent implementation until superseded by a reviewed ADR revision.
+- **Cloud boundary:** acceptance does not authorize creating, changing or deploying Cloudflare resources; the spike performed no remote Cloudflare write.

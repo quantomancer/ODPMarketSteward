@@ -1,0 +1,16 @@
+{
+  "name": "@odp-market-steward/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "1.7.4",
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@odp-market-steward/application": "workspace:*",
+    "@odp-market-steward/contract-runtime": "workspace:*",
+    "@odp-market-steward/domain": "workspace:*",
+    "@odp-market-steward/mcp-contracts": "workspace:*",
+    "agents": "0.17.4",
+    "zod": "4.4.3"
+  }
+}
