@@ -1,6 +1,7 @@
 # WP02 standalone MCP schema and DLD-001 closure report
 
 - **Evidence timestamp:** 2026-07-21T12:11:47Z
+- **Implementation source revision:** `32089ceb4ab213d151be236079388384002eb617`
 - **Scope:** DLD-001 and WP06-002 closure; focused progress on WP00-002, WP02-003 and WP02-004
 - **Runtime:** checksum-verified Node.js 24.18.0; pnpm 11.15.1
 - **Contract baseline:** governed bundle 1.2.0; MCP application contract 1.2.0
