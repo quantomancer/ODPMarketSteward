@@ -4,7 +4,7 @@ kind: DeterministicRuleSet
 metadata:
   id: fxlive-ohlc-governance-rules
   name: "FXLive OHLC quality, calculation, and fitness rules"
-  version: "1.3.0"
+  version: "1.4.0"
   status: testing
   classification: project_executable_rule_contract
   description: >-
@@ -210,6 +210,8 @@ spec:
       dimension: consistency
       severity: warning
       method: rolling_median_and_median_absolute_deviation
+      targetSeries: CLOSE
+      seriesMixingProhibited: true
       configuration:
         status: CONFIGURED
         utcLookbackWindowSeconds: 3600

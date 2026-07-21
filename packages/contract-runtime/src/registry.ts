@@ -109,6 +109,7 @@ export interface InstrumentSetMemberProjection {
 }
 
 export interface PlausibilityConfigurationProjection {
+  readonly targetSeries: "CLOSE";
   readonly status: "CONFIGURED";
   readonly utcLookbackWindowSeconds: 3600;
   readonly minimumSampleSize: 30;
@@ -444,13 +445,15 @@ export class ContractRegistry {
   }
 
   plausibilityConfiguration(): PlausibilityConfigurationProjection {
-    const configuration = asRecord(
+    const plausibilityRule = asRecord(
       this.resolve(
         "ohlc-rules",
-        "/spec/contextualRules/contextual-ohlc-plausibility/configuration",
+        "/spec/contextualRules/contextual-ohlc-plausibility",
       ),
     );
+    const configuration = asRecord(plausibilityRule.configuration);
     return {
+      targetSeries: requiredLiteral(plausibilityRule, "targetSeries", "CLOSE"),
       status: requiredLiteral(configuration, "status", "CONFIGURED"),
       utcLookbackWindowSeconds: requiredNumber(
         configuration,

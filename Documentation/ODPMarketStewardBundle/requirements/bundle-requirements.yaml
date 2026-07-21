@@ -3,20 +3,20 @@ kind: RequirementsNormalization
 
 metadata:
   id: odp-market-steward-bundle-requirements
-  version: "1.3.0"
+  version: "1.4.0"
   status: incorporated
   classification: project_requirements_mapping
   sourceDocument: FuncitionalRequirements.html
-  sourceDraft: "0.4"
+  sourceDraft: "0.6"
   priorSourceDraft: "0.2"
   technicalDocument: TechnicalRequirements.html
-  technicalDraft: "0.3"
+  technicalDraft: "0.4"
   sourceRequirementStatus: tracked_item_by_item_in_project_plan
 
 purpose: >-
   Record how the responsibility issues found in Draft 0.2 were incorporated into
   Functional Requirements Draft 0.3, retain that migration history, and map current
-  Functional Requirements Draft 0.5 and Technical Requirements Draft 0.3 to the
+  Functional Requirements Draft 0.6 and Technical Requirements Draft 0.4 to the
   responsibility-correct governed bundle. This file is a migration and traceability
   record; it does not override current requirements or the evidence status controlled
   by ProjectPlan.html.
@@ -26,7 +26,7 @@ authority:
   technicalDocumentStatus: normative_project_requirements_draft
   normalizationStatus: migration_and_traceability_record
   precedence: >-
-    Functional Requirements Draft 0.5 and Technical Requirements Draft 0.3 contain
+    Functional Requirements Draft 0.6 and Technical Requirements Draft 0.4 contain
     the current requirements. The normalizations below describe the completed wording
     migration from Draft 0.2 through Draft 0.3 and must not be used as a hidden runtime
     or implementation-status override.
@@ -256,7 +256,8 @@ resolvedDecisions:
       lookback; minimum 30 eligible completed hard-valid 1m bars from the same
       instrument and granularity, strictly before and excluding the target; MAD score
       greater than or equal to 6 is UNUSUAL; insufficient sample and zero MAD remain
-      NOT_EVALUATED; hard validity is unchanged and trading signals are prohibited.
+      NOT_EVALUATED; the MVP series is CLOSE-only with series mixing prohibited;
+      hard validity is unchanged and trading signals are prohibited.
 
 unresolvedRequirements:
   - decisionID: OD-002

@@ -95,9 +95,9 @@
         <p class="lead">An accepted implementation-planning baseline for the Cloudflare-hosted MCP service and ChatGPT component, derived from the governed ODP Market Steward bundle without moving product, API, rule, monitoring, AI, or presentation responsibilities into the wrong artifact. Individual open decisions and release gates retain their explicit safe states.</p>
         <div class="badges">
           <span class="badge">Document OMS-DLD-001</span>
-          <span class="badge">Draft 0.3</span>
+          <span class="badge">Draft 0.4</span>
           <span class="badge">Status: Accepted baseline</span>
-          <span class="badge">Baseline: Bundle 1.5.0</span>
+          <span class="badge">Baseline: Bundle 1.6.0</span>
           <span class="badge">UTC only</span>
         </div>
         <div class="hero-grid">
@@ -135,11 +135,11 @@
         <div class="table-wrap">
           <table>
             <tbody>
-              <tr><th>Document ID</th><td><code>OMS-DLD-001</code></td><th>Version</th><td>Draft 0.3</td></tr>
+              <tr><th>Document ID</th><td><code>OMS-DLD-001</code></td><th>Version</th><td>Draft 0.4</td></tr>
               <tr><th>Status</th><td><span class="pill proposed">PROPOSED</span></td><th>Prepared</th><td>2026-07-21 UTC design baseline</td></tr>
               <tr><th>Product</th><td>FXLive Market Data Demo - Standard FX-35</td><th>Application</th><td>ODP Market Steward</td></tr>
               <tr><th>Source baseline</th><td>Governed bundle 1.1.0</td><th>Runtime state</th><td><span class="pill blocked">NOT IMPLEMENTED</span></td></tr>
-              <tr><th>Normative effect</th><td colspan="3">Non-normative. Functional Requirements Draft 0.5, Technical Requirements Draft 0.3, the bundle manifest, and responsibility-owning artifacts control acceptance and runtime facts.</td></tr>
+              <tr><th>Normative effect</th><td colspan="3">Non-normative. Functional Requirements Draft 0.6, Technical Requirements Draft 0.4, the bundle manifest, and responsibility-owning artifacts control acceptance and runtime facts.</td></tr>
             </tbody>
           </table>
         </div>
@@ -603,7 +603,7 @@ type ContractReadiness =
           <li>Run the coherent-snapshot rule independently from availability; rule <code>FAIL</code> maps to availability <code>INCOHERENT</code>.</li>
           <li>Use arbitrary-precision decimal arithmetic at working precision 34. Do not round authoritative calculations before the approved presentation boundary.</li>
           <li>Evaluate calendar and freshness only with their required evidence. Staleness cannot infer market closure.</li>
-          <li>Evaluate statistical plausibility separately using the ADR-004 baseline: inclusive 3,600-second UTC lookback, at least 30 eligible same-instrument hard-valid completed one-minute references strictly before and excluding the target, and <code>UNUSUAL</code> at MAD score ≥ 6. Insufficient samples or zero MAD return <code>NOT_EVALUATED</code>.</li>
+          <li>Evaluate statistical plausibility separately using the ADR-004 baseline and ADR-005 <code>CLOSE</code>-only MVP series. Compare target Close only with eligible prior Close values, label the series, and never mix OHLC fields or derived metrics. Insufficient samples or zero MAD return <code>NOT_EVALUATED</code>.</li>
           <li>Apply the purpose-specific fitness decision table. A model can explain but never alter the result.</li>
         </ol>
 
@@ -1131,8 +1131,8 @@ interface ComponentState {
         <p>WP00 creates the individual acceptance ledger and a machine check that extracts all 61 FR/NFR identifiers and all 47 TR identifiers from the accepted baselines, then fails when any identifier lacks an owner, interface, test case, and gate. The grouped matrix above is a design index; it is not a substitute for that exhaustive generated ledger.</p>
 
         <h3>Design-to-artifact dependency map</h3>
-        <pre>Functional Requirements Draft 0.5
-└── Technical Requirements Draft 0.3
+        <pre>Functional Requirements Draft 0.6
+└── Technical Requirements Draft 0.4
     ├── bundle.yaml + seven runtime responsibility artifacts
     ├── application/mcp-application.yaml tool and result contract
     └── OMS-DLD-001 Detailed Level Design (this document)
@@ -1157,7 +1157,7 @@ interface ComponentState {
               <tr><td>DLD-005</td><td>Select and contract-test authoritative UTC FX calendar</td><td>OPEN/MARKET_CLOSED, freshness, G2</td><td>UNKNOWN</td></tr>
               <tr><td>DLD-006</td><td>Confirm producer semantics for <code>CreatedAt</code></td><td>Freshness PASS</td><td>UNKNOWN</td></tr>
               <tr><td>DLD-007</td><td>Approve decimal rounding, scales, trailing zeros, and negative-zero normalization</td><td>Public calculation verification</td><td>CLOSED in OHLC rules 1.1.0 and ADR-003; golden vectors control implementation</td></tr>
-              <tr><td>DLD-008</td><td>Approve plausibility window, minimum samples, MAD threshold and reference eligibility</td><td>Plausibility feature</td><td>CLOSED in OHLC rules 1.3.0 and ADR-004; exact configured fixtures control implementation</td></tr>
+              <tr><td>DLD-008</td><td>Approve plausibility window, minimum samples, MAD threshold, reference eligibility and MVP series</td><td>Plausibility feature</td><td>CLOSED in OHLC rules 1.4.0 and ADR-004/005; exact configured fixtures control implementation</td></tr>
               <tr><td>DLD-009</td><td>Confirm display/redistribution/judge rights, attribution, product licence, and data holder</td><td>G1, G6, G7</td><td>Publication and recorded fallback blocked</td></tr>
               <tr><td>DLD-010</td><td>Approve unique component domain and exact compiled CSP</td><td>WP07 public release</td><td>No plugin submission</td></tr>
               <tr><td>DLD-011</td><td>Approve Steward Brief prompt, schema, timeout, attempts, fact verifier, evaluation rubric, and privacy settings</td><td>WP08</td><td>Brief disabled / NOT_REQUESTED</td></tr>
@@ -1185,7 +1185,7 @@ interface ComponentState {
               <tr><td>DLD-005</td><td>Data governance lead</td><td>Product owner</td><td>Calendar source decision, UTC contract and open/closed/unknown fixture report; before G2</td><td>OPEN</td></tr>
               <tr><td>DLD-006</td><td>Source-service owner</td><td>Data governance lead</td><td>Producer semantic confirmation and timestamp fixtures; before freshness PASS</td><td>OPEN</td></tr>
               <tr><td>DLD-007</td><td>Rules owner</td><td>Product owner</td><td>Versioned decimal/display policy and golden vectors; before public metric verification</td><td>CLOSED · ADR-003 · 2026-07-21 UTC</td></tr>
-              <tr><td>DLD-008</td><td>Quality-rules owner</td><td>Product owner</td><td>Versioned parameters, minimum-sample rule and normal/unusual/not-evaluated fixtures</td><td>CLOSED · ADR-004 · 2026-07-21 UTC</td></tr>
+              <tr><td>DLD-008</td><td>Quality-rules owner</td><td>Product owner</td><td>Versioned parameters, series, minimum-sample rule and normal/unusual/not-evaluated fixtures</td><td>CLOSED · ADR-004/005 · 2026-07-21 UTC</td></tr>
               <tr><td>DLD-009</td><td>Data-rights owner</td><td>Product/competition accountable</td><td>Written display, redistribution, judge, attribution, licence and data-holder record; before G1</td><td>OPEN</td></tr>
               <tr><td>DLD-010</td><td>Component lead</td><td>Security lead</td><td>Unique domain, built-asset inventory, exact CSP and deployed enforcement test; before WP07 release</td><td>OPEN</td></tr>
               <tr><td>DLD-011</td><td>Evaluation lead</td><td>Product owner</td><td>Versioned prompt/schema, privacy review, rubric, threshold, adjudication and run plan; before scored T7</td><td>OPEN</td></tr>
@@ -1216,7 +1216,7 @@ interface ComponentState {
           <li><a href="../operations/monitoring.yaml"><code>operations/monitoring.yaml</code> — UTC, state, evidence, no-store, and observability</a></li>
           <li><a href="../policies/publication-policy.yaml"><code>policies/publication-policy.yaml</code> — exact disclosure, safety, identity, and accessibility</a></li>
           <li><a href="../application/mcp-application.yaml"><code>application/mcp-application.yaml</code> — tools, schemas, app, session, model boundaries</a></li>
-              <li><a href="../requirements/FuncitionalRequirements.html">Functional Requirements Draft 0.5</a> and <a href="../requirements/TechnicalRequirements.html">Technical Requirements Draft 0.3</a></li>
+              <li><a href="../requirements/FuncitionalRequirements.html">Functional Requirements Draft 0.6</a> and <a href="../requirements/TechnicalRequirements.html">Technical Requirements Draft 0.4</a></li>
         </ul>
 
         <h3>Current official implementation guidance consulted</h3>
@@ -1248,7 +1248,7 @@ interface ComponentState {
       </section>
 
       <footer class="footer">
-        ODP Market Steward · OMS-DLD-001 · Draft 0.3 · Accepted baseline · Open decisions and release gates remain controlling
+        ODP Market Steward · OMS-DLD-001 · Draft 0.4 · Accepted baseline · Open decisions and release gates remain controlling
       </footer>
     </main>
   </div>

@@ -20,7 +20,7 @@ describe("two-phase governed bundle loader", () => {
     ).toEqual({
       state: "READY",
       operation: "get_fx_product_profile",
-      bundleVersion: "1.5.0",
+      bundleVersion: "1.6.0",
       requiredArtifacts: [
         "bundle-manifest",
         "product-contract",
@@ -92,6 +92,7 @@ describe("two-phase governed bundle loader", () => {
       },
     });
     expect(registry.plausibilityConfiguration()).toEqual({
+      targetSeries: "CLOSE",
       status: "CONFIGURED",
       utcLookbackWindowSeconds: 3600,
       minimumSampleSize: 30,
@@ -128,7 +129,7 @@ describe("two-phase governed bundle loader", () => {
     expect(registry.productProfile()).toMatchObject({
       productName: "FXLive Market Data Demo - Standard FX-35",
       productId: "fxlive-market-data-demo-fx35",
-      productVersion: "1.1.2",
+      productVersion: "1.1.3",
       odpsVersion: 4.1,
       disclaimer: { label: "MARKET DATA DEMO", policyVersion: "1.1.0" },
     });

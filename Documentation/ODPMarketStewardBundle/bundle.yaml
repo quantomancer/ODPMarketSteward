@@ -4,7 +4,7 @@ kind: GovernedProductBundle
 metadata:
   id: odp-market-steward-fxlive-bundle
   name: "ODP Market Steward — FXLive governed product bundle"
-  version: "1.5.0"
+  version: "1.6.0"
   status: draft
   classification: project_bundle_manifest
   constructName: ODPS-centred-market-data-product-package
@@ -16,7 +16,7 @@ metadata:
 
 product:
   id: fxlive-market-data-demo-fx35
-  version: "1.1.2"
+  version: "1.1.3"
   lifecycleStatus: testing
   contract: product/fxlive.odps.yaml
 
@@ -63,11 +63,11 @@ artifacts:
     classification: ODPI_standard
     standard: ODPS
     standardVersion: "4.1"
-    artifactVersion: "1.1.2"
+    artifactVersion: "1.1.3"
     mediaType: application/yaml
     normative: true
     requiredAtRuntime: true
-    sha256: 2ebe619b5cc2f7b30530df95f4aa29828cd1256170a627aa2ac68835c55c5a2a
+    sha256: 417202d291b0cae4c0233a1961b32148f808eebea45f0aadbfd31c855634b53a
     dependsOn: []
 
   - id: api-contract
@@ -98,11 +98,11 @@ artifacts:
     role: deterministic quality, calculation, plausibility, and fitness contract
     path: rules/ohlc-rules.yaml
     classification: project_companion
-    artifactVersion: "1.3.0"
+    artifactVersion: "1.4.0"
     mediaType: application/yaml
     normative: true
     requiredAtRuntime: true
-    sha256: cbaea406abe92746ee302ae0f95187d5157361b4cb080bfa31a9ec1921635ea8
+    sha256: f2ca0652d627aa8bf6720051006fbb750f218307dd3988b3b1d5b839d3f584ee
     dependsOn: [product-contract, api-contract, instrument-set]
 
   - id: monitoring
@@ -131,77 +131,77 @@ artifacts:
     role: MCP tools, schemas, acknowledgement contract, responsibility boundaries, application safety, and ChatGPT delivery target
     path: application/mcp-application.yaml
     classification: project_companion
-    artifactVersion: "1.4.0"
+    artifactVersion: "1.5.0"
     mediaType: application/yaml
     normative: true
     requiredAtRuntime: true
-    sha256: 0e32be5299fb16d5b058c8979d291e921dc99a875f7937bcfdf08a14fe7a2cb5
+    sha256: 4108c0c208e0c3dabf32e112d4fe160b5fe19024015652d06bcbd8f92296dbb2
     dependsOn: [product-contract, api-contract, instrument-set, ohlc-rules, monitoring, publication-policy]
 
   - id: source-functional-requirements
     role: current functional requirements and acceptance baseline
     path: requirements/FuncitionalRequirements.html
     classification: project_requirements_document
-    artifactVersion: "Draft 0.5"
+    artifactVersion: "Draft 0.6"
     mediaType: text/html
     normative: true
     requiredAtRuntime: false
-    sha256: e2a310bcc52b33d12b840c93c83221dadafc31885c7efe6ebfb419e6be0b24b7
+    sha256: bcf1225d36207409ef19885e9181bf3969d0c3fa7c83978f51082766300cfe38
     dependsOn: []
 
   - id: technical-requirements
     role: Cloudflare, MCP, component, security, operations, deployment, and verification requirements
     path: requirements/TechnicalRequirements.html
     classification: project_requirements_document
-    artifactVersion: "Draft 0.3"
+    artifactVersion: "Draft 0.4"
     mediaType: text/html
     normative: true
     requiredAtRuntime: false
-    sha256: 7f0b86c7f0f04dcbfbf18b32b8652e041774887c477f2846bd0cda435bba6355
+    sha256: d8315cff1a09376b8f734b767607b387ad7bea1d6d25df0a32e00a92e0bbc1c7
     dependsOn: [source-functional-requirements]
 
   - id: requirements-normalization
     role: Draft 0.2 to Draft 0.3 migration record and responsibility traceability mapping
     path: requirements/bundle-requirements.yaml
     classification: project_requirements_mapping
-    artifactVersion: "1.3.0"
+    artifactVersion: "1.4.0"
     mediaType: application/yaml
     normative: false
     requiredAtRuntime: false
-    sha256: 9de65aed72fc56741f818e750e23205c1dc8ecd6aaef19766cec7263d702e4c7
+    sha256: 0f9f729f82ee687b62d36963b00bf144cdb85fa7b03df76321c29f5e2a8c1a59
     dependsOn: [source-functional-requirements, technical-requirements]
 
   - id: detailed-level-design
     role: accepted implementation-planning component, sequence, contract, security, operations, testing, and delivery design
     path: design/DetailedLevelDesign.html
     classification: project_design_document
-    artifactVersion: "Draft 0.3"
+    artifactVersion: "Draft 0.4"
     mediaType: text/html
     normative: false
     requiredAtRuntime: false
-    sha256: 54256144f28fa0655144f8078ac5a12d9d82a7d0c906c596506abb7e589b36e0
+    sha256: 05703a2f0c408a989f30f7a7860aaf9633aea805cb601abf8853aa381e1c52c7
     dependsOn: [source-functional-requirements, technical-requirements, requirements-normalization, mcp-application-contract]
 
   - id: professional-documentation
     role: human-readable architecture, compliance, artifact, validation, and implementation guide
     path: ODPMarketStewardBundleDocumentation.html
     classification: project_documentation
-    artifactVersion: "1.4.0"
+    artifactVersion: "1.5.0"
     mediaType: text/html
     normative: false
     requiredAtRuntime: false
-    sha256: a59118b523350a5567868fb83a912c40dbff45b46c589c70b56e893bc282b3da
+    sha256: c2621f541f1c25387f2f7e6aaadb321a778c5bf313620a9445e3b8de65af5cb1
     dependsOn: [source-functional-requirements, technical-requirements, requirements-normalization, detailed-level-design]
 
   - id: readme
     role: package entry point
     path: README.html
     classification: project_documentation
-    artifactVersion: "1.4.0"
+    artifactVersion: "1.5.0"
     mediaType: text/html
     normative: false
     requiredAtRuntime: false
-    sha256: 1cbcab70a7470d5f7c035581335761a0627fd4c5f7cf5d72f678b1e3c12ec35a
+    sha256: 50f1a406eba2fbaacc33bf140b17691b74f7042b751e573b807c05c9b46e3785
     dependsOn: [professional-documentation]
 
 runtimePolicy:
