@@ -3,7 +3,7 @@
 - Work item: `WP03-006`
 - Related records: `T2`, `G2`
 - Evidence time: `2026-07-21T15:58:18Z`
-- Tested implementation revision: pending immutable repository commit
+- Tested implementation revision: `f2fb151eea87545bc915dfb3a0749b3c019a53d5`
 - Runtime: checksum-matched Node.js `24.18.0`
 - Package manager: pnpm `11.15.1`
 - Remote scope: no Cloudflare, source API, ChatGPT host, staging, or public endpoint was accessed
