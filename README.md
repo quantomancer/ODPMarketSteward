@@ -84,23 +84,26 @@ Start with the [bundle documentation](Documentation/ODPMarketStewardBundle/ODPMa
 
 ## Try it in ChatGPT
 
-The competition deployment is public and requires no authentication.
+The competition deployment is public and requires no authentication. It is a **developer-mode ChatGPT MCP App**, not yet a marketplace-listed plugin; each tester installs it from the public MCP Server URL.
 
-1. In ChatGPT, open **Settings → Plugins**.
-2. Select **Create plugin** (`+`).
-3. Enter the name `ODP Market Steward`.
-4. Choose **Server URL** and enter:
+1. In ChatGPT, open **Settings → Security and login** and enable **Developer mode**.
+2. Open **Settings → Plugins** (or visit [chatgpt.com/plugins](https://chatgpt.com/plugins)).
+3. Select **Create plugin** (`+`).
+4. Enter the name `ODP Market Steward`.
+5. Choose **Server URL** and enter:
 
    ```text
    https://odp-market-steward.qmvp.workers.dev/mcp
    ```
 
-5. Select **No Auth**, acknowledge ChatGPT's standard custom-server warning, and create the plugin.
-6. Start a new chat, enable **ODP Market Steward**, and try:
+6. Select **No Auth**, acknowledge ChatGPT's standard custom-server warning, and create the plugin.
+7. Start a new chat, enable **ODP Market Steward**, and try:
 
    ```text
    Show me the current governed FX-35 market board.
    ```
+
+If **Developer mode** or the `+` button is unavailable, the ChatGPT account or managed workspace does not currently permit custom MCP Apps. Use a developer-enabled ChatGPT account; no separate ODP Market Steward credentials are required.
 
 Useful follow-up prompts:
 
