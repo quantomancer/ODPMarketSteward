@@ -157,6 +157,21 @@ The verification pipeline regenerates governed artifacts, checks Worker types, T
 - The POC does not claim that every planned catalogue, graph, vocabulary or recipe artifact is an official ODPI-family implementation.
 - Broader historical evidence, production-grade tenant isolation, calendar-backed freshness and the remaining planned domain tools are future work.
 
+## License
+
+ODP Market Steward is source-available under the
+[PolyForm Noncommercial License 1.0.0](LICENSE). Commercial use, commercial
+production deployment, resale, paid hosted services, incorporation into a
+commercial product, and commercial derivative products require a separate
+written licence from Quantomancer. See
+[Commercial licensing](COMMERCIAL-LICENSING.md) or contact
+**quantomancer@pm.me**.
+
+The required copyright notice is recorded in [`NOTICE`](NOTICE).
+
+The software licence does not grant rights to market data, service output,
+third-party standards, dependencies, names, logos, or trademarks.
+
 ## Disclaimer
 
 **MARKET DATA DEMO.** This API and application are provided solely to demonstrate app functionality for the competition. Use at your own risk. Data may be delayed, incomplete, unavailable, inaccurate, or contain errors. The provider accepts no responsibility for use of the API, application, or data and gives no guarantee regarding data accuracy or service availability. Nothing presented is investment advice, a recommendation, or an offer to buy or sell any financial instrument. The API, application, and data must not be used for live trading or order execution.
